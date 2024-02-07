@@ -1,0 +1,90 @@
+drop table if exists diklat_kursus;
+create table diklat_kursus
+(
+  diklat_kursus_id numeric NOT NULL,
+  pegawai_id numeric,
+  tipe_kursus_id numeric,
+  ref_jenis_kursus_id numeric,
+  nama character varying,
+  no_sertifikat character varying,
+  tanggal_sertifikat date,
+  tanggal_mulai date,
+  tanggal_selesai date,
+  tahun numeric,
+  jumlah_jam numeric,
+  angkatan character varying,
+  tempat character varying,
+  nilai_rekam_jejak numeric,
+  rumpun_id integer,
+  ref_instansi_id numeric,
+  ref_instansi_nama character varying,
+  penyelenggara character varying,
+  status_lulus character varying(1),
+  last_user character varying,
+  last_date timestamp without time zone,
+  last_level numeric,
+  status character varying(1),
+  user_login_id numeric,
+  user_login_pegawai_id numeric,
+  last_create_user character varying,
+  last_create_date timestamp without time zone,
+  CONSTRAINT pk_diklat_kursus PRIMARY KEY (diklat_kursus_id),
+  CONSTRAINT fk_diklateknistopegawai FOREIGN KEY (pegawai_id) REFERENCES pegawai (pegawai_id) MATCH SIMPLE ON UPDATE RESTRICT ON DELETE RESTRICT
+)
+WITH (OIDS=FALSE);
+ALTER TABLE diklat_kursus OWNER TO postgres;
+
+delete from diklat_kursus;
+insert into diklat_kursus(
+diklat_kursus_id, pegawai_id, tipe_kursus_id, 
+nama, no_sertifikat, tanggal_sertifikat, tanggal_mulai, tanggal_selesai, 
+tahun, jumlah_jam, angkatan, tempat, penyelenggara, status_lulus, 
+last_user, last_date, last_level, status, user_login_id, user_login_pegawai_id, 
+last_create_user, last_create_date)
+select
+row_number () over (order by pegawai_id, tipe_kursus_id, tanggal_mulai desc) diklat_kursus_id,
+pegawai_id, tipe_kursus_id, 
+nama, no_sertifikat, tanggal_sertifikat, tanggal_mulai, tanggal_selesai, 
+tahun, jumlah_jam, angkatan, tempat, penyelenggara, 1 status_lulus, last_user, last_date, last_level, status, user_login_id, user_login_pegawai_id, 
+last_create_user, last_create_date
+from
+(
+  select 1 tipe_kursus_id, pegawai_id,
+  nama, no_sttpp no_sertifikat, tanggal_sttpp tanggal_sertifikat, tanggal_mulai, tanggal_selesai, 
+  tahun, jumlah_jam, angkatan, tempat, penyelenggara
+  , last_user, last_date, last_level, status, user_login_id, user_login_pegawai_id
+  , last_create_user, last_create_date
+  from diklat_teknis a
+  where 1=1 and (coalesce(nullif(a.status, ''), null) is null or a.status = '2')
+  --and a.pegawai_id = 25
+  union all
+  select 2 tipe_kursus_id, pegawai_id,
+  nama, no_sttpp no_sertifikat, tanggal_sttpp tanggal_sertifikat, tanggal_mulai, tanggal_selesai, 
+  tahun, jumlah_jam, angkatan, tempat, penyelenggara
+  , last_user, last_date, last_level, status, user_login_id, user_login_pegawai_id
+  , last_create_user, last_create_date
+  from diklat_fungsional a
+  where 1=1 and (coalesce(nullif(a.status, ''), null) is null or a.status = '2')
+  --and a.pegawai_id = 25
+  union all
+  select 3 tipe_kursus_id, pegawai_id,
+  nama, no_piagam no_sertifikat, tanggal_piagam tanggal_sertifikat, tanggal_mulai, tanggal_selesai, 
+  to_char(tanggal_mulai, 'yyyy')::numeric tahun, null jumlah_jam, null angkatan, tempat, penyelenggara
+  , last_user, last_date, last_level, status, user_login_id, user_login_pegawai_id
+  , null last_create_user, null last_create_date
+  from kursus a
+  where 1=1 and (coalesce(nullif(a.status, ''), null) is null or a.status = '2')
+  --and a.pegawai_id = 25
+  union all
+  select 3 tipe_kursus_id, pegawai_id,
+  nama, no_piagam no_sertifikat, tanggal_piagam tanggal_sertifikat, tanggal_mulai, tanggal_selesai, 
+  to_char(tanggal_mulai, 'yyyy')::numeric tahun, null jumlah_jam, null angkatan, tempat, penyelenggara
+  , last_user, last_date, last_level, status, user_login_id, user_login_pegawai_id
+  , null last_create_user, null last_create_date
+  from seminar a
+  where 1=1 and (coalesce(nullif(a.status, ''), null) is null or a.status = '2')
+  --and a.pegawai_id = 25
+) a
+where 1=1
+--and a.pegawai_id = 8300
+order by a.pegawai_id, a.tipe_kursus_id, a.tanggal_mulai desc;

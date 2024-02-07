@@ -1,0 +1,507 @@
+/*@font-face {
+	font-family: 'Open SansRegular';
+	src: url('../fonts/OpenSans-Regular-webfont.eot');
+	src: url('../fonts/OpenSans-Regular-webfont.eot?#iefix') format('embedded-opentype'),
+	url('../fonts/OpenSans-Regular-webfont.woff') format('woff'),
+	url('../fonts/OpenSans-Regular-webfont.ttf') format('truetype'),
+	url('../fonts/OpenSans-Regular-webfont.svg#Open SansRegular') format('svg');
+	font-weight: normal;
+	font-style: normal;
+}
+@font-face {
+	font-family: 'Open SansItalic';
+	src: url('../fonts/OpenSans-Italic-webfont.eot');
+	src: url('../fonts/OpenSans-Italic-webfont.eot?#iefix') format('embedded-opentype'),
+	url('../fonts/OpenSans-Italic-webfont.woff') format('woff'),
+	url('../fonts/OpenSans-Italic-webfont.ttf') format('truetype'),
+	url('../fonts/OpenSans-Italic-webfont.svg#Open SansItalic') format('svg');
+	font-weight: normal;
+	font-style: normal;
+}
+@font-face {
+	font-family: 'Open SansSemi Bold';
+	src: url('../fonts/OpenSans-Semibold-webfont.eot');
+	src: url('../fonts/OpenSans-Semibold-webfont.eot?#iefix') format('embedded-opentype'),
+	url('../fonts/OpenSans-Semibold-webfont.woff') format('woff'),
+	url('../fonts/OpenSans-Semibold-webfont.ttf') format('truetype'),
+	url('../fonts/OpenSans-Semibold-webfont.svg#Open SansSemi Bold') format('svg');
+	font-weight: normal;
+	font-style: normal;
+}
+@font-face {
+	font-family: 'Open SansLight';
+	src: url('../fonts/OpenSans-Light-webfont.eot');
+	src: url('../fonts/OpenSans-Light-webfont.eot?#iefix') format('embedded-opentype'),
+	url('../fonts/OpenSans-Light-webfont.woff') format('woff'),
+	url('../fonts/OpenSans-Light-webfont.ttf') format('truetype'),
+	url('../fonts/OpenSans-Light-webfont.svg#Open SansLight') format('svg');
+	font-weight: normal;
+	font-style: normal;
+}
+
+/****
+@font-face {
+	font-family: 'Candara Bold';
+	src: url('../fonts/candarab-webfont.eot');
+	src: url('../fonts/candarab-webfont.eot?#iefix') format('embedded-opentype'),
+	url('../fonts/candarab-webfont.woff') format('woff'),
+	url('../fonts/candarab-webfont.ttf') format('truetype'),
+	url('../fonts/candarab-webfont.svg#Open SansSemi Bold') format('svg');
+	font-weight: normal;
+	font-style: normal;
+}
+
+/****/
+
+@page 
+{
+	size: auto;   /* auto is the current printer page size */
+	*margin: 0mm 5mm;  /* this affects the margin in the printer settings */
+	
+	margin: 10mm 15mm;  /* this affects the margin in the printer settings */
+}
+
+body{
+	font-family:Arial, Helvetica, sans-serif;
+	font-size:12px;
+	
+	margin:0 0;
+}
+table{
+	font-family:Arial, Helvetica, sans-serif;
+	font-size:12px;
+}
+
+/****/
+.judul-laporan{
+	font-size:15px;
+	text-align:center;
+	text-transform:uppercase;
+	font-weight:bold;
+}
+.judul-section{
+	font-size:18px;
+	text-align:center;
+	text-transform:uppercase;
+	*background:#FC6;
+	clear:both;
+	display:inline-block;
+	width:100%;
+	margin-top:10px;
+}
+.judul-sub-section{
+	font-size:15px;
+	text-transform:uppercase;
+	clear:both;
+	display:inline-block;
+	width:100%;
+	margin-top:10px;
+}
+
+/****/
+.ket-kanan{
+	background:#FFF; 
+	position:relative; 
+	padding:5px 0 5px 5px; 
+	text-align:right; 
+	float:right; 
+	margin-top:-19px; 
+	width:220px;
+	
+	*border:1px solid red;
+}
+
+/****/
+.lampiran{
+	*background:#F36;
+	display:inline-block;
+	width:100%;
+}
+.lampiran table{
+	*border:1px solid #393;
+	border-collapse:collapse;
+	float:right;
+}
+
+dt, dd{
+	*background:#FC9;
+	padding:5px 0;
+}
+
+/****/
+dl.biodata { width: 100%; display:inline-block; }
+dl.biodata dt{ float: left; width: 20%; overflow: hidden; white-space: nowrap; *background:#3FC; }
+dl.biodata dd { float: left; width: 80%; overflow: hidden; white-space: nowrap;  margin:0; *background:#FC0; }
+
+dl.biodata dt span:after { *content: " .........................................................................................................................................................................................................................................................................................................................................................................................................................." }
+dl.biodata dd span:after { *content: " ........................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................." }
+
+/****/
+dl.permohonan { width: 100%;}
+dl.permohonan dt { float: left; width: 100%; overflow: hidden; white-space: nowrap }
+/*dd { float: left; width: 100px; overflow: hidden }*/
+
+dl.permohonan dt span:after { *content: " ................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................" }
+
+/****/
+dl.sisa { *width: calc(100% - 400px); width:70%; *background:#C60; display:inline-block;}
+dl.sisa dt { float: left; width: calc(100% - 100px); overflow: hidden; white-space: nowrap; *background:#3CC; }
+dl.sisa dd { float: left; width: 100px; overflow: hidden; *background:#F9C; margin:0; }
+
+dl.sisa dt span:after { *content: " ........................................................................................................................................................................................................................................................................................................................................" }
+
+/****/
+dl.alamat { width: 100%;}
+dl.alamat dt { float: left; width: 100%; overflow: hidden; white-space: nowrap }
+/*dd { float: left; width: 100px; overflow: hidden }*/
+
+dl.alamat dt span:after { *content: " .................................................................................................................................................................................................................................................................................................................................................................................................................................." }
+
+/****/
+.area-ttd{
+	*background:#F96;
+	display:inline-block;
+	width:100%;
+	margin-bottom:18px;
+}
+.area-ttd .menyetujui{
+	*background:#F96;
+	float:left;
+	width:40%;
+	text-align:center;
+}
+.area-ttd .pemohon{
+	*background:#C6F;
+	float:right;
+	width:40%;
+	text-align:center;
+}
+
+/****/
+.keterangan ul{
+	list-style:none;
+	padding-left:20px;
+	padding-top:0px;
+	margin-top:0px;
+}
+.tembusan ul{
+	list-style:decimal;
+	padding-top:0px;
+	margin-top:0px;
+}
+.syarat ul{
+	list-style:lower-latin;
+	padding-top:0px;
+	margin-top:0px;
+}
+
+/****/
+.underline{
+	text-decoration:underline;
+}
+.bold{
+	font-weight:bold;
+}
+.center{
+	text-align:center;
+}
+
+/****/
+.kop{
+	display:inline-block;
+	width:100%;
+	*background:#FC6;
+	margin-bottom:20px;
+}
+.kop .logo{
+	float:left;
+	width:60px;
+}
+.kop .judul{
+	float:left;
+	
+	width: -moz-calc(100% - 60px);
+    width: -webkit-calc(100% - 60px);
+    width: -o-calc(100% - 60px);
+    width: calc(100% - 60px);
+	
+	font-size:16px;
+}
+
+/****/
+.kop2{
+	display:inline-block;
+	width:100%;
+	*background:#FC6;
+	margin-bottom:20px;
+}
+.kop2 .logo{
+	float:left;
+	width:60px;
+	*height:60px;
+	*line-height:60px;
+	
+	text-align:right;
+}
+.kop2 .logo img{
+	*vertical-align:middle;
+}
+.kop2 .judul{
+	float:left;
+	text-align:center;
+	line-height:40px;
+	
+	width: -moz-calc(100% - 500px);
+    width: -webkit-calc(100% - 500px);
+    width: -o-calc(100% - 500px);
+    width: calc(100% - 500px);
+	
+	font-size:18px;
+}
+.kop2 .nomor{
+	float:right;
+	width:440px;
+	*background:#F9C;
+	box-sizing:border-box;
+}
+.kop2 .nomor table{
+	font-size:12px;
+}
+.kop2 .nomor table td{
+	padding:1px 7px;
+}
+
+/****/
+.kop3{
+	display:inline-block;
+	width:100%;
+	*background:#FC6;
+	margin-bottom:20px;
+}
+.kop3 .logo{
+	float:left;
+	width:159px;
+	*height:60px;
+	*line-height:60px;
+	
+	text-align:right;
+	*border-right:1px solid #000;
+}
+.kop3 .logo img{
+	*vertical-align:middle;
+}
+.kop3 .judul{
+	float:left;
+	text-align:center;
+	line-height:40px;
+	
+	width: -moz-calc(100% - 600px);
+    width: -webkit-calc(100% - 600px);
+    width: -o-calc(100% - 600px);
+    width: calc(100% - 600px);
+	
+	font-size:18px;
+}
+.kop3 .nomor{
+	float:right;
+	width:440px;
+	*background:#F9C;
+	box-sizing:border-box;
+}
+.kop3 .nomor table{
+	font-size:12px;
+	border-collapse:collapse;
+	width:100%;
+	margin:0 0;
+}
+.kop3 .nomor table td{
+	padding:1px 7px;
+	border:1px solid #000;
+	border-width:1px 0;
+	padding:2.5px 2px 2px;
+}
+.kop3 .nomor table td:nth-child(1){
+	width:100px;
+}
+
+/****/
+.kop4{
+	display:inline-block;
+	width:100%;
+	*background:#FC6;
+	margin-bottom:20px;
+}
+.kop4 .logo{
+	float:left;
+	width:160px;
+	
+	text-align:right;
+}
+.kop4 .logo img{ 
+	display: block; 
+	margin-left: auto; 
+	margin-right: auto;
+}
+
+.kop4 .judul{
+	float:left;
+	text-align:center;
+	line-height:40px;
+	
+	width: -moz-calc(60% - 160px);
+    width: -webkit-calc(60% - 160px);
+    width: -o-calc(60% - 160px);
+    width: calc(60% - 160px);
+	
+	font-size:18px;
+}
+.kop4 .nomor{
+	float:right;
+	width:40%;
+	*background:#F9C;
+	box-sizing:border-box;
+}
+.kop4 .nomor table{
+	font-size:12px;
+	border-collapse:collapse;
+	width:100%;
+	margin:0 0;
+}
+.kop4 .nomor table td{
+	padding:1px 7px;
+	border:1px solid #000;
+	border-width:1px 0;
+	padding:2.5px 2px 2px;
+}
+.kop4 .nomor table td:nth-child(1){
+	width:100px;
+}
+
+/****/
+.kop4.on-call{
+	display:inline-block;
+	width:calc(100% - 10px) !important;
+	background:#FC6 !important;
+	margin-bottom:20px;
+	
+}
+.kop4 .logo-oncall{
+	float:left;
+	width:90px;
+	
+	text-align:right;
+	
+	*border:1px solid green;
+	
+	padding-top:6px;
+}
+.kop4 .logo-oncall img{ 
+	display: block; 
+	margin-left: auto; 
+	margin-right: auto;
+	
+	
+}
+
+.kop4 .judul-oncall{
+	float:left;
+	text-align:center;
+	line-height:40px;
+	
+	*width: -moz-calc(60% - 320px);
+    *width: -webkit-calc(60% - 320px);
+    *width: -o-calc(60% - 320px);
+    *width: calc(100% - 320px);
+	
+	width:369px;
+	
+	font-size:18px;
+	
+	*border:2px solid red;
+}
+.kop4 .nomor-oncall{
+	float:right;
+	width:220px;
+	*background:#F9C;
+	box-sizing:border-box;
+}
+.kop4 .nomor-oncall table{
+	font-size:12px;
+	border-collapse:collapse;
+	width:100%;
+	margin:0 0;
+}
+.kop4 .nomor-oncall table td{
+	padding:1px 7px;
+	border:1px solid #000;
+	border-width:1px 0;
+	padding:2.5px 2px 2px;
+}
+.kop4 .nomor-oncall table td:nth-child(1){
+	width:100px;
+}
+.kop4 .nomor-oncall table tr:nth-child(1) td{
+	border-top:none;
+}
+.kop4 .nomor-oncall table tr:nth-child(4) td{
+	border-bottom:none;
+}
+
+
+/****/
+.form{
+	
+}
+.form table{
+	*border:1px solid #000;
+	border-collapse:collapse;
+	width:100%;
+}
+.form table td{
+	padding:3px 7px;
+	
+}
+
+/****/
+.noborder-left{
+	*border-left:none !important;
+	border-left:1px solid #FFF !important;
+}
+.noborder-top{		border-top:1px solid #FFF !important;}
+.noborder-bottom{	border-bottom:1px solid #FFF !important;}
+.border-full{
+	border:1px solid #000;
+	text-align:center;
+}
+.border-bottom{
+	border-bottom:1px solid #000;
+}
+
+/****/
+.area-tombol-cetak{
+	background:#2d77be;
+	border-bottom:4px solid #7eb3e7;
+	
+	height:40px;
+	line-height:40px;
+}
+button.cetak{
+	
+		margin-top:4px !important;
+		margin-left:10px;
+}
+@media print {
+		
+	button.cetak{
+		display:none;
+		height:0px;
+	}
+	.area-tombol-cetak{
+		display:none;
+	}
+}
+
+
+.konten-cetak{
+	padding: 10px;
+}

@@ -1,0 +1,64 @@
+.source-img{
+    *border: 1px solid black;
+	cursor:pointer;
+}
+
+#destination{
+	
+	*width:670px;
+	*height:335px;
+	
+	width:100%;
+	max-height: 168px;
+	overflow: hidden; 
+	*border:1px solid red;
+	
+	border:7px solid #eaedf2 !important;
+
+}
+#destination img.half{
+	*-moz-transform:scale(0.5);
+	*-webkit-transform:scale(0.5);
+	*transform:scale(0.5);
+	
+}
+
+.crop-height {
+  /* max-width: 1200px; /* img src width (if known) */
+  *max-height: 320px;
+  *overflow: hidden; 
+}
+
+img.scale {
+  /* corrects inline gap in enclosing div */
+  display: block;
+  max-width: 100%;
+  /* just in case, to force correct aspect ratio */
+  height: auto !important;
+  *width: auto\9; /* ie8+9 */
+  width:100%;
+  /* lt ie8 */
+  -ms-interpolation-mode: bicubic; 
+  
+  
+}
+
+
+@media screen and (max-width:767px) {
+	#destination{
+		width:100%;
+		height: auto;
+	
+	}
+	#destination img{
+		width:100%;
+		
+	
+	}
+	
+	/****/
+	.grafik-kehadiran-area canvas{
+		height:240px !important;
+	}
+
+}

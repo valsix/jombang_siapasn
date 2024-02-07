@@ -1,0 +1,256 @@
+.nav-wrapper-center
+{
+	*border: 1px solid red; 
+	display: flex; 
+	justify-content: center; 
+	align-items: center;
+}
+
+#main, footer {
+  padding-left: 0px;
+}
+
+header .brand-logo {
+  margin: 1px 0px;
+  padding: 14px 10px;
+}
+
+header .brand-logo img {
+  width: 172px;
+}
+
+#layouts-horizontal .sidebar-collapse {
+  position: absolute;
+  left: 10px;
+  top: 10px;
+  z-index: 999;
+}
+
+#ul-horizontal-nav{
+  margin: 2px auto;
+}
+
+#ul-horizontal-nav > li > a {
+  padding: 0 8px;
+}
+
+#horizontal-nav {
+  margin-top: 64px;
+  z-index: -1;
+}
+
+@media only screen and (min-width: 993px) {
+  #content {
+    margin-top: 65px;
+  }
+  
+  #content-noheader {
+    margin-top: 5px;
+  }
+  
+  #content-full{
+    margin-top: 0px;
+	margin-left: 26px;
+	margin-right: 26px;
+  }
+}
+
+.doughnut-chart-status {
+  top: -85px;
+}
+
+/*----------------------------------------
+    Horizontal Menu
+------------------------------------------*/
+#horizontal-nav ul li {
+  text-align: center;
+}
+
+#horizontal-nav ul li a i {
+  height: 0px;
+  line-height: 45px;
+  font-size: 1.4rem;
+}
+
+#horizontal-nav ul li a span {
+  position: relative;
+  top: 12px;
+}
+
+#horizontal-nav .dropdown-menu span i {
+  line-height: 65px;
+}
+
+.dropdown-horizontal-list li a {
+  min-width: 150px;
+  text-align: left;
+  font-size: 1.0rem;
+  padding: 10px;
+  font-weight: 400;
+}
+
+/*IE Specific CSS */
+@media screen and (min-width: 0\0) and (min-resolution: 72dpi) {
+  #horizontal-nav ul li {
+    min-width: 110px;
+  }
+  #horizontal-nav .dropdown-menu span i {
+    line-height: 0px;
+    position: absolute;
+    top: 10px;
+    right: -20px;
+  }
+}
+
+/*modif */
+#horizontal-nav {
+    margin-top: 54px !important;
+    z-index: -1;
+}
+
+/*modif */
+#ul-horizontal-menu-nav{
+  margin: 2px auto;
+}
+
+#ul-horizontal-menu-nav > li > a {
+  padding: 0 8px;
+}
+
+#horizontal-menu-nav {
+  margin-top: 0px;
+  z-index: -1;
+}
+
+/*----------------------------------------
+    Horizontal Menu
+------------------------------------------*/
+#horizontal-menu-nav ul li {
+  text-align: center;
+}
+
+#horizontal-menu-nav ul li a i {
+  height: 0px;
+  line-height: 25px;
+  font-size: 1.4rem;
+}
+
+#horizontal-menu-nav ul li a span {
+  position: relative;
+  top: 10px;
+}
+
+#horizontal-menu-nav .dropdown-menu span i {
+  line-height: 45px;
+}
+
+/*IE Specific CSS */
+@media screen and (min-width: 0\0) and (min-resolution: 72dpi) {
+  #horizontal-menu-nav ul li {
+    min-width: 110px;
+  }
+  #horizontal-menu-nav .dropdown-menu span i {
+    line-height: 0px;
+    position: absolute;
+    top: 10px;
+    right: -20px;
+  }
+}
+
+/*modif */
+
+nav, nav .nav-wrapper i, nav a.button-collapse, nav a.button-collapse i {
+    height: 54px !important;
+    line-height: 44px !important;
+}
+
+#horizontal-nav ul li a i {
+    height: 0px;
+    line-height: 25px !important;
+    font-size: 1.4rem;
+}
+
+@media only screen and (min-width: 993px) {
+  #content-noheader {
+    margin-top: 5px;
+  }
+  
+  #content {
+    *margin-top: 40px !important;
+	margin-top: 35px !important;
+  }
+}
+
+.backdrop
+{
+	display:none !important
+}
+
+
+@media 
+only screen and (max-width: 760px),
+(min-device-width: 768px) and (max-device-width: 1024px)  {
+
+  /* Force table to not be like tables anymore */
+  
+  table.tabel-responsif,
+  table.tabel-responsif > thead,
+  table.tabel-responsif > tbody,
+  table.tabel-responsif > tbody > tr > th,
+  table.tabel-responsif > tbody > tr > td,
+  table.tabel-responsif > tbody > tr { 
+    display: block; 
+    /*font-size: 13px !important;*/
+  }
+  
+  /* Hide table headers (but not display: none;, for accessibility) */
+  table.tabel-responsif > thead > tr { 
+    position: absolute;
+    top: -9999px;
+    left: -9999px;
+  }
+  table.tabel-responsif > tbody > tr.judul-kolom{
+    display:none;
+  }
+  
+  table.tabel-responsif > tbody > tr { border: 1px solid #ccc; margin-bottom:10px; }
+  
+  table.tabel-responsif > tbody > tr > td { 
+    /* Behave  like a "row" */
+    border: none;
+    border-bottom: 1px solid #eee; 
+    position: relative;
+    padding-left: 50% !important; 
+  }
+  
+  table.tabel-responsif > tbody > tr > td:before { 
+    /* Now like a table header */
+    position: absolute;
+    /* Top/left values mimic padding */
+    top: 6px;
+    left: 6px;
+    width: 45%; 
+    padding-right: 10px; 
+    white-space: nowrap;
+    
+    text-align:left;
+  }
+  table.tabel-responsif > tbody > tr > td:after { content:"\00a0";}
+  
+  
+  /*
+  Label the data
+  */
+  /*
+  #tbl_bidang.paket-lelang td:nth-of-type(1):before { content: "Tanggal"; }
+  #tbl_bidang.paket-lelang td:nth-of-type(2):before { content: "Lokasi"; }
+  #tbl_bidang.paket-lelang td:nth-of-type(3):before { content: "Nama"; }
+  #tbl_bidang.paket-lelang td:nth-of-type(4):before { content: "Bidang/Sub Bidang"; }
+  #tbl_bidang.paket-lelang td:nth-of-type(5):before { content: "Aksi"; }
+  
+  #tbl_bidang.paket-lelang tr:last-child td:before{ content:""; background:#eee; }
+  #tbl_bidang.paket-lelang tr:last-child td{ padding-left:0px; padding-right:0px; }
+  */
+  
+  
+}

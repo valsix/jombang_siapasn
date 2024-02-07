@@ -1,0 +1,114 @@
+@page 
+{
+	size: auto;   /* auto is the current printer page size */	
+	margin: 5mm 5mm;  /* this affects the margin in the printer settings */
+}
+
+body{
+	font-family:Arial, Helvetica, sans-serif;
+	font-size:12px;
+	
+	margin:0 0;
+}
+
+.table.table { page-break-inside:auto }
+.tr.baris    { page-break-inside:avoid; page-break-after:auto }
+.tr    { page-break-inside:avoid; page-break-after:auto }
+
+
+.table.table.overflow-y{
+	border-collapse:collapse;
+	border:2px solid #000;
+	margin-top:20px;
+}
+.table.table.overflow-y th{
+	border:1px solid #000;
+	
+	
+}
+.table.table.overflow-y th.atas{
+	*background:#dddddd !important; 
+	*-webkit-print-color-adjust: exact;
+	border-bottom:4px solid #000 !important;
+}
+/*table.table.overflow-y tr.baris-data{
+	border-bottom:4px solid #000 !important;
+}*/
+.table.table.overflow-y thead th{
+	*border-bottom:4px solid red !important;
+}
+.table.table.overflow-y td.jam-dinas{
+	border-right:1px solid #000;
+}
+.table.table.overflow-y td{
+	border:1px solid #000;
+}
+
+/****/
+.table td.bg-shift-biru{
+	background:#363594 !important; 
+	-webkit-print-color-adjust: exact;
+}
+.table td.bg-shift-pink{
+	background:#ff7d81 !important; 
+	-webkit-print-color-adjust: exact;
+}
+.table td.bg-shift-hijau{
+	background:#00b73a !important; 
+	-webkit-print-color-adjust: exact;
+}
+.table td.bg-shift-putih{
+	background:#FFF !important; 
+	-webkit-print-color-adjust: exact;
+}
+
+.kop-jadwal-shift{
+	
+}
+.kop-jadwal-shift table{
+	border-collapse:collapse;
+	border:2px solid #000 !important;
+	width:100%;
+}
+.kop-jadwal-shift table td{
+	border:1px solid #000 !important;
+	padding:2px;
+}
+
+/****/
+.table th.gelap{
+	background:#f0f0f0 !important; 
+	-webkit-print-color-adjust: exact;
+	text-align:center !important;
+}
+.table th.terang{
+	background:#fff !important; 
+	-webkit-print-color-adjust: exact;
+	text-align:center !important;
+}
+
+/****/
+.area-tombol-cetak{
+	background:#2d77be;
+	border-bottom:4px solid #7eb3e7;
+	
+	height:40px;
+	line-height:40px;
+}
+button.cetak{
+	
+		margin-top:4px !important;
+		margin-left:10px;
+}
+
+@media print {	
+	.kop{
+		border:1px solid red !important;
+		display:none !important;
+	}
+}
+
+
+.konten-cetak{
+	padding: 10px;
+}

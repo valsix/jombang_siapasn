@@ -1,0 +1,544 @@
+/****/
+.area-judul{
+	background:rgba(255,255,255,0.5);
+	float:left;
+	width:100%;
+}
+
+/****/
+/*.area-menu-aksi{
+	*border:10px solid red !important;
+	*background:rgba(255,255,255,0.5);
+	padding:7px 10px;
+	
+	float:right;
+}
+.area-menu-aksi a{
+	width:24px;
+	height:24px;
+	line-height:24px;
+	text-align:center;
+	display:inline-block;
+	
+	-webkit-border-radius: 50%;
+	-moz-border-radius: 50%;
+	border-radius: 50%;
+}
+.area-menu-aksi a i{
+	*color:#f09c58;
+	color:#FFF;
+}
+.area-menu-aksi a.btn-tambah{
+	*background:#26a209;
+	*background:#ff9031;
+	background:#2C9CA8;
+}
+.area-menu-aksi a.btn-ubah{
+	*background:#efae22;
+	*background:#ff9031;
+	background:#40E3F5;
+}
+.area-menu-aksi a.btn-hapus{
+	*background:#a20909;	
+	*background:#ff9031;
+	background:#F57040;
+}
+.area-menu-aksi a.btn-cetak{
+	*background:#3c98a3;
+	*background:#ff9031;
+	background:#575757;
+}*/
+
+/****/
+/*.judul-halaman-admin{
+	float:left;
+	height:38px;
+	line-height:38px;
+	*padding-left:10px;
+	text-transform:uppercase;
+	font-weight:bold;
+}
+*/
+/*.judul-halaman-admin:before{
+	content:url(../images/icon-judul-halaman.png);
+	display:inline-block;
+	vertical-align:middle;
+}
+*/
+/*.judul-halaman-admin:before{
+	font-family:"FontAwesome";
+	content:"\f061";
+	font-weight:lighter;
+	margin-left:10px;
+	margin-right:10px;
+	color:#2c9ca8;
+}*/
+/*.judul-halaman-admin i{
+	color:#878787;
+}
+*/
+
+/****/
+.area-konten-admin{
+	*border:2px solid red;
+	width:100%;
+}
+
+/****/
+.area-konten-popup{
+	background:url(../images/bg-popup.png);
+	
+}
+.area-konten-popup .container-fluid{
+	*border:1px solid rgba(255,255,255,0.5);
+	*padding-left:0px;
+	*padding-right:0px;
+}
+.area-konten-popup .container-fluid .row{
+	*border:1px solid rgba(255,255,255,0.5);
+}
+.area-konten-popup .container-fluid .row .col-md-12{
+	*border:1px solid rgba(255,255,255,0.5);
+	padding-left:0px;
+	padding-right:0px;
+}
+
+/****/
+.form-pjb{
+	margin-top:18px;
+}
+.form-pjb input[type=text],
+.form-pjb input[type=email]{
+	border:none;
+	background:#474747;
+	color:#FFF;
+	
+	-webkit-border-radius: 0px;
+	-moz-border-radius: 0px;
+	border-radius: 0px;
+
+}
+.form-pjb button[type=submit]{
+	background:#ef9e4c;
+	color:#FFF;
+	border:none;
+	text-transform:uppercase;
+}
+.form-pjb button[type=reset]{
+	background:#d80202;
+	color:#FFF;
+	border:none;
+	text-transform:uppercase;
+}
+.form-pjb .form-control:focus {
+	border-color: #ef9e4c !important;
+	outline: 0;
+	-webkit-box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(239, 158, 76, .6);
+		  box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(239, 158, 76, .6);
+}
+.form-pjb .form-group label{
+	color:#333;
+}
+
+/****/
+.pelaporan{
+	*border:1px solid #ddd;
+	*margin:18px 0px;
+	*padding:0 0;
+	*background:#FFF;
+	*border:2px solid red;
+	width:100%;
+	
+	max-height:calc(100vh - 66px);
+	overflow:auto;
+	
+	*border:0px solid rgba(255,255,255,0);
+	
+}
+.pelaporan table{
+	border:1px solid cyan;
+	border-collapse:collapse;
+	width:100%;
+}
+.pelaporan table td{
+	border:1px solid #dddddd;
+	padding:7px 10px;
+	
+}
+.pelaporan table tr td{
+	*background:#eeeeee;
+	background:rgba(0,0,0,0.4);
+	color:#FFF;
+}
+.pelaporan table tr:nth-child(odd) td{
+	*background:#f4f4f4;
+	background:rgba(0,0,0,0.6);
+}
+.pelaporan table td.judul-grup{
+	background:#2c9ca8 !important;
+	*color:#FFF;
+	text-transform:uppercase;
+	border-top:1px solid #dddddd !important;
+	border-bottom:1px solid #dddddd !important;
+}
+.pelaporan table td.total{
+	background:#015d67 !important;
+	color:#FFF;
+}
+
+/** FORM SNQ **/
+form.form-pjb > div {
+  clear: both;
+  overflow: hidden;
+  padding: 1px;
+  margin: 0 0 10px 0;
+}
+form.form-pjb > div > fieldset > div > div {
+  margin: 0 0 5px 0;
+}
+form.form-pjb > div > label,
+form.form-pjb legend {
+	width: 25%;
+  float: left;
+  padding-right: 10px;
+}
+form.form-pjb > div > label{
+	*border:1px solid red;
+	text-align:right;
+	line-height:32px !important;
+}
+form.form-pjb > div > div,
+form.form-pjb > div > fieldset > div {
+  width: 75%;
+  float: right;
+}
+form.form-pjb > div > fieldset label {
+	font-size: 90%;
+}
+form.form-pjb fieldset {
+	border: 0;
+  padding: 0;
+}
+
+form.form-pjb input[type=text],
+form.form-pjb input[type=email],
+form.form-pjb input[type=url],
+form.form-pjb input[type=password],
+form.form-pjb textarea {
+	width: 100%;
+	font-size:16px !important;
+  /*border-top: 1px solid #ccc;
+  border-left: 1px solid #ccc;
+  border-right: 1px solid #eee;
+  border-bottom: 1px solid #eee;*/
+}
+form.form-pjb input[type=text],
+form.form-pjb input[type=email],
+form.form-pjb input[type=url],
+form.form-pjb input[type=password] {
+  width: 50%;
+}
+form.form-pjb input[type=text]:focus,
+form.form-pjb input[type=email]:focus,
+form.form-pjb input[type=url]:focus,
+form.form-pjb input[type=password]:focus,
+form.form-pjb textarea:focus {
+  outline: 0;
+  border-color: #4697e4;
+}
+
+@media (max-width: 600px) {
+  form.form-pjb > div {
+	margin: 0 0 15px 0; 
+  }
+  form.form-pjb > div > label,
+  form.form-pjb legend {
+	  width: 100%;
+	float: none;
+	margin: 0 0 5px 0;
+  }
+  form.form-pjb > div > div,
+  form.form-pjb > div > fieldset > div {
+	width: 100%;
+	float: none;
+  }
+  form.form-pjb input[type=text],
+  form.form-pjb input[type=email],
+  form.form-pjb input[type=url],
+  form.form-pjb input[type=password],
+  form.form-pjb textarea,
+  select {
+	width: 100%; 
+	
+  }
+}
+@media (min-width: 1200px) {
+  form.form-pjb > div > label,
+	form.form-pjb legend {
+	text-align: right;
+  }
+}
+
+/****/
+form.form-pjb span.combo{
+	*border:1px solid yellow !important;
+	position:relative;
+	width:100%;
+	min-width:120px;
+	
+	height:34px !important;
+	border:none;
+	background-color:transparent !important;
+	vertical-align:middle !important;
+}
+form.form-pjb span.combo input.combo-text{
+	width:calc(100% - 34px) !important;
+	*border:1px solid red !important;
+	*padding:10px !important;
+	height:34px !important;
+	line-height:34px !important;
+	padding-left:12px;
+	padding-right:10px;
+}
+form.form-pjb span.combo input.combo-text ~ span{
+	*border:1px solid cyan !important;
+}
+form.form-pjb div.panel.combo-p{
+	*border:1px solid green !important;
+	min-width:100px !important
+}
+form.form-pjb span.combo-arrow{
+	*border:1px solid red !important;
+	width:34px !important;
+	height:34px !important;
+}
+.panel-body{
+	padding:0px !important;
+}
+.panel-body .combobox-item{
+	background:#f4f4f4;
+	font-family: 'FuturaBookC';
+	font-size:16px;
+	padding:10px;
+}
+.panel-body .combobox-item:nth-child(even){
+	background:#fafafa;
+}
+.panel-body .combobox-item:hover{
+	background:#ededed !important;
+}
+
+/****/
+.form-pjb table{
+	border-collapse:separate;
+	border-spacing:1px;
+	width:100%;
+	margin-bottom:18px;
+}
+.form-pjb table thead th{
+	background:#7a7a7a;
+	padding:4px 8px;
+}
+.form-pjb table tbody td{
+	*border:1px solid red;
+	background:#959595;
+	vertical-align:top;
+}
+.form-pjb table tbody td.aksi{
+	text-align:center;
+	background-color:transparent;
+}
+.form-pjb table tbody td.aksi a.hapus{
+	*border:1px solid cyan;
+	*background:#474747;
+	width:24px;
+	height:24px;
+	line-height:24px;
+	text-align:center;
+	
+	-webkit-border-radius: 50%;
+	-moz-border-radius: 50%;
+	border-radius: 50%;
+	display:inline-block;
+
+}
+.form-pjb table tbody td.aksi a.hapus i{
+	color:red;
+}
+.form-pjb table tbody td input{
+	background:#474747 !important;
+	color:#FFF;
+	display:inline-block;
+	height:34px !important;
+	padding-left:10px;
+	padding-right:10px;
+}
+.form-pjb table tbody td.foto img{
+	height:34px !important;
+	float:left;
+	max-width:35% !important;
+}
+.form-pjb table tbody td.foto input[type=file]{
+	width:65% !important;
+	float:right;
+	border:none;
+	padding:0 0 !important;
+}
+.form-pjb .form-group label[for=foto] ~ img{
+	float:left;
+	*border:2px solid cyan;
+}
+.form-pjb .form-group input[type=file]{
+	*border:2px solid red;
+	float:left;
+	width:auto !important;
+	margin-left:15px;
+	background:#474747;
+	border:none;
+	padding:0 0 !important;
+	
+	-webkit-border-radius: 0px;
+	-moz-border-radius: 0px;
+	border-radius: 0px;
+}
+
+/****/
+/*.styled-select {
+   background: url(http://i62.tinypic.com/15xvbd5.png) no-repeat 96% 0;
+   height: 29px;
+   overflow: hidden;
+   width: 240px;
+}
+*/
+.form-pjb select {
+   background-color: transparent;
+   *background: url(http://i62.tinypic.com/15xvbd5.png) no-repeat 96% 0;
+   border: none;
+   *font-size: 14px;
+   height: 34px;
+   padding: 5px; /* If you add too much padding here, the options won't show in IE */
+   *width: 268px;
+   width:100%;
+   
+   font-size:16px !important;
+}
+.form-pjb select:after{
+	border:1px solid red;
+}
+.form-pjb select option{
+	font-size:16px !important;
+}
+
+/*.styled-select.slate {
+   background: url(http://i62.tinypic.com/2e3ybe1.jpg) no-repeat right center;
+   height: 34px;
+   width: 240px;
+}
+
+.styled-select.slate select {
+   border: 1px solid #ccc;
+   font-size: 16px;
+   height: 34px;
+   width: 268px;
+}
+*/
+/* -------------------- Rounded Corners */
+.rounded {
+   -webkit-border-radius: 20px;
+   -moz-border-radius: 20px;
+   border-radius: 20px;
+}
+
+.semi-square {
+   -webkit-border-radius: 5px;
+   -moz-border-radius: 5px;
+   border-radius: 5px;
+}
+
+/* -------------------- Colors: Background */
+.slate   { background-color: #ddd; }
+.green   { background-color: #779126; }
+.blue    { background-color: #3b8ec2; }
+.yellow  { background-color: #eec111; }
+.black   { background-color: #000; }
+
+/* -------------------- Colors: Text */
+.slate select   { color: #000; }
+.green select   { color: #fff; }
+.blue select    { color: #fff; }
+.yellow select  { color: #000; }
+.black select   { color: #fff; }
+
+
+/* -------------------- Select Box Styles: danielneumann.com Method */
+/* -------------------- Source: http://danielneumann.com/blog/how-to-style-dropdown-with-css-only/ */
+#mainselection select {
+   border: 0;
+   color: #EEE;
+   background: transparent;
+   font-size: 20px;
+   font-weight: bold;
+   padding: 2px 10px;
+   width: 378px;
+   *width: 350px;
+   *background: #58B14C;
+   -webkit-appearance: none;
+}
+
+#mainselection {
+   overflow:hidden;
+   width:350px;
+   -moz-border-radius: 9px 9px 9px 9px;
+   -webkit-border-radius: 9px 9px 9px 9px;
+   border-radius: 9px 9px 9px 9px;
+   box-shadow: 1px 1px 11px #330033;
+   background: #58B14C url("http://i62.tinypic.com/15xvbd5.png") no-repeat scroll 319px center;
+}
+
+
+/* -------------------- Select Box Styles: stackoverflow.com Method */
+/* -------------------- Source: http://stackoverflow.com/a/5809186 */
+select#soflow, select#soflow-color {
+   -webkit-appearance: button;
+   -webkit-border-radius: 2px;
+   -webkit-box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.1);
+   -webkit-padding-end: 20px;
+   -webkit-padding-start: 2px;
+   -webkit-user-select: none;
+   background-image: url(http://i62.tinypic.com/15xvbd5.png), -webkit-linear-gradient(#FAFAFA, #F4F4F4 40%, #E5E5E5);
+   background-position: 97% center;
+   background-repeat: no-repeat;
+   border: 1px solid #AAA;
+   color: #555;
+   font-size: inherit;
+   margin: 20px;
+   overflow: hidden;
+   padding: 5px 10px;
+   text-overflow: ellipsis;
+   white-space: nowrap;
+   width: 300px;
+}
+
+select#soflow-color {
+   color: #fff;
+   background-image: url(http://i62.tinypic.com/15xvbd5.png), -webkit-linear-gradient(#779126, #779126 40%, #779126);
+   background-color: #779126;
+   -webkit-border-radius: 20px;
+   -moz-border-radius: 20px;
+   border-radius: 20px;
+   padding-left: 15px;
+}
+
+/****/
+.judul-popup{
+	background:rgba(37,86,161,0.9);
+	color:#FFF;
+	padding:10px 15px;
+	font-size:18px;
+	text-transform:uppercase;
+	
+	*border-bottom:1px solid rgba(255,255,255,0.2);
+	border-bottom:1px solid rgba(0,0,0,0.3);
+	*margin-top:15px;
+}
+

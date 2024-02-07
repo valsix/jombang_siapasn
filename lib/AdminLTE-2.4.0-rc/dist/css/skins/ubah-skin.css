@@ -1,0 +1,93 @@
+.skin-blue {
+	background-color: #3c8dbc !important
+}
+.skin-blue.text-darken-1 {
+	background-color: #FFF !important;
+    color: #3c8dbc !important
+}
+.skin-blue-light {
+	background-color: #3c8dbc !important
+}
+.skin-blue-light.text-darken-1 {
+	background-color: #FFF !important;
+    color: #3c8dbc !important
+}
+.skin-black {
+	background-color: #fff !important
+}
+.skin-black.text-darken-1 {
+	background-color: #FFF !important;
+    color: #fff !important
+}
+.skin-black-light {
+	background-color: #fff !important
+}
+.skin-black-light.text-darken-1 {
+	background-color: #FFF !important;
+    color: #fff !important
+}
+.skin-green {
+	background-color: #00a65a !important
+}
+.skin-green.text-darken-1 {
+	background-color: #FFF !important;
+    color: #00a65a !important
+}
+.skin-green-light {
+	background-color: #00a65a !important
+}
+.skin-green-light.text-darken-1 {
+	background-color: #FFF !important;
+    color: #00a65a !important
+}
+.skin-red {
+	background-color: #dd4b39 !important
+}
+.skin-red.text-darken-1 {
+  background-color: #FFF !important;
+  color: #dd4b39 !important;
+}
+.skin-red-light {
+	background-color: #dd4b39 !important
+}
+.skin-red-light.text-darken-1 {
+	background-color: #FFF !important;
+    color: #dd4b39 !important
+}
+.skin-yellow {
+	background-color: #f39c12 !important
+}
+.skin-yellow.text-darken-1 {
+	background-color: #FFF !important;
+    color: #f39c12 !important
+}
+.skin-yellow-light {
+	background-color: #f39c12 !important
+}
+.skin-yellow-light.text-darken-1 {
+	background-color: #FFF !important;
+    color: #f39c12 !important
+}
+.skin-purple {
+	background-color: #605ca8 !important
+}
+.skin-purple.text-darken-1 {
+	background-color: #FFF !important;
+    color: #605ca8 !important
+}
+.skin-purple-light {
+	background-color: #605ca8 !important
+}
+.skin-purple-light.text-darken-1 {
+	background-color: #FFF !important;
+    color: #605ca8 !important
+}
+
+.loader {
+  position: absolute;
+  top :0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  margin: auto;
+}

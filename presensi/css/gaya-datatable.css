@@ -1,0 +1,195 @@
+@import url("fonts.css");
+
+body{
+	font-family: 'UbuntuRegular';
+	font-size:14px;
+}
+
+/*table.dataTable.stripe tbody tr.odd, 
+table.dataTable.display tbody tr.odd {
+	background-color: rgba(0,0,0,0.4) !important;
+}
+table.dataTable tbody tr {
+	background-color: rgba(0,0,0,0.6) !important;
+	color:#FFF;
+}
+table.dataTable tbody tr.odd.row_selected,
+table.dataTable tbody tr.even.row_selected {
+	background-color: rgba(0,0,0,0.7) !important;
+}*/
+
+/****/
+table.dataTable.order-column tbody tr > .sorting_1,
+table.dataTable.order-column tbody tr > .sorting_2,
+table.dataTable.order-column tbody tr > .sorting_3, table.dataTable.display tbody tr > .sorting_1,
+table.dataTable.display tbody tr > .sorting_2,
+table.dataTable.display tbody tr > .sorting_3 {
+  background-color: transparent/* #f9f9f9*/;
+}
+table.dataTable.order-column tbody tr.selected > .sorting_1,
+table.dataTable.order-column tbody tr.selected > .sorting_2,
+table.dataTable.order-column tbody tr.selected > .sorting_3, table.dataTable.display tbody tr.selected > .sorting_1,
+table.dataTable.display tbody tr.selected > .sorting_2,
+table.dataTable.display tbody tr.selected > .sorting_3 {
+  background-color: transparent/*#acbad4*/;
+}
+table.dataTable.display tbody tr.odd > .sorting_1, table.dataTable.order-column.stripe tbody tr.odd > .sorting_1 {
+  background-color: transparent/*#f1f1f1*/;
+}
+table.dataTable.display tbody tr.odd > .sorting_2, table.dataTable.order-column.stripe tbody tr.odd > .sorting_2 {
+  background-color: transparent/*#f3f3f3*/;
+}
+table.dataTable.display tbody tr.odd > .sorting_3, table.dataTable.order-column.stripe tbody tr.odd > .sorting_3 {
+  background-color: transparent/*whitesmoke*/;
+}
+table.dataTable.display tbody tr.odd.selected > .sorting_1, table.dataTable.order-column.stripe tbody tr.odd.selected > .sorting_1 {
+  background-color: transparent/*#a6b3cd*/;
+}
+table.dataTable.display tbody tr.odd.selected > .sorting_2, table.dataTable.order-column.stripe tbody tr.odd.selected > .sorting_2 {
+  background-color: transparent/*#a7b5ce*/;
+}
+table.dataTable.display tbody tr.odd.selected > .sorting_3, table.dataTable.order-column.stripe tbody tr.odd.selected > .sorting_3 {
+  background-color: transparent/*#a9b6d0*/;
+}
+table.dataTable.display tbody tr.even > .sorting_1, table.dataTable.order-column.stripe tbody tr.even > .sorting_1 {
+  background-color: transparent/*#f9f9f9*/;
+}
+table.dataTable.display tbody tr.even > .sorting_2, table.dataTable.order-column.stripe tbody tr.even > .sorting_2 {
+  background-color: transparent/*#fbfbfb*/;
+}
+table.dataTable.display tbody tr.even > .sorting_3, table.dataTable.order-column.stripe tbody tr.even > .sorting_3 {
+  background-color: transparent/*#fdfdfd*/;
+}
+table.dataTable.display tbody tr.even.selected > .sorting_1, table.dataTable.order-column.stripe tbody tr.even.selected > .sorting_1 {
+  background-color: transparent/*#acbad4*/;
+}
+table.dataTable.display tbody tr.even.selected > .sorting_2, table.dataTable.order-column.stripe tbody tr.even.selected > .sorting_2 {
+  background-color: transparent/*#adbbd6*/;
+}
+table.dataTable.display tbody tr.even.selected > .sorting_3, table.dataTable.order-column.stripe tbody tr.even.selected > .sorting_3 {
+  background-color: transparent/*#afbdd8*/;
+}
+table.dataTable.display tbody tr:hover > .sorting_1, table.dataTable.order-column.hover tbody tr:hover > .sorting_1 {
+  background-color: transparent/*#eaeaea*/;
+}
+table.dataTable.display tbody tr:hover > .sorting_2, table.dataTable.order-column.hover tbody tr:hover > .sorting_2 {
+  background-color: transparent/*#ebebeb*/;
+}
+table.dataTable.display tbody tr:hover > .sorting_3, table.dataTable.order-column.hover tbody tr:hover > .sorting_3 {
+  background-color: transparent/*#eeeeee*/;
+}
+table.dataTable.display tbody tr:hover.selected > .sorting_1, table.dataTable.order-column.hover tbody tr:hover.selected > .sorting_1 {
+  background-color: transparent/*#a1aec7*/;
+}
+table.dataTable.display tbody tr:hover.selected > .sorting_2, table.dataTable.order-column.hover tbody tr:hover.selected > .sorting_2 {
+  background-color: transparent/*#a2afc8*/;
+}
+table.dataTable.display tbody tr:hover.selected > .sorting_3, table.dataTable.order-column.hover tbody tr:hover.selected > .sorting_3 {
+  background-color: transparent/*#a4b2cb*/;
+}
+
+/****/
+.dataTables_info span{
+	color:#FFF !important;
+}
+
+/****/
+table.dataTable.nowrap th{
+	*white-space: nowrap;
+}
+.dataTables_scrollHead{
+	background:#0F6E84 !important;	
+}
+.dataTables_wrapper{
+	*background:red !important;
+}
+
+/****/
+.dataTables_length{
+	box-sizing:border-box;
+	padding:5px 10px 0px;
+	*background:#a1a1a1;
+	background:rgba(255,255,255,0.5);
+	border-top:1px solid #8a8a8a;
+	width:50%;
+	*height:38px;
+	height:33px;
+	*background:red;
+}
+.dataTables_filter{
+	box-sizing:border-box;
+	padding:5px 10px 0px;
+	*background:#a1a1a1;
+	background:rgba(255,255,255,0.5);
+	border-top:1px solid #8a8a8a;
+	width:50%;
+	*height:38px;
+	height:33px;
+	*background:red;
+}
+.dataTables_info{
+	box-sizing:border-box;
+	padding:5px 10px;
+	*background:#a1a1a1;
+	*background:#f4f4f4;
+	background:rgba(255,255,255,0.7);
+	border-top:1px solid #8a8a8a;
+	width:50%;
+	height:38px;
+}
+.dataTables_info span.showing-data{
+	color:#333 !important;
+}
+
+.dataTables_paginate{
+	box-sizing:border-box;
+	padding:5px 10px;
+	*background:#a1a1a1;
+	background:rgba(255,255,255,0.7);
+	border-top:1px solid #8a8a8a;
+	width:50%;
+	height:38px;
+}
+.dataTables_paginate a{
+	*background:red;
+	line-height:28px;
+	display:inline-block;
+	*border:1px solid #FFF;
+	*background:rgba(0,0,0,0.1);
+	background:#2556a1;
+	color:#FFF !important;
+	padding-left:10px;
+	padding-right:10px;
+	margin-left:1px;
+}
+.dataTables_paginate a:hover{
+	background:rgba(0,0,0,0.8);
+	text-decoration:none;
+}
+a.paginate_button{
+	padding:0 0 !important;
+	color:#FFF !important;
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button {
+	/*box-sizing: border-box;
+	display: inline-block;
+	min-width: 1.5em;
+	padding: 0.5em 1em;
+	margin-left: 2px;
+	text-align: center;
+	text-decoration: none !important;
+	cursor: pointer;*/
+	border: none;
+}
+.dataTables_wrapper .dataTables_paginate .paginate_button.current, 
+.dataTables_wrapper .dataTables_paginate .paginate_button.current:hover {
+	color: #333 !important;
+	border: none;
+	
+	background:#fffc00;
+}
+
+
+
+

@@ -1,0 +1,437 @@
+
+/****/
+
+@page 
+{
+	size: auto;   /* auto is the current printer page size */
+	*margin: 0mm 5mm;  /* this affects the margin in the printer settings */
+	
+	margin: 10mm 4mm;  /* this affects the margin in the printer settings */
+}
+
+body{
+	font-family:Arial, Helvetica, sans-serif;
+	font-size:12px;
+	
+	margin:0 0;
+}
+table{
+	font-family:Arial, Helvetica, sans-serif;
+	font-size:12px;
+}
+
+/****/
+.judul-laporan{
+	font-size:15px;
+	text-align:center;
+	text-transform:uppercase;
+	font-weight:bold;
+}
+.judul-section{
+	font-size:18px;
+	text-align:center;
+	text-transform:uppercase;
+	*background:#FC6;
+	clear:both;
+	display:inline-block;
+	width:100%;
+	margin-top:10px;
+}
+.judul-sub-section{
+	font-size:15px;
+	text-transform:uppercase;
+	clear:both;
+	display:inline-block;
+	width:100%;
+	margin-top:10px;
+}
+
+/****/
+.ket-kanan{
+	background:#FFF; 
+	position:relative; 
+	padding:5px 0 5px 5px; 
+	text-align:right; 
+	float:right; 
+	margin-top:-19px; 
+	width:220px;
+	
+	*border:1px solid red;
+}
+
+/****/
+.lampiran{
+	*background:#F36;
+	display:inline-block;
+	width:100%;
+}
+.lampiran-inner{
+	*border:1px solid cyan;
+	*background:#F96;
+	float:right;
+	width:280px;
+}
+.lampiran table{
+	*border:1px solid #393;
+	border-collapse:collapse;
+	float:right;
+	
+	*background:#6F0;
+}
+
+dt, dd{
+	*background:#FC9;
+	padding:5px 0;
+}
+
+/****/
+dl.biodata { width: 100%; display:inline-block; }
+dl.biodata dt{ float: left; width: 20%; overflow: hidden; white-space: nowrap; *background:#3FC; }
+dl.biodata dd { float: left; width: calc(80% - 6px); overflow: hidden; white-space: nowrap;  margin:0; *background:url(images/dot.png); }
+
+dl.biodata dd:after{
+	content:"sdfghjkl";
+
+}
+
+dl.biodata dt span:after {
+	*border:2px solid red;
+	*background:#963 !important;
+	*content: " .........................................................................................................................................................................................................................................................................................................................................................................................................................."; }
+
+dl.biodata dd span{
+	border:6px solid #FFF;
+	width:100% !important;
+	display:block !important;
+	*position:relative;
+	background:#FFF;;
+}
+dl.biodata dd span:after {
+	*border:2px solid #C3C;
+	background:#963 !important;
+	*content: " ........................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................."; }
+
+/****/
+dl.permohonan { width: 100%;}
+dl.permohonan dt {
+	float: left; 
+	width: 100%; 
+	overflow: hidden; 
+	white-space: nowrap;
+	*background:url(images/dot.png) ;
+}
+dl.permohonan dt span{
+	border:5px solid #FFF;
+	border-width:5px 5px 5px 0;
+	background:#FFF;
+	
+}
+/*dd { float: left; width: 100px; overflow: hidden }*/
+
+dl.permohonan dt span:after { *content: " ................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................" }
+
+/****/
+dl.sisa { *width: calc(100% - 400px); width:80%; *background:#C60; display:inline-block;}
+dl.sisa dt { float: left; width:500px; *width:440px; *width: calc(100% - 100px); overflow: hidden; white-space: nowrap; *background:url(images/dot.png) ; }
+dl.sisa dd { float: right; width: 100px; overflow: hidden; *background:#F9C; margin:0; }
+dl.sisa dt span{
+	border:5px solid #FFF;
+	border-width:5px 5px 5px 0;
+	background:#FFF;
+}
+
+dl.sisa dt span:after { *content: " ........................................................................................................................................................................................................................................................................................................................................" }
+
+/****/
+dl.alamat { width: 100%;}
+dl.alamat dt { float: left; width: 100%; overflow: hidden; white-space: nowrap; *background:url(images/dot.png); }
+dl.alamat dt span{
+	border:5px solid #FFF;
+	border-width:5px 5px 5px 0;
+	background:#FFF;
+}
+
+/*dd { float: left; width: 100px; overflow: hidden }*/
+
+dl.alamat dt span:after { *content: " .................................................................................................................................................................................................................................................................................................................................................................................................................................." }
+
+/****/
+.area-ttd{
+	*background:#F96;
+	display:inline-block;
+	width:100%;
+	margin-bottom:18px;
+}
+.area-ttd .menyetujui{
+	*background:#F96;
+	float:left;
+	width:40%;
+	text-align:center;
+}
+.area-ttd .pemohon{
+	*background:#C6F;
+	float:right;
+	width:40%;
+	text-align:center;
+}
+
+/****/
+.keterangan ul{
+	list-style:none;
+	padding-left:20px;
+	padding-top:0px;
+	margin-top:0px;
+}
+.tembusan ul{
+	list-style:decimal;
+	padding-top:0px;
+	margin-top:0px;
+}
+.syarat ul{
+	list-style:lower-latin;
+	padding-top:0px;
+	margin-top:0px;
+}
+
+/****/
+.underline{
+	text-decoration:underline;
+}
+.bold{
+	font-weight:bold;
+}
+.center{
+	text-align:center;
+}
+
+/****/
+.kop{
+	display:inline-block;
+	width:100%;
+	*background:#FC6;
+	margin-bottom:20px;
+}
+.kop .logo{
+	float:left;
+	width:60px;
+}
+.kop .judul{
+	float:left;
+	
+	width: -moz-calc(100% - 60px);
+    width: -webkit-calc(100% - 60px);
+    width: -o-calc(100% - 60px);
+    width: calc(100% - 60px);
+	
+	font-size:16px;
+}
+
+/****/
+.kop2{
+	display:inline-block;
+	width:100%;
+	*background:#FC6;
+	margin-bottom:20px;
+}
+.kop2 .logo{
+	float:left;
+	width:60px;
+	*height:60px;
+	*line-height:60px;
+	
+	text-align:right;
+}
+.kop2 .logo img{
+	*vertical-align:middle;
+}
+.kop2 .judul{
+	float:left;
+	text-align:center;
+	line-height:40px;
+	
+	width: -moz-calc(100% - 500px);
+    width: -webkit-calc(100% - 500px);
+    width: -o-calc(100% - 500px);
+    width: calc(100% - 500px);
+	
+	font-size:18px;
+}
+.kop2 .nomor{
+	float:right;
+	width:440px;
+	*background:#F9C;
+	box-sizing:border-box;
+}
+.kop2 .nomor table{
+	font-size:12px;
+}
+.kop2 .nomor table td{
+	padding:1px 7px;
+}
+
+/****/
+.kop3{
+	display:inline-block;
+	width:100%;
+	*background:#FC6;
+	margin-bottom:20px;
+}
+.kop3 .logo{
+	float:left;
+	width:159px;
+	*height:60px;
+	*line-height:60px;
+	
+	text-align:right;
+	*border-right:1px solid #000;
+}
+.kop3 .logo img{
+	*vertical-align:middle;
+}
+.kop3 .judul{
+	float:left;
+	text-align:center;
+	line-height:40px;
+	
+	width: -moz-calc(100% - 600px);
+    width: -webkit-calc(100% - 600px);
+    width: -o-calc(100% - 600px);
+    width: calc(100% - 600px);
+	
+	font-size:18px;
+}
+.kop3 .nomor{
+	float:right;
+	width:440px;
+	*background:#F9C;
+	box-sizing:border-box;
+}
+.kop3 .nomor table{
+	font-size:12px;
+	border-collapse:collapse;
+	width:100%;
+	margin:0 0;
+}
+.kop3 .nomor table td{
+	padding:1px 7px;
+	border:1px solid #000;
+	border-width:1px 0;
+	padding:2.5px 2px 2px;
+}
+.kop3 .nomor table td:nth-child(1){
+	width:100px;
+}
+
+/****/
+.kop4{
+	display:inline-block;
+	width:100%;
+	*background:#FC6;
+	margin-bottom:20px;
+}
+.kop4 .logo{
+	float:left;
+	width:160px;
+	
+	text-align:right;
+	
+	*background:#990;
+}
+.kop4 .logo img{ }
+
+.kop4 .judul{
+	float:left;
+	text-align:center;
+	line-height:40px;
+	
+	/*width: -moz-calc(60% - 160px);
+    width: -webkit-calc(60% - 160px);
+    width: -o-calc(60% - 160px);
+    width: calc(60% - 160px);*/
+	
+	width:633px;
+	
+	font-size:18px;
+	
+	*background:#0FF;
+}
+.kop4 .nomor{
+	float:right;
+	width:40%;
+	*background:#F9C;
+	box-sizing:border-box;
+}
+.kop4 .nomor table{
+	font-size:12px;
+	border-collapse:collapse;
+	width:100%;
+	margin:0 0;
+}
+.kop4 .nomor table td{
+	padding:1px 7px;
+	border:1px solid #000;
+	border-width:1px 0;
+	padding:2.5px 2px 2px;
+}
+.kop4 .nomor table td:nth-child(1){
+	width:100px;
+}
+
+
+/****/
+.form{
+	
+}
+.form table{
+	*border:1px solid #000;
+	border-collapse:collapse;
+	width:100%;
+}
+.form table td{
+	padding:3px 7px;
+	
+}
+
+/****/
+.noborder-left{
+	*border-left:none !important;
+	border-left:1px solid #FFF !important;
+}
+.noborder-top{		border-top:1px solid #FFF !important;}
+.noborder-bottom{	border-bottom:1px solid #FFF !important;}
+.border-full{
+	border:1px solid #000;
+	text-align:center;
+}
+.border-bottom{
+	border-bottom:1px solid #000;
+}
+
+/****/
+.area-tombol-cetak{
+	background:#2d77be;
+	border-bottom:4px solid #7eb3e7;
+	
+	height:40px;
+	line-height:40px;
+}
+button.cetak{
+	
+		margin-top:4px !important;
+		margin-left:10px;
+}
+@media print {
+		
+	button.cetak{
+		display:none;
+		height:0px;
+	}
+	.area-tombol-cetak{
+		display:none;
+	}
+}
+
+
+.konten-cetak{
+	padding: 10px;
+}

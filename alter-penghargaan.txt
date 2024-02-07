@@ -1,0 +1,65 @@
+/*
+select *
+from
+(
+select pegawai_id, count(1) jumlah from penghargaan a
+where (coalesce(nullif(a.status, ''), null) is null or a.status = '2')
+group by pegawai_id
+) a
+order by jumlah desc
+
+http://192.168.88.100/jombang/siapasn/app/loadUrl/app/pegawai_add?reqId=7794
+http://192.168.88.100/jombang/siapasn/app/loadUrl/app/pegawai_add_penghargaan_data?reqId=7794&reqRowId=371
+
+http://192.168.88.100/jombang/siapasn/app/loadUrl/app/pegawai_add?reqId=4249
+http://192.168.88.100/jombang/siapasn/app/loadUrl/app/pegawai_add_penghargaan_data?reqId=4249&reqRowId=70
+*/
+
+--select * from kategori_file order by urut desc
+insert into kategori_file (kategori_file_id, nama, urut) values(22, 'Penghargaan', 10);
+
+alter table penghargaan
+add column ref_penghargaan_id numeric
+, add column nama_detil character varying
+, add column jenjang_peringkat_id numeric;
+
+update penghargaan as u
+set
+tahun= x.tahun
+, ref_penghargaan_id = x.ref_penghargaan_id
+from
+(
+ 	select *
+	from
+	(
+		select penghargaan_id, to_char(tanggal_sk, 'yyyy')::numeric tahun
+		, case when coalesce(nullif(a.nama, ''), null) is null then null else nama end::numeric ref_penghargaan_id
+		, tanggal_sk
+		from penghargaan a
+		where (coalesce(nullif(a.status, ''), null) is null or a.status = '2')
+		--and pegawai_id = 4249
+		and tanggal_sk is not null
+	) a
+	order by penghargaan_id
+) as x
+where u.penghargaan_id = x.penghargaan_id;
+
+drop table if exists sapk.ref_penghargaan;
+create table sapk.ref_penghargaan
+(
+  ref_penghargaan_id integer not null,
+  ref_penghargaan_id_sapk character varying,
+  nama character varying,
+  info_detil character varying(1),
+  constraint ref_penghargaan_pkey primary key (ref_penghargaan_id)
+) with (oids=false);
+alter table sapk.ref_penghargaan owner to postgres;
+
+drop table if exists sapk.ref_penghargaan_jenjang;
+create table sapk.ref_penghargaan_jenjang
+(
+  ref_penghargaan_jenjang_id integer not null,
+  nama character varying,
+  constraint ref_penghargaan_jenjang_pkey primary key (ref_penghargaan_jenjang_id)
+) with (oids=false);
+alter table sapk.ref_penghargaan_jenjang owner to postgres;

@@ -1,0 +1,25 @@
+/*.mbox-wrapper .mbox
+{
+	background-color:#6FF
+}
+
+.mbox > hr
+{
+	background-color:#FFF
+}
+
+.mbox > .right-align
+{
+	display:none;
+}*/
+
+.mbox-wrapper .mbox
+{
+	background-color: aliceblue !important;
+}
+
+.mbox-wrapper hr
+{
+	margin: 10px 0 !important;
+	height: 4px !important;
+}

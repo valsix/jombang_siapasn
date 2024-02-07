@@ -1,0 +1,231 @@
+create or replace function penilaian_skp_detil_p()
+  returns trigger as
+$body$
+declare
+vquery character varying;
+exequery character varying;
+vid numeric;
+begin
+  
+  if new.triwulan = 99 then
+
+    select penilaian_skp_id into vid from penilaian_skp where pegawai_id = new.pegawai_id and tahun = new.tahun;
+    --raise notice 'sql %',vid;
+
+    vquery:='
+    select
+      case
+      when coalesce(id_detil,0) > 0 then id_detil
+      else
+      (select coalesce(max(penilaian_skp_id),0) + a.penilaian_skp_id from penilaian_skp)
+      end penilaian_skp_id,
+      a.tahun,
+      a.pegawai_id,
+      a.pegawai_unor_id,
+      a.pegawai_unor_nama,
+      a.jenis_jabatan_dinilai,
+      a.pegawai_pejabat_penilai_id,
+      a.pegawai_pejabat_penilai_nip,
+      a.pegawai_pejabat_penilai_nama,
+      a.pegawai_pejabat_penilai_jabatan_nama,
+      a.pegawai_pejabat_penilai_unor_nama,
+      a.pegawai_pejabat_penilai_pangkat_id,
+      a.pegawai_atasan_pejabat_id,
+      a.pegawai_atasan_pejabat_nip,
+      a.pegawai_atasan_pejabat_nama,
+      a.pegawai_atasan_pejabat_jabatan_nama,
+      a.pegawai_atasan_pejabat_unor_nama,
+      a.pegawai_atasan_pejabat_pangkat_id,
+      a.nilai_hasil_kerja,
+      a.nilai_hasil_perilaku 
+    from
+    (
+      select
+        row_number () over (order by a.penilaian_skp_detil_id) penilaian_skp_id,
+        a2.penilaian_skp_id id_detil,
+        a.tahun,
+        a.pegawai_id,
+        a.pegawai_unor_id,
+        a.pegawai_unor_nama,
+        a.jenis_jabatan_dinilai,
+        a.pegawai_pejabat_penilai_id,
+        a.pegawai_pejabat_penilai_nip,
+        a.pegawai_pejabat_penilai_nama,
+        a.pegawai_pejabat_penilai_jabatan_nama,
+        a.pegawai_pejabat_penilai_unor_nama,
+        a.pegawai_pejabat_penilai_pangkat_id,
+        a.pegawai_atasan_pejabat_id,
+        a.pegawai_atasan_pejabat_nip,
+        a.pegawai_atasan_pejabat_nama,
+        a.pegawai_atasan_pejabat_jabatan_nama,
+        a.pegawai_atasan_pejabat_unor_nama,
+        a.pegawai_atasan_pejabat_pangkat_id,
+        a.nilai_hasil_kerja,
+        a.nilai_hasil_perilaku 
+      from penilaian_skp_detil a
+      inner join
+      (
+        select
+        a.pegawai_id, a.tahun
+        from
+        (
+          select
+          a.pegawai_id, a.tahun
+          , sum(a.tw1 + a.tw2 + a.tw3 + a.tw4 + a.tw99) total
+          from
+          (
+            select
+            a.pegawai_id, a.tahun
+            , case when a.triwulan = 1 then 1 else 0 end tw1
+            , case when a.triwulan = 2 then 1 else 0 end tw2
+            , case when a.triwulan = 3 then 1 else 0 end tw3
+            , case when a.triwulan = 4 then 1 else 0 end tw4
+            , case when a.triwulan = 99 then 1 else 0 end tw99
+            from penilaian_skp_detil a
+            where 1=1
+            and (coalesce(nullif(a.status, ''''), null) is null or a.status = ''2'')
+            and a.triwulan in (1,2,3,4,99)
+          ) a
+          group by a.pegawai_id, a.tahun
+        ) a
+        where total = 5
+      ) a1 on a.pegawai_id = a1.pegawai_id and a.tahun = a1.tahun
+      left join penilaian_skp a2 on a.pegawai_id = a2.pegawai_id and a.tahun = a2.tahun
+      where 1=1 and a.pegawai_id = ' || new.pegawai_id || ' and a.triwulan = 99
+      and (coalesce(nullif(a.status, ''''), null) is null or a.status = ''2'')
+      order by a.penilaian_skp_detil_id
+    ) a
+    order by a.penilaian_skp_id
+    ';
+    --raise notice 'sql %',vquery;
+
+    --untuk insert
+    if vid is null then
+
+      exequery:='
+      insert into penilaian_skp
+      (
+        penilaian_skp_id, tahun, pegawai_id, pegawai_unor_id, pegawai_unor_nama, jenis_jabatan_dinilai, pegawai_pejabat_penilai_id
+        , pegawai_pejabat_penilai_nip, pegawai_pejabat_penilai_nama, pegawai_pejabat_penilai_jabatan_nama, pegawai_pejabat_penilai_unor_nama
+        , pegawai_pejabat_penilai_pangkat_id, pegawai_atasan_pejabat_id, pegawai_atasan_pejabat_nip, pegawai_atasan_pejabat_nama
+        , pegawai_atasan_pejabat_jabatan_nama, pegawai_atasan_pejabat_unor_nama, pegawai_atasan_pejabat_pangkat_id
+        , nilai_hasil_kerja, nilai_hasil_perilaku
+      )'
+      || vquery
+      ;
+
+    else
+      exequery:='
+      update penilaian_skp as u
+      set
+      tahun= x.tahun
+      , pegawai_unor_id= x.pegawai_unor_id
+      , pegawai_unor_nama= x.pegawai_unor_nama
+      , jenis_jabatan_dinilai= x.jenis_jabatan_dinilai
+      , pegawai_pejabat_penilai_id= x.pegawai_pejabat_penilai_id
+      , pegawai_pejabat_penilai_nip= x.pegawai_pejabat_penilai_nip
+      , pegawai_pejabat_penilai_nama= x.pegawai_pejabat_penilai_nama
+      , pegawai_pejabat_penilai_jabatan_nama= x.pegawai_pejabat_penilai_jabatan_nama
+      , pegawai_pejabat_penilai_unor_nama= x.pegawai_pejabat_penilai_unor_nama
+      , pegawai_pejabat_penilai_pangkat_id= x.pegawai_pejabat_penilai_pangkat_id
+      , pegawai_atasan_pejabat_id= x.pegawai_atasan_pejabat_id
+      , pegawai_atasan_pejabat_nip= x.pegawai_atasan_pejabat_nip
+      , pegawai_atasan_pejabat_nama= x.pegawai_atasan_pejabat_nama
+      , pegawai_atasan_pejabat_jabatan_nama= x.pegawai_atasan_pejabat_jabatan_nama
+      , pegawai_atasan_pejabat_unor_nama= x.pegawai_atasan_pejabat_unor_nama
+      , pegawai_atasan_pejabat_pangkat_id= x.pegawai_atasan_pejabat_pangkat_id
+      , nilai_hasil_kerja= x.nilai_hasil_kerja
+      , nilai_hasil_perilaku= x.nilai_hasil_perilaku
+      from
+      (
+        ' || vquery || '
+      ) as x
+      where u.penilaian_skp_id = x.penilaian_skp_id
+      ';
+    end if;
+
+    if coalesce(nullif(exequery, ''), null) is not null then
+      execute exequery;
+    end if;
+    --raise notice 'sql %',exequery;
+
+  end if;
+  return new;
+   
+end;
+$body$
+language plpgsql volatile cost 100;
+alter function penilaian_skp_detil_p() owner to postgres;
+  
+drop trigger if exists penilaian_skp_detil_t on penilaian_skp_detil;
+create trigger penilaian_skp_detil_t
+before insert or update
+on penilaian_skp_detil
+for each row
+execute procedure penilaian_skp_detil_p();
+
+/*
+update penilaian_skp_detil as u
+set
+penilaian_skp_detil_id = x.penilaian_skp_detil_id
+from
+(
+  select 
+  a.penilaian_skp_detil_id, a.pegawai_id, a.tahun
+  from penilaian_skp_detil a
+  inner join
+  (
+    select
+    a.pegawai_id, a.tahun
+    from
+    (
+      select
+      a.pegawai_id, a.tahun
+      , sum(a.tw1 + a.tw2 + a.tw3 + a.tw4 + a.tw99) total
+      from
+      (
+        select
+        a.pegawai_id, a.tahun
+        , case when a.triwulan = 1 then 1 else 0 end tw1
+        , case when a.triwulan = 2 then 1 else 0 end tw2
+        , case when a.triwulan = 3 then 1 else 0 end tw3
+        , case when a.triwulan = 4 then 1 else 0 end tw4
+        , case when a.triwulan = 99 then 1 else 0 end tw99
+        from penilaian_skp_detil a
+        where 1=1
+        and (coalesce(nullif(a.status, ''), null) is null or a.status = '2')
+        and a.triwulan in (1,2,3,4,99)
+      ) a
+      group by a.pegawai_id, a.tahun
+    ) a
+    where total = 5
+  ) a1 on a.pegawai_id = a1.pegawai_id and a.tahun = a1.tahun
+  where 1=1
+  and a.triwulan in (99)
+  and a.pegawai_id = 8300
+  and a.pegawai_id not in ( select pegawai_id from penilaian_skp where tahun = 2023 )
+) as x
+where u.penilaian_skp_detil_id = x.penilaian_skp_detil_id
+
+alter table user_login add column info_sipeta character varying;
+
+--untuk update data Sipeta Semua Satuan Kerja
+update user_login set info_sipeta = 'sipeta_all' where satuan_kerja_id is null and login_level in (30, 99);
+
+--untuk update data Sipeta Sesuai Satuan Kerja
+update user_login set info_sipeta = 'sipeta_sesuai' where satuan_kerja_id is not null and login_level in (20);
+
+create table teken_log
+(
+  teken_log_id numeric,
+  jenis character varying,
+  ip_address character varying,
+  user_agent character varying,
+  keterangan character varying,
+  last_user character varying,
+  last_date timestamp without time zone,
+  user_login_id numeric,
+  user_login_pegawai_id numeric
+);
+alter table teken_log owner to postgres;
+*/

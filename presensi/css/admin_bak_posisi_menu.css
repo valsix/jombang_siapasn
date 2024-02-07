@@ -1,0 +1,653 @@
+@import url("fonts.css");
+@import url("../lib/font-awesome-4.7.0/css/font-awesome.css");
+
+/****/
+body{
+	font-family: 'UbuntuRegular';
+	font-size:16px;
+	padding:0 0;
+	margin:0 0;
+}
+
+/****/
+#begron{
+	display:none;
+}
+#wadah{
+	*border:2px solid magenta;
+	height:calc(100vh - 36px);
+	
+	padding:18px 20px 18px;
+	
+	background:#dfdfdf url(../images/bg-permohonan.png) top fixed;
+	background-size:100% 100%;
+	
+	position:relative !important;
+}
+
+/****/
+.judul-halaman{
+	
+	background:rgba(255,255,255,0.2) url(../images/bg-judul-halaman.png) no-repeat;
+	background-position: left 15px bottom 0px;
+	text-transform:uppercase;
+	padding-left:15px;
+	padding-right:15px;
+	
+	font-size:18px;
+	color: #2556a1;
+	
+	height:40px;
+	line-height:40px;
+}
+
+/****/
+.bluetabs{
+	*border:1px solid cyan;
+	padding:0 0;
+	margin-top:10px;
+	margin-bottom:10px;
+	float:left;
+	*width:calc(50% - 80px);
+	*max-width:calc(50% - 80px);
+	*max-width:calc(50% - 0px);
+	max-width:calc(100% - 340px);
+	*min-height:62px;
+	min-height:32px;
+	
+	background:cyan;
+	
+}
+.bluetabs ul{
+	padding:0 0;
+	margin:0 0;
+	*border:1px solid green;
+}
+/*.bluetabs li{
+	list-style:none;
+	*display:table;
+	
+	overflow: hidden;
+	width:80px;
+	height:60px;
+	
+	border:1px solid rgba(255,255,255,0.2);
+	background:rgba(255,255,255,0.1);
+	*position:relative;
+	
+	-webkit-border-radius: 3px;
+	-moz-border-radius: 3px;
+	border-radius: 3px;
+	
+	float:left;
+	margin-right:7px;
+	*padding-top:35px;
+	
+	box-sizing:border-box;
+}*/
+.bluetabs li{
+	list-style:none;
+	*display:table;
+	
+	overflow: hidden;
+	width: auto;
+	height:32px;
+	
+	border:1px solid rgba(255,255,255,0.2);
+	background:rgba(255,255,255,0.1);
+	*position:relative;
+	
+	-webkit-border-radius: 3px;
+	-moz-border-radius: 3px;
+	border-radius: 3px;
+	
+	float:left;
+	margin-right:7px;
+	margin-bottom:2px;
+	
+	box-sizing:border-box;
+}
+/*.bluetabs li a{
+	display:inline-block;	
+	min-width:80px;
+	height:60px;
+	padding-top:35px;
+
+	text-align:center ;
+	text-decoration:none;
+	
+	color:#FFF;
+	font-size:14px;
+	font-family: 'UbuntuLight';
+	
+	white-space:nowrap;	
+}
+*/
+.bluetabs li a{
+	display:inline-block;	
+	min-width: inherit;
+	height:32px;
+	line-height:28px;
+	padding-top:0px;
+	padding-left:10px;
+	padding-right:10px;
+
+	text-align:center ;
+	text-decoration:none;
+	
+	color:#FFF;
+	font-size:14px;
+	font-family: 'UbuntuLight';
+	
+	white-space:nowrap;	
+}
+
+.bluetabs li a img{
+	display:none;
+}
+/*.bluetabs li a:before{
+	font-size: 22px;
+	margin-top: 6px;
+	margin-bottom: 4px;
+	
+	display:block;
+	
+	*border:1px solid red;
+	width:80px;
+	position:fixed;
+	margin-top:-30px;
+	
+}*/
+.bluetabs li a:before{
+	font-size: 20px;
+	margin-top: 6px;
+	margin-bottom: 4px;
+	
+	display: inline;
+	
+	*border:1px solid red;
+	width: auto;
+	position:relative;
+	margin-top:0px;
+	
+}
+.bluetabs li a#btnAdd:before{
+	font-family: 'FontAwesome';
+	content:"\f055";
+	color:#fefb00;
+	
+}
+.bluetabs li a#btnEdit:before{
+	font-family: 'FontAwesome';
+	content:"\f040";
+	color:#fe9500;
+}
+.bluetabs li a#btnDelete:before{
+	font-family: 'FontAwesome';
+	content:"\f014";
+	color:#fe0000;
+}
+.bluetabs li a#btnProses:before{
+	font-family: 'FontAwesome';
+	content:"\f085";
+	color:#feb900;
+}
+.bluetabs li a#btnImport:before{
+	font-family: 'FontAwesome';
+	content:"\f019";
+	color:#aecdfb;
+}
+.bluetabs li a#btnCetak:before,
+.bluetabs li a#btnCetakHari:before,
+.bluetabs li a#btnCetakMingguan:before{
+	font-family: 'FontAwesome';
+	content:"\f02f";
+	color:#f699fe;
+}
+.bluetabs li a#btnCetakSurat:before{
+	font-family: 'FontAwesome';
+	content:"\f162";
+	color:#5bcdf7;
+}
+
+.bluetabs li a#btnKoreksi:before{
+	font-family: 'FontAwesome';
+	content:"\f044";
+	color:#d0fe99;
+}
+.bluetabs li a#btnApproval:before{
+	font-family: 'FontAwesome';
+	content:"\f046";
+	color:#02e71d;
+}
+.bluetabs li a#btnResetAbsensi:before,
+.bluetabs li a#btnResetAbsensiAll:before{
+	font-family: 'FontAwesome';
+	content:"\f1da";
+	color:#99d7fe;
+}
+.bluetabs li a#btnLihat:before{
+	font-family: 'FontAwesome';
+	content:"\f002";
+	color:#e5fe99;
+}
+.bluetabs li a#btnEkspor:before{
+	font-family: 'FontAwesome';
+	content:"\f1c3";
+	color:#01e531;
+}
+.bluetabs li a#btnSinkronisasi:before,
+.bluetabs li a#btnSinkronisasiDl:before{
+	font-family: 'FontAwesome';
+	content:"\f0ec";
+	color:#ab47cc;
+}
+.bluetabs li a#btnDetil:before{
+	font-family: 'FontAwesome';
+	*content:"\f0f6";
+	*content:"\f022";
+	content:"\f141";
+	color:#aac8fc;
+}
+.bluetabs li a#btnPilih:before{
+	font-family: 'FontAwesome';
+	content:"\f25a";
+	color:#FFF;
+}
+
+
+
+
+
+
+
+
+
+
+/****/
+.menu-aksi{
+	display:none;
+}
+
+/** datatable **/
+table.dataTable thead th,
+table.dataTable tfoot th {
+	font-weight: bold;
+	
+	background:#2556a1;
+	color:#FFF;
+}
+
+/****/
+/*#parameter-tambahan{
+	*clear:both;
+	float:right;
+	*width:calc(60% - 0px);
+	*background:rgba(0,0,0,0.1);
+	background:rgba(37,86,161,0.3);
+	*border:1px solid rgba(255,255,255,0.2);
+	border:1px solid rgba(37,86,161,0.4);
+	padding:4px 10px;
+	box-sizing:border-box;
+	
+	-webkit-border-radius: 4px;
+	-moz-border-radius: 4px;
+	border-radius: 4px;
+	
+	margin-top:42px;
+	text-align:right;
+	
+	font-family: 'UbuntuLight';
+	font-size:14px;
+	color:#FFF;
+}*/
+#parameter-tambahan{
+	*clear:both;
+	float:right;
+	background:rgba(37,86,161,0.3);
+	border:1px solid rgba(37,86,161,0.4);
+	*padding:4px 10px;
+	padding:5px 10px;
+	box-sizing:border-box;
+	
+	-webkit-border-radius: 4px;
+	-moz-border-radius: 4px;
+	border-radius: 4px;
+	
+	*margin-top:10px;
+	*margin-right:340px;
+	text-align:right;
+	
+	font-family: 'UbuntuLight';
+	font-size:14px;
+	color:#FFF;
+	
+	position:absolute;
+	top:20px;
+	*right:350px;
+	right:200px;
+	z-index:99;
+}
+#parameter-tambahan input.easyui-combotree{
+	*border:1px solid rgba(255,255,255,0.2);
+	*background:rgba(255,255,255,0.1);
+	
+	border:1px solid #808a9a;
+	background:#FFF;
+	
+	-webkit-border-radius: 4px;
+	-moz-border-radius: 4px;
+	border-radius: 4px;
+
+}
+
+/****/
+.dataTables_wrapper table{
+	font-family: 'UbuntuRegular';
+	font-size:14px;
+	
+}
+.dataTables_wrapper .dataTables_scrollHeadInner{
+	background:#2556a1;
+}
+
+.fg-toolbar.ui-toolbar.ui-widget-header.ui-helper-clearfix.ui-corner-tl.ui-corner-tr{
+	
+}
+.fg-toolbar.ui-toolbar.ui-widget-header.ui-helper-clearfix.ui-corner-tl.ui-corner-tr{
+	*border:1px solid yellow;
+	*padding:10px;
+	box-sizing:border-box;
+	
+	*display:table;
+	*float:right;
+	*width:50%;
+	
+	*position:absolute;
+	*top:-60px;
+	*top:0;
+	*right:0;
+	
+	float:left;
+	background:pink;
+	width:auto;
+	
+	*height:400px;
+	
+	position:fixed;
+	top:18px;
+	right:20px;
+}
+.fg-toolbar.ui-toolbar.ui-widget-header.ui-helper-clearfix.ui-corner-tl.ui-corner-tr .dataTables_length{
+	float:right;
+	*width:100%;
+	width:auto;
+	*background:pink;
+	text-align:right;
+	*padding-top:30px;
+	*border:1px solid red;
+	
+	*clear: both;
+	color:#FFF;
+	font-family: 'UbuntuLight';
+	font-size:14px;
+	
+	height:40px;
+	line-height:40px;
+	padding-right:15px;
+}
+
+.fg-toolbar.ui-toolbar.ui-widget-header.ui-helper-clearfix.ui-corner-tl.ui-corner-tr .dataTables_filter{
+	*float:right;
+	*width:100%;
+	width:auto;
+	*background:green;
+	*margin-top:-30px;
+	
+	clear:both;
+	float: right;
+	*border: 1px solid cyan;
+	*margin-top: -60px;
+	color:#FFF;
+	font-family: 'UbuntuLight';
+	font-size:14px;
+	
+	*margin-top:10px;
+	margin-top:5px;
+	margin-right:15px;
+}
+.fg-toolbar.ui-toolbar.ui-widget-header.ui-helper-clearfix.ui-corner-tl.ui-corner-tr .dataTables_filter label:after{
+	font-family: 'FontAwesome';
+	content:"\f002";
+	margin-left:-23px;
+	margin-right:10px;
+}
+.fg-toolbar.ui-toolbar.ui-widget-header.ui-helper-clearfix.ui-corner-tl.ui-corner-tr .dataTables_filter label input[type=search]{
+	
+	-webkit-border-radius: 4px;
+	-moz-border-radius: 4px;
+	border-radius: 4px;
+	
+	border:1px solid rgba(255,255,255,0.2);
+	background:rgba(255,255,255,0.1);
+	
+	height:30px;
+	line-height:30px;
+	padding-left:10px;
+	padding-right:10px;
+	
+	width:250px;
+}
+
+/****/
+table.display{
+	clear:both;
+	
+}
+.dataTables_wrapper .dataTables_processing {
+	
+	position:fixed !important;
+	*border:5px solid green;
+	top:50vh !important;
+	width:500px !important;
+	margin:0 auto !important;
+	left:0 !important;
+	right:0 !important;
+	
+}
+
+/****/
+table.dataTable thead th,
+table.dataTable thead td {
+  *padding: 6px 10px !important;
+  *border-bottom: 0px solid #111111;
+  *border-bottom: 1px solid red !important;
+}
+.DataTables_sort_wrapper{
+	padding-top:2px;
+	padding-bottom:2px;
+}
+table.dataTable tbody tr {
+  background-color: rgba(37,87,161,0.3) !important;
+  color:#FFF;
+}
+table.dataTable tbody th,
+table.dataTable tbody td {
+  padding: 8px 10px !important;
+}
+table.dataTable.row-border tbody th, 
+table.dataTable.row-border tbody td, 
+table.dataTable.display tbody th, 
+table.dataTable.display tbody td {
+  border-top: none !important;
+}
+
+table.dataTable.stripe tbody tr.odd, 
+table.dataTable.display tbody tr.odd {
+  background-color: rgba(37,87,161,0.5) !important;
+  color:#FFF;
+}
+table.dataTable tbody tr.odd.row_selected,
+table.dataTable tbody tr.even.row_selected {
+	background-color: rgba(0,0,0,0.7) !important;
+}
+
+table.dataTable.display tbody tr.odd.selected > .sorting_1, table.dataTable.order-column.stripe tbody tr.odd.selected > .sorting_1 {
+	*background-color: red !important;
+}
+
+
+/****/
+.dataTables_info{
+	float:left;
+	width:50%;
+	color:#333 !important;
+	font-family: 'UbuntuLight'  ;
+	font-size:14px;
+	line-height:28px;
+}
+.dataTables_paginate{
+	float:right;
+	width:50%;
+}
+.dataTables_info,
+.dataTables_paginate{
+	background:#ebebeb;
+	height:38px;
+	padding:5px 10px !important;
+	box-sizing:border-box;
+}
+
+.dataTables_paginate a{
+	background:#bfbebe;
+	color:#333;
+	margin-left:2px;
+	padding:0 6px;
+	display:inline-block;
+	height:28px;
+	line-height:28px;
+	font-weight:normal !important;
+	font-size:14px !important;
+}
+a.ui-state-disabled{
+	background:#2557a1;
+	color:#FFF;
+	font-weight:normal !important;
+}
+a.ui-state-disabled:hover{
+	background:#2557a1 !important;
+	
+}
+.dataTables_paginate a:hover{
+	text-decoration:none;
+	
+	color: white !important;
+	border: none;
+	background-color: #2556a1;
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #2556a1), color-stop(100%, #507dc2));
+	/* Chrome,Safari4+ */
+	background: -webkit-linear-gradient(top, #2556a1 0%, #507dc2 100%);
+	/* Chrome10+,Safari5.1+ */
+	background: -moz-linear-gradient(top, #2556a1 0%, #507dc2 100%);
+	/* FF3.6+ */
+	background: -ms-linear-gradient(top, #2556a1 0%, #507dc2 100%);
+	/* IE10+ */
+	background: -o-linear-gradient(top, #2556a1 0%, #507dc2 100%);
+	/* Opera 11.10+ */
+	background: linear-gradient(to bottom, #2556a1 0%, #507dc2 100%);
+	/* W3C */
+
+}
+
+/****/
+.konten-utama-popup{
+	box-sizing:border-box;
+	
+	background:#FFF;
+	float:left;
+	*width:100px;
+	*height:200px;
+	margin-left:250px;
+
+	width: -moz-calc(100% - 250px);
+	width: -webkit-calc(100% - 250px);
+	width: -o-calc(100% - 250px);
+	width: calc(100% - 250px);
+	
+	/*height: -moz-calc(100% - 402px);
+	height: -webkit-calc(100% - 402px);
+	height: -o-calc(100% - 402px);
+	height: calc(100% - 402px);*/
+	
+	height: -moz-calc(100% - 52px);
+	height: -webkit-calc(100% - 52px);
+	height: -o-calc(100% - 52px);
+	height: calc(100% - 52px);
+	
+	*height:450px;
+	
+	*border:5px solid brown;
+	
+	overflow: auto !important;
+	position:relative;
+	
+	
+	/*height: -moz-calc(100% - 70px);
+	height: -webkit-calc(100% - 70px);
+	height: -o-calc(100% - 70px);
+	height: calc(100% - 70px);*/
+}
+
+/** UNTUK MENGATUR TINGGI HEADER POPUP **/
+nav.navbar.navbar-default.navbar-static-top.popup-atas{
+	*border:1px solid red;
+	*padding-bottom:1px !important;
+	*height:10px !important;
+	
+	position: relative;
+	min-height: 35px !important;
+	margin-bottom: 0px !important;
+	border: 1px solid transparent;
+	
+	background:#00405e/*dbf2fd*/;
+	*border-bottom:1px solid #FFF;
+}
+nav.popup-atas{
+	*display:none;
+	
+	*border:1px solid yellow;
+	*padding-top:12px;
+	*padding-bottom:-20px;
+	*margin-bottom:-20px;
+	*height:0px;
+}
+nav.popup-atas a.navbar-brand{
+	*border:2px solid blue;
+	*padding-bottom:0px !important;
+	*height:0px;
+	color:#FFF;
+	
+	*background:#963;
+	line-height:50px;
+}
+nav.popup-atas a.navbar-brand-popup{
+	*border:5px solid #00F;
+	padding-bottom:0px !important;
+	height:0px;
+	padding-top:0px !important;
+	
+	color:#FFF;
+	text-transform:uppercase;
+	font-size:14px;
+	line-height:35px;
+	font-weight:bold;
+	padding-left:20px;
+}
+
+/****/
+nav.popup-atas div.navbar-default.sidebar{
+	margin-top:52px !important;
+	margin-left:-1px;
+}
+
+

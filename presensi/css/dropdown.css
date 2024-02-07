@@ -1,0 +1,43 @@
+.dropmenudiv_b{
+	position:absolute;
+	top: 36px !important;
+	left: 0px !important;
+	border: 1px solid #918d8d; /*THEME CHANGE HERE*/
+	border-width: 1px 1px 0px;
+	font:normal 12px Verdana;
+	line-height:18px;
+	z-index:100;
+	background-color: white;
+	width: 200px;
+	visibility: hidden;
+	
+	-webkit-border-radius: 3px;
+	-moz-border-radius: 3px;
+	border-radius: 3px;
+	
+}
+
+
+.dropmenudiv_b a{
+width: auto;
+display: block;
+text-indent: 5px;
+border: 0 solid #918d8d; /*THEME CHANGE HERE*/
+border-bottom-width: 1px;
+padding: 2px 0;
+text-decoration: none;
+color: black;
+}
+
+* html .dropmenudiv_b a{ /*IE only hack*/
+width: 100%;
+}
+
+.dropmenudiv_b a:hover{ /*THEME CHANGE HERE*/
+background-color: #edf3f3;
+}
+
+.bluetabs li a.tidaknyalabutton
+{
+	background: white url(media/bluetab.gif) top left repeat-x; cursor:default; color:#C0C0C0
+}

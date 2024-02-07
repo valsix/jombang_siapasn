@@ -1,0 +1,12 @@
+
+/** UNTUK FULLSCREEN POPUP CETAK **/
+
+.modal-dialog.modal-lg{
+	*border:1px solid red;
+	width:100% !important;
+	height:calc(100% - 50px) !important;
+}
+.embed-responsive-item{
+	*border:1px solid red !important;
+	height:81vh !important;
+}

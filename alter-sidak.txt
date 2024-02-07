@@ -1,0 +1,1459 @@
+alter table jabatan_riwayat
+add column lama_jabatan_bulan numeric;
+
+CREATE OR REPLACE FUNCTION jabatan_riwayat_hlamajabatan(vpegawaiid numeric)
+  RETURNS void AS
+$BODY$
+declare
+  sqlquery text;
+  vurut numeric;
+  recdata record;
+
+  vjabatanriwayatid numeric;
+  vtipepegawaiid numeric;
+  vtmtjabatan date;
+  ntmtjabatan date;
+  nlabajabatan numeric;
+  nlabajabatanbulan numeric;
+  ncheck integer;
+begin
+
+  for recdata in (select * from p_jabatanrwyturut_pegawai('', vpegawaiid))
+  loop
+    vurut:= recdata.urut;
+    vjabatanriwayatid:= recdata.jabatan_riwayat_id;
+    vtmtjabatan:= recdata.tmt_jabatan_date;
+    vtipepegawaiid:= recdata.tipe_pegawai_id;
+
+    if ntmtjabatan is not null and vtmtjabatan is not null then
+    --if vtipepegawaiid = 11 then
+      if vurut > 1 then
+        --datediff(''month'', to_date('''||vtmtjabatan||''', ''yyyy-mm-dd''), to_date('''||ntmtjabatan||''', ''yyyy-mm-dd'')) 
+        sqlquery:= '
+        select
+        (datediff(''month'', to_date('''||vtmtjabatan||''', ''yyyy-mm-dd''), to_date('''||ntmtjabatan||''', ''yyyy-mm-dd''))::integer % 12::integer) nlabajabatanbulan
+        , datediff(''year'', to_date('''||vtmtjabatan||''', ''yyyy-mm-dd''), to_date('''||ntmtjabatan||''', ''yyyy-mm-dd'')) nlabajabatan
+        ';
+        --raise notice 'sql %',sqlquery;
+        execute sqlquery into nlabajabatanbulan, nlabajabatan;
+        --raise notice 'sql %',nlabajabatanbulan || '-' || nlabajabatan;
+
+        --select (nlabajabatanbulan::integer / 12::integer)::integer into ncheck;
+        --raise notice 'sql %',ncheck;
+
+        --if(nlabajabatanbulan > 0) then
+          --nlabajabatan:= nlabajabatan + ncheck;
+          --select nlabajabatanbulan % 12 into nlabajabatanbulan;
+        --end if;
+        --raise notice 'sql %',nlabajabatanbulan || '-' || nlabajabatan;
+
+        sqlquery:= ' update jabatan_riwayat set tmt_selesai_jabatan = to_date('''||ntmtjabatan||''', ''yyyy-mm-dd'')
+        , lama_jabatan = ' || nlabajabatan ||'
+        , lama_jabatan_bulan = ' || nlabajabatanbulan ||'
+        , status_triger = 1
+        where jabatan_riwayat_id = ' || vjabatanriwayatid;
+        --raise notice 'sql %',sqlquery;
+        execute sqlquery;
+      end if;
+    else
+      sqlquery:= ' update jabatan_riwayat set tmt_selesai_jabatan = null
+      , lama_jabatan = null
+      , lama_jabatan_bulan= null
+      , status_triger = 1
+      where jabatan_riwayat_id = ' || vjabatanriwayatid;
+      --raise notice 'sql %',sqlquery;
+      execute sqlquery;
+    end if;
+    
+    --ambil data sebelum
+    ntmtjabatan:= vtmtjabatan;
+  end loop;
+  
+  --update jabatan_riwayat set pegawai_id = 4857 where jabatan_riwayat_id = 33584;
+  --execute sqlquery;
+  --select jabatan_riwayat_hlamajabatan(4857);
+    
+--exception
+--when others
+--then raise exception 'an error was encountered - ', sqlquery; 
+
+end;
+$BODY$
+LANGUAGE plpgsql VOLATILE
+COST 100;
+ALTER FUNCTION jabatan_riwayat_hlamajabatan(numeric) OWNER TO postgres;
+
+drop table if exists penghargaan_predikat;
+create table penghargaan_predikat
+(
+  penghargaan_predikat_id numeric not null,
+  nama character varying,
+  nilai numeric not null,
+  constraint pk_penghargaan_predikat primary key (penghargaan_predikat_id)
+) with (oids=false);
+alter table penghargaan_predikat owner to postgres;
+
+insert into penghargaan_predikat(penghargaan_predikat_id, nama, nilai)values(1, 'Terbaik 1', 100);
+insert into penghargaan_predikat(penghargaan_predikat_id, nama, nilai)values(2, 'Terbaik 2', 90);
+insert into penghargaan_predikat(penghargaan_predikat_id, nama, nilai)values(3, 'Terbaik 3', 80);
+insert into penghargaan_predikat(penghargaan_predikat_id, nama, nilai)values(4, 'Kategori Selain 1, 2 dan 3', 70);
+insert into penghargaan_predikat(penghargaan_predikat_id, nama, nilai)values(5, 'Tidak', 0);
+
+alter table penghargaan
+add column penghargaan_predikat_id numeric;
+
+alter table tingkat_hukuman add column nilai numeric;
+insert into tingkat_hukuman(tingkat_hukuman_id, nama, nilai)values(-1, 'Tidak Pernah', 100);
+update tingkat_hukuman set nilai =  90 where tingkat_hukuman_id in (1,4);
+update tingkat_hukuman set nilai =  80 where tingkat_hukuman_id in (2,5);
+update tingkat_hukuman set nilai =  70 where tingkat_hukuman_id in (3,6);
+
+drop table if exists penilaian_kompetensi_konversi;
+create table penilaian_kompetensi_konversi
+(
+  penilaian_kompetensi_konversi_id numeric not null,
+  nama character varying,
+  x1 numeric not null,
+  x2 numeric not null,
+  nilai numeric not null,
+  constraint pk_penilaian_kompetensi_konversi primary key (penilaian_kompetensi_konversi_id)
+) with (oids=false);
+alter table penilaian_kompetensi_konversi owner to postgres;
+
+delete from penilaian_kompetensi_konversi;
+insert into penilaian_kompetensi_konversi(penilaian_kompetensi_konversi_id, nama, x1, x2, nilai) values(1, '100 atau lebih dari 100', 100, 10000, 100);
+insert into penilaian_kompetensi_konversi(penilaian_kompetensi_konversi_id, nama, x1, x2, nilai) values(2, '90-99', 90, 100, 70);
+insert into penilaian_kompetensi_konversi(penilaian_kompetensi_konversi_id, nama, x1, x2, nilai) values(3, '80-89', 80, 90, 50);
+insert into penilaian_kompetensi_konversi(penilaian_kompetensi_konversi_id, nama, x1, x2, nilai) values(4, 'belum pernah', 1, 80, 50);
+insert into penilaian_kompetensi_konversi(penilaian_kompetensi_konversi_id, nama, x1, x2, nilai) values(5, '79 kebawah', 0, 0, 30);
+
+alter table jabatan_ft
+add column jenjang_jft character varying;
+
+alter table diklat_kursus add column bidang_terkait_id numeric;
+drop table if exists talent.bidang_terkait;
+create table talent.bidang_terkait (
+  bidang_terkait_id numeric not null,
+  rumpun_id numeric not null,
+  nama character varying,
+  CONSTRAINT bidang_terkait_pkey PRIMARY KEY (bidang_terkait_id)
+);
+
+insert into talent.bidang_terkait (bidang_terkait_id, rumpun_id, nama) values(1, 1, 'Monitoring Dan Evaluasi Kinerja');
+insert into talent.bidang_terkait (bidang_terkait_id, rumpun_id, nama) values(2, 1, 'Perencanaan Pembangunan');
+insert into talent.bidang_terkait (bidang_terkait_id, rumpun_id, nama) values(3, 1, 'Pengawasan Internal/ Eksternal');
+insert into talent.bidang_terkait (bidang_terkait_id, rumpun_id, nama) values(4, 1, 'Reformasi Birokrasi');
+insert into talent.bidang_terkait (bidang_terkait_id, rumpun_id, nama) values(5, 1, 'Perencanaan Pengembangan Sumber Daya Manusi Aparatur');
+insert into talent.bidang_terkait (bidang_terkait_id, rumpun_id, nama) values(6, 1, 'Literasi');
+insert into talent.bidang_terkait (bidang_terkait_id, rumpun_id, nama) values(7, 1, 'Tata Naskah Dinas');
+insert into talent.bidang_terkait (bidang_terkait_id, rumpun_id, nama) values(8, 1, 'Pengelolaan Data Dan Informasi');
+insert into talent.bidang_terkait (bidang_terkait_id, rumpun_id, nama) values(9, 2, 'Pemerintahan Desa/Daerah');
+insert into talent.bidang_terkait (bidang_terkait_id, rumpun_id, nama) values(10, 2, 'Sosial Politik');
+insert into talent.bidang_terkait (bidang_terkait_id, rumpun_id, nama) values(11, 2, 'Wawasan Kebangsaan');
+insert into talent.bidang_terkait (bidang_terkait_id, rumpun_id, nama) values(12, 2, 'Pelayanan Publik');
+insert into talent.bidang_terkait (bidang_terkait_id, rumpun_id, nama) values(13, 2, 'Budaya Kerja');
+insert into talent.bidang_terkait (bidang_terkait_id, rumpun_id, nama) values(14, 3, 'Pendidikan');
+insert into talent.bidang_terkait (bidang_terkait_id, rumpun_id, nama) values(15, 3, 'Kesehatan');
+insert into talent.bidang_terkait (bidang_terkait_id, rumpun_id, nama) values(16, 3, 'Peningkatan Keimanan/Rohani');
+insert into talent.bidang_terkait (bidang_terkait_id, rumpun_id, nama) values(17, 3, 'Keprotokolan Dan Kehumasan');
+insert into talent.bidang_terkait (bidang_terkait_id, rumpun_id, nama) values(18, 4, 'Hukum');
+insert into talent.bidang_terkait (bidang_terkait_id, rumpun_id, nama) values(19, 4, 'Advokasi');
+insert into talent.bidang_terkait (bidang_terkait_id, rumpun_id, nama) values(20, 4, 'Ketentuan Perundang-Undangan');
+insert into talent.bidang_terkait (bidang_terkait_id, rumpun_id, nama) values(21, 5, 'Keuangan');
+insert into talent.bidang_terkait (bidang_terkait_id, rumpun_id, nama) values(22, 5, 'Perdagangan/ Industri');
+insert into talent.bidang_terkait (bidang_terkait_id, rumpun_id, nama) values(23, 5, 'Perpajakan');
+insert into talent.bidang_terkait (bidang_terkait_id, rumpun_id, nama) values(24, 5, 'Pariwisata');
+insert into talent.bidang_terkait (bidang_terkait_id, rumpun_id, nama) values(25, 5, 'Pengadaan Barang Dan Jasa');
+insert into talent.bidang_terkait (bidang_terkait_id, rumpun_id, nama) values(26, 6, 'Teknis Pembangunan Daerah');
+insert into talent.bidang_terkait (bidang_terkait_id, rumpun_id, nama) values(27, 6, 'Teknis Sistem Informasi/ Aplikasi/ Web Service');
+insert into talent.bidang_terkait (bidang_terkait_id, rumpun_id, nama) values(28, 6, 'Sistem Elektronik');
+insert into talent.bidang_terkait (bidang_terkait_id, rumpun_id, nama) values(29, 7, 'Teknis Pertanian');
+insert into talent.bidang_terkait (bidang_terkait_id, rumpun_id, nama) values(30, 7, 'Teknis Perikanan');
+insert into talent.bidang_terkait (bidang_terkait_id, rumpun_id, nama) values(31, 7, 'Teknis Peternakan');
+
+alter table pendidikan add column jenjang_nama character varying, add column jenjang_skor numeric;
+update pendidikan set jenjang_nama = 'SD / SMP / SMA', jenjang_skor = 10 where pendidikan_id = 1;
+update pendidikan set jenjang_nama = 'SD / SMP / SMA', jenjang_skor = 10 where pendidikan_id = 2;
+update pendidikan set jenjang_nama = 'SD / SMP / SMA', jenjang_skor = 10 where pendidikan_id = 3;
+update pendidikan set jenjang_nama = 'SD / SMP / SMA', jenjang_skor = 10 where pendidikan_id = 4;
+update pendidikan set jenjang_nama = 'SD / SMP / SMA', jenjang_skor = 10 where pendidikan_id = 5;
+update pendidikan set jenjang_nama = 'SD / SMP / SMA', jenjang_skor = 10 where pendidikan_id = 6;
+update pendidikan set jenjang_nama = 'D-I / D-II / D-III / D-IV / S-1', jenjang_skor = 20 where pendidikan_id = 7;
+update pendidikan set jenjang_nama = 'D-I / D-II / D-III / D-IV / S-1', jenjang_skor = 20 where pendidikan_id = 8;
+update pendidikan set jenjang_nama = 'D-I / D-II / D-III / D-IV / S-1', jenjang_skor = 20 where pendidikan_id = 9;
+update pendidikan set jenjang_nama = 'D-I / D-II / D-III / D-IV / S-1', jenjang_skor = 20 where pendidikan_id = 10;
+update pendidikan set jenjang_nama = 'D-I / D-II / D-III / D-IV / S-1', jenjang_skor = 20 where pendidikan_id = 11;
+update pendidikan set jenjang_nama = 'S-2', jenjang_skor = 30 where pendidikan_id = 12;
+update pendidikan set jenjang_nama = 'S-3', jenjang_skor = 40 where pendidikan_id = 13;
+
+alter table sapk.ref_penghargaan add column nilai numeric;
+alter table sapk.ref_penghargaan add column predikat character varying;
+update sapk.ref_penghargaan set nilai = 100 where ref_penghargaan_id = 6;
+update sapk.ref_penghargaan set nilai = 90 where ref_penghargaan_id = 7;
+update sapk.ref_penghargaan set nilai = 80 where ref_penghargaan_id = 8;
+update sapk.ref_penghargaan set nilai = 70 where ref_penghargaan_id = 9;
+
+alter table nilai_kuadran add column nilai numeric;
+update nilai_kuadran set nilai = 95 where nilai_kuadran_id = 1;
+update nilai_kuadran set nilai = 60 where nilai_kuadran_id = 2;
+update nilai_kuadran set nilai = 27 where nilai_kuadran_id = 3;
+update nilai_kuadran set nilai = 60 where nilai_kuadran_id = 4;
+update nilai_kuadran set nilai = 60 where nilai_kuadran_id = 5;
+update nilai_kuadran set nilai = 27 where nilai_kuadran_id = 6;
+update nilai_kuadran set nilai = 40 where nilai_kuadran_id = 7;
+update nilai_kuadran set nilai = 40 where nilai_kuadran_id = 8;
+update nilai_kuadran set nilai = 11 where nilai_kuadran_id = 9;
+
+create or replace function penilaian_skp_b2022()
+  returns trigger as
+$body$
+declare
+  vnilai numeric;
+begin
+  
+  if new.tahun = '2022' and (coalesce(nullif(new.status, ''), null) is null or new.status = '2') then
+    --update penilaian_skp set penilaian_skp_id = 36779 where penilaian_skp_id = 36779;
+
+    select coalesce(nilai,0) into vnilai from nilai_kuadran where kode = new.nilai_hasil_kerja::text || new.nilai_hasil_perilaku::text;
+
+    if vnilai is null then
+      vnilai:= 0;
+    end if;
+    --raise notice 'sql %', vnilai;
+    new.prestasi_hasil:= vnilai;
+
+    return new;
+  end if;
+  return new;
+   
+end;
+$body$
+language plpgsql volatile cost 100;
+alter function penilaian_skp_b2022() owner to postgres;
+
+drop trigger if exists penilaian_skp_t2022 on penilaian_skp;
+create trigger penilaian_skp_t2022
+before insert or update
+on penilaian_skp
+for each row
+execute procedure penilaian_skp_b2022();
+
+update penilaian_skp as u
+set
+penilaian_skp_id = x.penilaian_skp_id
+from
+(
+  select
+  ps.penilaian_skp_id, ps.tahun
+  from penilaian_skp ps
+  where 1=1 --and ps.pegawai_id = 9106
+  and ps.tahun = '2022'
+  and (coalesce(nullif(ps.status, ''), null) is null or ps.status = '2')
+) as x
+where u.penilaian_skp_id = x.penilaian_skp_id;
+
+create or replace function talent.pembulatan(vnilai numeric)
+  returns numeric as
+$body$
+declare 
+
+vartemp numeric;
+varreturn numeric;
+
+begin
+  case when coalesce(vnilai,0) != 0 
+  then 
+  vartemp:= round(vnilai,2);
+  else
+  vartemp:= 0;
+  end case;
+ 
+  --raise notice 'sql %',vartemp;
+  
+  case when vartemp - floor(vartemp) > .00 
+  then varreturn:= vartemp;
+  else 
+  varreturn:= cast(vartemp as integer);
+  end case;
+  
+  return varreturn; 
+end;
+$body$
+  language plpgsql volatile
+  cost 100;
+alter function talent.pembulatan(numeric) owner to postgres;
+
+alter table jabatan_riwayat add column bidang_jabatan_terkait_id numeric;
+drop table if exists talent.bidang_jabatan_terkait;
+create table talent.bidang_jabatan_terkait (
+  bidang_jabatan_terkait_id numeric not null,
+  rumpun_id numeric not null,
+  nama character varying,
+  CONSTRAINT bidang_jabatan_terkait_pkey PRIMARY KEY (bidang_jabatan_terkait_id)
+);
+
+insert into talent.bidang_jabatan_terkait (bidang_jabatan_terkait_id, rumpun_id, nama) values(1, 1, 'Administrasi Kependudukan Dan Catatan Sipil');
+insert into talent.bidang_jabatan_terkait (bidang_jabatan_terkait_id, rumpun_id, nama) values(2, 1, 'Kearsipan');
+insert into talent.bidang_jabatan_terkait (bidang_jabatan_terkait_id, rumpun_id, nama) values(3, 6, 'Kebencanaan ');
+insert into talent.bidang_jabatan_terkait (bidang_jabatan_terkait_id, rumpun_id, nama) values(4, 3, 'Kebudayaan');
+insert into talent.bidang_jabatan_terkait (bidang_jabatan_terkait_id, rumpun_id, nama) values(5, 1, 'Kepegawaian');
+insert into talent.bidang_jabatan_terkait (bidang_jabatan_terkait_id, rumpun_id, nama) values(6, 3, 'Kepemudaan Dan Olah Raga');
+insert into talent.bidang_jabatan_terkait (bidang_jabatan_terkait_id, rumpun_id, nama) values(7, 2, 'Kesatuan Bangsa Dan Politik');
+insert into talent.bidang_jabatan_terkait (bidang_jabatan_terkait_id, rumpun_id, nama) values(8, 3, 'Kesehatan');
+insert into talent.bidang_jabatan_terkait (bidang_jabatan_terkait_id, rumpun_id, nama) values(9, 1, 'Kesekretariatan');
+insert into talent.bidang_jabatan_terkait (bidang_jabatan_terkait_id, rumpun_id, nama) values(10, 7, 'Ketahanan Pangan');
+insert into talent.bidang_jabatan_terkait (bidang_jabatan_terkait_id, rumpun_id, nama) values(11, 2, 'Ketenteraman, Ketertiban Umum Dan Perlindungan Masyarakat');
+insert into talent.bidang_jabatan_terkait (bidang_jabatan_terkait_id, rumpun_id, nama) values(12, 5, 'Keuangan ');
+insert into talent.bidang_jabatan_terkait (bidang_jabatan_terkait_id, rumpun_id, nama) values(13, 6, 'Komunikasi Dan Informatika');
+insert into talent.bidang_jabatan_terkait (bidang_jabatan_terkait_id, rumpun_id, nama) values(14, 5, 'Koperasi, Usaha Mikro, Kecil Dan Menengah');
+insert into talent.bidang_jabatan_terkait (bidang_jabatan_terkait_id, rumpun_id, nama) values(15, 6, 'Lingkungan Hidup');
+insert into talent.bidang_jabatan_terkait (bidang_jabatan_terkait_id, rumpun_id, nama) values(16, 5, 'Pariwisata');
+insert into talent.bidang_jabatan_terkait (bidang_jabatan_terkait_id, rumpun_id, nama) values(17, 6, 'Pekerjaan Umum Dan Penataan Ruang');
+insert into talent.bidang_jabatan_terkait (bidang_jabatan_terkait_id, rumpun_id, nama) values(18, 4, 'Pembentukan Peraturan');
+insert into talent.bidang_jabatan_terkait (bidang_jabatan_terkait_id, rumpun_id, nama) values(19, 3, 'Pemberdayaan Masyarakat Dan Desa');
+insert into talent.bidang_jabatan_terkait (bidang_jabatan_terkait_id, rumpun_id, nama) values(20, 3, 'Pemberdayaan Perempuan Dan Perlindungan Anak');
+insert into talent.bidang_jabatan_terkait (bidang_jabatan_terkait_id, rumpun_id, nama) values(21, 2, 'Pemerintahan Kecamatan');
+insert into talent.bidang_jabatan_terkait (bidang_jabatan_terkait_id, rumpun_id, nama) values(22, 5, 'Penanaman Modal');
+insert into talent.bidang_jabatan_terkait (bidang_jabatan_terkait_id, rumpun_id, nama) values(23, 5, 'Pendapatan Daerah');
+insert into talent.bidang_jabatan_terkait (bidang_jabatan_terkait_id, rumpun_id, nama) values(24, 1, 'Pendidikan Dan Pelatihan');
+insert into talent.bidang_jabatan_terkait (bidang_jabatan_terkait_id, rumpun_id, nama) values(25, 3, 'Pendidikan');
+insert into talent.bidang_jabatan_terkait (bidang_jabatan_terkait_id, rumpun_id, nama) values(26, 4, 'Penegakkan Peraturan');
+insert into talent.bidang_jabatan_terkait (bidang_jabatan_terkait_id, rumpun_id, nama) values(27, 1, 'Penelitian Dan Pengkajian');
+insert into talent.bidang_jabatan_terkait (bidang_jabatan_terkait_id, rumpun_id, nama) values(28, 1, 'Pengawasan Dan Pelaporan');
+insert into talent.bidang_jabatan_terkait (bidang_jabatan_terkait_id, rumpun_id, nama) values(29, 3, 'Pengendalian Penduduk Dan Keluarga Berencana');
+insert into talent.bidang_jabatan_terkait (bidang_jabatan_terkait_id, rumpun_id, nama) values(30, 1, 'Perencanaan Pembangunan');
+insert into talent.bidang_jabatan_terkait (bidang_jabatan_terkait_id, rumpun_id, nama) values(31, 6, 'Perhubungan');
+insert into talent.bidang_jabatan_terkait (bidang_jabatan_terkait_id, rumpun_id, nama) values(32, 7, 'Perikanan');
+insert into talent.bidang_jabatan_terkait (bidang_jabatan_terkait_id, rumpun_id, nama) values(33, 5, 'Perindustrian Dan Perdagangan');
+insert into talent.bidang_jabatan_terkait (bidang_jabatan_terkait_id, rumpun_id, nama) values(34, 1, 'Perizinan');
+insert into talent.bidang_jabatan_terkait (bidang_jabatan_terkait_id, rumpun_id, nama) values(35, 1, 'Perizinan');
+insert into talent.bidang_jabatan_terkait (bidang_jabatan_terkait_id, rumpun_id, nama) values(36, 1, 'Perpustakaan');
+insert into talent.bidang_jabatan_terkait (bidang_jabatan_terkait_id, rumpun_id, nama) values(37, 1, 'Persandian');
+insert into talent.bidang_jabatan_terkait (bidang_jabatan_terkait_id, rumpun_id, nama) values(38, 7, 'Pertanian');
+insert into talent.bidang_jabatan_terkait (bidang_jabatan_terkait_id, rumpun_id, nama) values(39, 6, 'Perumahan Rakyat Dan Kawasan Permukiman');
+insert into talent.bidang_jabatan_terkait (bidang_jabatan_terkait_id, rumpun_id, nama) values(40, 7, 'Peternakan');
+insert into talent.bidang_jabatan_terkait (bidang_jabatan_terkait_id, rumpun_id, nama) values(41, 3, 'Sosial');
+insert into talent.bidang_jabatan_terkait (bidang_jabatan_terkait_id, rumpun_id, nama) values(42, 1, 'Statistik');
+insert into talent.bidang_jabatan_terkait (bidang_jabatan_terkait_id, rumpun_id, nama) values(43, 5, 'Tenaga Kerja');
+
+drop table if exists jabatan_masa_kerja_konversi;
+create table jabatan_masa_kerja_konversi
+(
+  jabatan_masa_kerja_konversi_id numeric not null,
+  nama character varying,
+  nilai numeric not null,
+  constraint pk_jabatan_masa_kerja_konversi primary key (jabatan_masa_kerja_konversi_id)
+) with (oids=false);
+alter table jabatan_masa_kerja_konversi owner to postgres;
+
+insert into jabatan_masa_kerja_konversi(jabatan_masa_kerja_konversi_id, nama, nilai) values(1, 'Eselon II a', 0.3);
+insert into jabatan_masa_kerja_konversi(jabatan_masa_kerja_konversi_id, nama, nilai) values(2, 'Eselon II b', 0.21);
+insert into jabatan_masa_kerja_konversi(jabatan_masa_kerja_konversi_id, nama, nilai) values(3, 'Eselon III a / Fungsional Utama', 0.17);
+insert into jabatan_masa_kerja_konversi(jabatan_masa_kerja_konversi_id, nama, nilai) values(4, 'Eselon III b / Fungsional Madya', 0.13);
+insert into jabatan_masa_kerja_konversi(jabatan_masa_kerja_konversi_id, nama, nilai) values(5, 'Eselon IV a / Fungsional Muda', 0.09);
+insert into jabatan_masa_kerja_konversi(jabatan_masa_kerja_konversi_id, nama, nilai) values(6, 'Eselon IV b / Fungsional Pertama', 0.06);
+insert into jabatan_masa_kerja_konversi(jabatan_masa_kerja_konversi_id, nama, nilai) values(7, 'Eselon V / Fungsional Keterampilan / Pelaksana', 0.04);
+
+alter table jabatan_ft add column jabatan_masa_kerja_konversi_id numeric;
+alter table eselon add column jabatan_masa_kerja_konversi_id numeric;
+
+update eselon set jabatan_masa_kerja_konversi_id = 1 where eselon_id = 21;
+update eselon set jabatan_masa_kerja_konversi_id = 2 where eselon_id = 22;
+update eselon set jabatan_masa_kerja_konversi_id = 3 where eselon_id = 31;
+update eselon set jabatan_masa_kerja_konversi_id = 4 where eselon_id = 32;
+update eselon set jabatan_masa_kerja_konversi_id = 5 where eselon_id = 41;
+update eselon set jabatan_masa_kerja_konversi_id = 6 where eselon_id = 42;
+update eselon set jabatan_masa_kerja_konversi_id = 7 where eselon_id = 51;
+update eselon set jabatan_masa_kerja_konversi_id = 7 where eselon_id = 52;
+
+update jabatan_ft set jabatan_masa_kerja_konversi_id = 3  where jenjang_jft = 'utama';
+update jabatan_ft set jabatan_masa_kerja_konversi_id = 4  where jenjang_jft = 'madya';
+update jabatan_ft set jabatan_masa_kerja_konversi_id = 5  where jenjang_jft = 'muda';
+update jabatan_ft set jabatan_masa_kerja_konversi_id = 6  where jenjang_jft = 'pertama';
+update jabatan_ft set jabatan_masa_kerja_konversi_id = 7  where jenjang_jft = 'terampil';
+
+drop table if exists talent.assesment_atribut;
+create table talent.assesment_atribut (
+  assesment_atribut_id character varying not null
+  , assesment_atribut_parent_id character varying not null
+  , permen_id numeric not null
+  , nama character varying
+  , persentase numeric
+  , constraint assesment_atribut_pkey primary key (assesment_atribut_id, permen_id)
+);
+
+insert into talent.assesment_atribut(assesment_atribut_id, assesment_atribut_parent_id, permen_id, nama, persentase) values('01', '0', 2, 'UNSUR KINERJA', null);
+insert into talent.assesment_atribut(assesment_atribut_id, assesment_atribut_parent_id, permen_id, nama, persentase) values('0101', '01', 2, 'Predikat Kinerja', null);
+insert into talent.assesment_atribut(assesment_atribut_id, assesment_atribut_parent_id, permen_id, nama, persentase) values('0102', '01', 2, 'Skor kinerja', null);
+insert into talent.assesment_atribut(assesment_atribut_id, assesment_atribut_parent_id, permen_id, nama, persentase) values('02', '0', 2, 'UNSUR POTENSIAL', null);
+insert into talent.assesment_atribut(assesment_atribut_id, assesment_atribut_parent_id, permen_id, nama, persentase) values('0201', '02', 2, 'Penerimaan Penghargaan', 3);
+insert into talent.assesment_atribut(assesment_atribut_id, assesment_atribut_parent_id, permen_id, nama, persentase) values('0202', '02', 2, 'Penjatuhan Hukuman Disiplin', 35);
+insert into talent.assesment_atribut(assesment_atribut_id, assesment_atribut_parent_id, permen_id, nama, persentase) values('0203', '02', 2, 'Nilai Uji Kompetensi ', 35);
+insert into talent.assesment_atribut(assesment_atribut_id, assesment_atribut_parent_id, permen_id, nama, persentase) values('0204', '02', 2, 'Masa Kerja dan Masa Jabatan', 5);
+insert into talent.assesment_atribut(assesment_atribut_id, assesment_atribut_parent_id, permen_id, nama, persentase) values('020401', '0204', 2, 'Masa Kerja', 70);
+insert into talent.assesment_atribut(assesment_atribut_id, assesment_atribut_parent_id, permen_id, nama, persentase) values('020402', '0204', 2, 'Masa Jabatan', 30);
+insert into talent.assesment_atribut(assesment_atribut_id, assesment_atribut_parent_id, permen_id, nama, persentase) values('0205', '02', 2, 'Riwayat Pengembangan Kompetensi
+Fungsional/ Struktural', 15);
+insert into talent.assesment_atribut(assesment_atribut_id, assesment_atribut_parent_id, permen_id, nama, persentase) values('0206', '02', 2, 'Riwayat Diklat/Workshop/Sosialisasi', 5);
+insert into talent.assesment_atribut(assesment_atribut_id, assesment_atribut_parent_id, permen_id, nama, persentase) values('0207', '02', 2, 'Riwayat Pendidikan Terakhir', 2);
+
+drop table if exists talent.pegawai_jabatan_2023;
+create table talent.pegawai_jabatan_2023 (
+  jabatan_riwayat_id numeric not null
+  , pegawai_id numeric not null
+  , jenjang_nama character varying
+  , skor_jabatan numeric
+  , lama_tahun numeric
+  , lama_bulan numeric
+  , total_lama numeric
+  , nilai_jenjang numeric
+  , nama_jabatan character varying
+  , bidang_urusan character varying
+  , rumpun_a numeric
+  , rumpun_p numeric
+  , rumpun_m numeric
+  , rumpun_h numeric
+  , rumpun_e numeric
+  , rumpun_pu numeric
+  , rumpun_t numeric
+  , constraint pegawai_jabatan_2023_pkey primary key (jabatan_riwayat_id, pegawai_id)
+);
+
+drop table if exists talent.pegawai_diklat_kursus_2023;
+create table talent.pegawai_diklat_kursus_2023 (
+  diklat_kursus_id numeric not null
+  , pegawai_id numeric not null
+  , diklat_kursus_nama character varying
+  , diklat_kursus_jp numeric
+  , bidang_terkait_nama character varying
+  , rumpun_a numeric
+  , rumpun_p numeric
+  , rumpun_m numeric
+  , rumpun_h numeric
+  , rumpun_e numeric
+  , rumpun_pu numeric
+  , rumpun_t numeric
+  , constraint pegawai_diklat_kursus_2023_pkey primary key (diklat_kursus_id, pegawai_id)
+);
+
+drop table if exists diklat_kursus_konversi;
+create table diklat_kursus_konversi
+(
+  diklat_kursus_konversi_id numeric not null,
+  nama character varying,
+  x1 numeric not null,
+  x2 numeric not null,
+  nilai numeric not null,
+  constraint pk_diklat_kursus_konversi primary key (diklat_kursus_konversi_id)
+) with (oids=false);
+alter table diklat_kursus_konversi owner to postgres;
+
+delete from diklat_kursus_konversi;
+insert into diklat_kursus_konversi(diklat_kursus_konversi_id, nama, x1, x2, nilai) values(1, '20 atau lebih dari 20', 20, 10000, 100);
+insert into diklat_kursus_konversi(diklat_kursus_konversi_id, nama, x1, x2, nilai) values(2, '15-19', 15, 20, 70);
+insert into diklat_kursus_konversi(diklat_kursus_konversi_id, nama, x1, x2, nilai) values(3, '10-14', 10, 15, 50);
+insert into diklat_kursus_konversi(diklat_kursus_konversi_id, nama, x1, x2, nilai) values(4, '5-9', 5, 10, 30);
+insert into diklat_kursus_konversi(diklat_kursus_konversi_id, nama, x1, x2, nilai) values(5, '1-4', 1, 5, 20);
+
+drop table if exists talent.pegawai_pendidikan_riwayat_2023;
+create table talent.pegawai_pendidikan_riwayat_2023 (
+  pendidikan_riwayat_id numeric not null
+  , pegawai_id numeric not null
+  , jenjang_nama character varying
+  , jurusan character varying
+  , tanggal_sttb date
+  , rumpun_a numeric
+  , rumpun_p numeric
+  , rumpun_m numeric
+  , rumpun_h numeric
+  , rumpun_e numeric
+  , rumpun_pu numeric
+  , rumpun_t numeric
+  , constraint pegawai_pendidikan_riwayat_2023_pkey primary key (pendidikan_riwayat_id, pegawai_id)
+);
+
+/*
+, CASE
+WHEN A.SKOR_PER_RUMPUN_A >= A.SKOR_PER_RUMPUN_P
+AND A.SKOR_PER_RUMPUN_A >= A.SKOR_PER_RUMPUN_M
+AND A.SKOR_PER_RUMPUN_A >= A.SKOR_PER_RUMPUN_H
+AND A.SKOR_PER_RUMPUN_A >= A.SKOR_PER_RUMPUN_E
+AND A.SKOR_PER_RUMPUN_A >= A.SKOR_PER_RUMPUN_PU
+AND A.SKOR_PER_RUMPUN_A >= A.SKOR_PER_RUMPUN_T
+THEN A.SKOR_PER_RUMPUN_A
+WHEN A.SKOR_PER_RUMPUN_P >= A.SKOR_PER_RUMPUN_A
+AND A.SKOR_PER_RUMPUN_P >= A.SKOR_PER_RUMPUN_M
+AND A.SKOR_PER_RUMPUN_P >= A.SKOR_PER_RUMPUN_H
+AND A.SKOR_PER_RUMPUN_P >= A.SKOR_PER_RUMPUN_E
+AND A.SKOR_PER_RUMPUN_P >= A.SKOR_PER_RUMPUN_PU
+AND A.SKOR_PER_RUMPUN_P >= A.SKOR_PER_RUMPUN_T
+THEN A.SKOR_PER_RUMPUN_P
+WHEN A.SKOR_PER_RUMPUN_M >= A.SKOR_PER_RUMPUN_A
+AND A.SKOR_PER_RUMPUN_M >= A.SKOR_PER_RUMPUN_P
+AND A.SKOR_PER_RUMPUN_M >= A.SKOR_PER_RUMPUN_H
+AND A.SKOR_PER_RUMPUN_M >= A.SKOR_PER_RUMPUN_E
+AND A.SKOR_PER_RUMPUN_M >= A.SKOR_PER_RUMPUN_PU
+AND A.SKOR_PER_RUMPUN_M >= A.SKOR_PER_RUMPUN_T
+THEN A.SKOR_PER_RUMPUN_M
+WHEN A.SKOR_PER_RUMPUN_H >= A.SKOR_PER_RUMPUN_A
+AND A.SKOR_PER_RUMPUN_H >= A.SKOR_PER_RUMPUN_P
+AND A.SKOR_PER_RUMPUN_H >= A.SKOR_PER_RUMPUN_M
+AND A.SKOR_PER_RUMPUN_H >= A.SKOR_PER_RUMPUN_E
+AND A.SKOR_PER_RUMPUN_H >= A.SKOR_PER_RUMPUN_PU
+AND A.SKOR_PER_RUMPUN_H >= A.SKOR_PER_RUMPUN_T
+THEN A.SKOR_PER_RUMPUN_H
+WHEN A.SKOR_PER_RUMPUN_E >= A.SKOR_PER_RUMPUN_A
+AND A.SKOR_PER_RUMPUN_E >= A.SKOR_PER_RUMPUN_P
+AND A.SKOR_PER_RUMPUN_E >= A.SKOR_PER_RUMPUN_M
+AND A.SKOR_PER_RUMPUN_E >= A.SKOR_PER_RUMPUN_H
+AND A.SKOR_PER_RUMPUN_E >= A.SKOR_PER_RUMPUN_PU
+AND A.SKOR_PER_RUMPUN_E >= A.SKOR_PER_RUMPUN_T
+THEN A.SKOR_PER_RUMPUN_E
+WHEN A.SKOR_PER_RUMPUN_PU >= A.SKOR_PER_RUMPUN_A
+AND A.SKOR_PER_RUMPUN_PU >= A.SKOR_PER_RUMPUN_P
+AND A.SKOR_PER_RUMPUN_PU >= A.SKOR_PER_RUMPUN_M
+AND A.SKOR_PER_RUMPUN_PU >= A.SKOR_PER_RUMPUN_H
+AND A.SKOR_PER_RUMPUN_PU >= A.SKOR_PER_RUMPUN_E
+AND A.SKOR_PER_RUMPUN_PU >= A.SKOR_PER_RUMPUN_T
+THEN A.SKOR_PER_RUMPUN_PU
+WHEN A.SKOR_PER_RUMPUN_T >= A.SKOR_PER_RUMPUN_A
+AND A.SKOR_PER_RUMPUN_T >= A.SKOR_PER_RUMPUN_P
+AND A.SKOR_PER_RUMPUN_T >= A.SKOR_PER_RUMPUN_M
+AND A.SKOR_PER_RUMPUN_T >= A.SKOR_PER_RUMPUN_H
+AND A.SKOR_PER_RUMPUN_T >= A.SKOR_PER_RUMPUN_E
+AND A.SKOR_PER_RUMPUN_T >= A.SKOR_PER_RUMPUN_PU
+THEN A.SKOR_PER_RUMPUN_T
+ELSE 0 END SKOR_POTENSIAL
+*/
+
+create or replace function talent.rankrumpunskor(va numeric, vp numeric, vm numeric, vh numeric, ve numeric, vpu numeric, vt numeric)
+  returns numeric as
+$body$
+declare 
+
+varreturn numeric;
+
+begin
+
+  select
+  case
+  when va >= vp and va >= vm and va >= vh and va >= ve and va >= vpu and va >= vt then va
+  when vp >= va and vp >= vm and vp >= vh and vp >= ve and vp >= vpu and vp >= vt then vp
+  when vm >= va and vm >= vp and vm >= vh and vm >= ve and vm >= vpu and vm >= vt then vm
+  when vh >= va and vh >= vp and vh >= vm and vh >= ve and vh >= vpu and vh >= vt then vh
+  when ve >= va and ve >= vp and ve >= vm and ve >= vh and ve >= vpu and ve >= vt then ve
+  when vpu >= va and vpu >= vp and vpu >= vm and vpu >= vh and vpu >= ve and vpu >= vt then vpu
+  when vt >= va and vt >= vp and vt >= vm and vt >= vh and vt >= ve and vt >= vpu then vt
+  else 0 end into varreturn;
+  
+  return varreturn; 
+end;
+$body$
+  language plpgsql volatile
+  cost 100;
+alter function talent.rankrumpunskor(numeric, numeric, numeric, numeric, numeric, numeric, numeric) owner to postgres;
+
+drop table if exists talent.formula_tp;
+create table talent.formula_tp (
+  permen_id numeric not null,
+  toleransi_y numeric null,
+  toleransi_x numeric null,
+  skp_x0 numeric null,
+  skp_y0 numeric null,
+  gm_x0 numeric null,
+  gm_y0 numeric null,
+  skp_x1 numeric null,
+  skp_y1 numeric null,
+  gm_x1 numeric null,
+  gm_y1 numeric null,
+  skp_x2 numeric null,
+  skp_y2 numeric null,
+  gm_x2 numeric null,
+  gm_y2 numeric null,
+  constraint formula_tp_pkey primary key (permen_id)
+);
+insert into talent.formula_tp (permen_id,toleransi_y,toleransi_x,skp_x0,skp_y0,gm_x0,gm_y0,skp_x1,skp_y1,gm_x1,gm_y1,skp_x2,skp_y2,gm_x2,gm_y2) values(2,null,null,33,0,0,33,66,0,0,66,100,0,0,100);
+
+--belum naik
+
+drop table if exists talent.pegawai_2023;
+create table talent.pegawai_2023 (
+  pegawai_id numeric not null
+  , satuan_kerja_id numeric not null
+  , eselon_id numeric
+  , pangkat_id numeric
+  , tmt_pangkat date
+  , satuan_kerja_nama character varying
+  , satuan_kerja_induk character varying
+  , nip_baru character varying
+  , nama_lengkap character varying
+  , penilaian_skp_id numeric
+  , predikat_kinerja character varying
+  , skor_kinerja numeric
+  , penghargaan_id numeric
+  , penghargaan_nama character varying
+  , penghargaan_nilai numeric
+  , hasil_penghargaan numeric
+  , hukuman_id numeric
+  , hukuman_nama character varying
+  , hukuman_nilai numeric
+  , hasil_hukuman numeric
+  , penilaian_kompetensi_id numeric
+  , skor_kompetensi numeric
+  , skor_konversi_kompetensi numeric
+  , hasil_kompetensi numeric
+  , hasil_jabatan_masa_kerja numeric
+  , hasil_jabatan_masa_jabatan_rumpun_a numeric
+  , hasil_jabatan_masa_jabatan_rumpun_p numeric
+  , hasil_jabatan_masa_jabatan_rumpun_m numeric
+  , hasil_jabatan_masa_jabatan_rumpun_h numeric
+  , hasil_jabatan_masa_jabatan_rumpun_e numeric
+  , hasil_jabatan_masa_jabatan_rumpun_pu numeric
+  , hasil_jabatan_masa_jabatan_rumpun_t numeric
+  , diklat_struktural_nama character varying
+  , diklat_struktural_nilai numeric
+  , hasil_diklat_struktural numeric
+  , hasil_diklat_kursus_rumpun_a numeric
+  , hasil_diklat_kursus_rumpun_p numeric
+  , hasil_diklat_kursus_rumpun_m numeric
+  , hasil_diklat_kursus_rumpun_h numeric
+  , hasil_diklat_kursus_rumpun_e numeric
+  , hasil_diklat_kursus_rumpun_pu numeric
+  , hasil_diklat_kursus_rumpun_t numeric
+  , hasil_pendidikan_rumpun_a numeric
+  , hasil_pendidikan_rumpun_p numeric
+  , hasil_pendidikan_rumpun_m numeric
+  , hasil_pendidikan_rumpun_h numeric
+  , hasil_pendidikan_rumpun_e numeric
+  , hasil_pendidikan_rumpun_pu numeric
+  , hasil_pendidikan_rumpun_t numeric
+  , skor_per_rumpun_a numeric
+  , skor_per_rumpun_p numeric
+  , skor_per_rumpun_m numeric
+  , skor_per_rumpun_h numeric
+  , skor_per_rumpun_e numeric
+  , skor_per_rumpun_pu numeric
+  , skor_per_rumpun_t numeric
+  , skor_potensial numeric
+  , kuadran_pegawai numeric
+  , nama_potensial character varying
+  , constraint pegawai_2023_pkey primary key (pegawai_id)
+);
+
+create or replace function talent.ppetapegawai2023()
+  returns void as
+$body$
+declare
+    sqlquery text;
+begin
+  
+  --untuk jabatan detil
+  delete from talent.pegawai_jabatan_2023;
+  insert into talent.pegawai_jabatan_2023
+  (jabatan_riwayat_id, pegawai_id, jenjang_nama, skor_jabatan, lama_tahun, lama_bulan, total_lama, nilai_jenjang, nama_jabatan, bidang_urusan, rumpun_a, rumpun_p, rumpun_m, rumpun_h, rumpun_e, rumpun_pu, rumpun_t)
+  select
+  a.jabatan_riwayat_id, a.pegawai_id
+  , a1.nama jenjang_nama, a1.nilai skor_jabatan
+  , a.lama_jabatan lama_tahun, a.lama_jabatan_bulan lama_bulan, a.lama_bulan total_lama
+  , a.lama_bulan * a1.nilai nilai_jenjang
+  , a.nama_jabatan, a.bidang_urusan
+  , case a.rumpun_id when 1 then talent.pembulatan(a.lama_bulan/12) else 0 end rumpun_a
+  , case a.rumpun_id when 2 then talent.pembulatan(a.lama_bulan/12) else 0 end rumpun_p
+  , case a.rumpun_id when 3 then talent.pembulatan(a.lama_bulan/12) else 0 end rumpun_m
+  , case a.rumpun_id when 4 then talent.pembulatan(a.lama_bulan/12) else 0 end rumpun_h
+  , case a.rumpun_id when 5 then talent.pembulatan(a.lama_bulan/12) else 0 end rumpun_e
+  , case a.rumpun_id when 6 then talent.pembulatan(a.lama_bulan/12) else 0 end rumpun_pu
+  , case a.rumpun_id when 7 then talent.pembulatan(a.lama_bulan/12) else 0 end rumpun_t
+  from
+  (
+    select
+    (coalesce(a.lama_jabatan,0) * 12) + coalesce(a.lama_jabatan_bulan,0)::numeric lama_bulan
+    ,
+    case when a.jabatan_fu_id is not null then 7::numeric
+    when a.jabatan_ft_id is not null then a2.jabatan_masa_kerja_konversi_id
+    else a1.jabatan_masa_kerja_konversi_id end jabatan_masa_kerja_konversi_id
+    , a.*
+    from
+    (
+      select
+      jr.jabatan_riwayat_id, jr.pegawai_id, jr.tmt_jabatan
+      ,
+      case
+      when jr.lama_jabatan is null
+      then datediff('year', to_date(to_char(jr.tmt_jabatan,'yyyy-mm-dd'),'yyyy-mm-dd'), to_date(to_char(now(),'yyyy-mm-dd'),'yyyy-mm-dd'))
+      else jr.lama_jabatan end lama_jabatan
+      ,
+      case
+      when jr.lama_jabatan_bulan is null
+      then (datediff('month', to_date(to_char(jr.tmt_jabatan,'yyyy-mm-dd'),'yyyy-mm-dd'), to_date(to_char(now(),'yyyy-mm-dd'),'yyyy-mm-dd'))::integer % 12::integer)
+      else jr.lama_jabatan_bulan end lama_jabatan_bulan
+      , jr.nama nama_jabatan
+      , bjt.nama bidang_urusan
+      , jr.rumpun_id, jr.jabatan_fu_id, jr.jabatan_ft_id, jr.eselon_id
+      from jabatan_riwayat jr
+      inner join talent.bidang_jabatan_terkait bjt on bjt.bidang_jabatan_terkait_id = jr.bidang_jabatan_terkait_id
+      where (COALESCE(NULLIF(jr.STATUS, ''), NULL) IS NULL OR jr.STATUS = '2')
+    ) a
+    left join eselon a1 on a.eselon_id = a1.eselon_id
+    left join jabatan_ft a2 on a.jabatan_ft_id = a2.jabatan_ft_id
+  ) a
+  inner join jabatan_masa_kerja_konversi a1 on a.jabatan_masa_kerja_konversi_id = a1.jabatan_masa_kerja_konversi_id
+  where 1=1
+  --and a.pegawai_id = 8300
+  order by a.pegawai_id, a.tmt_jabatan desc;
+
+  --untuk diklat kursus detil
+  delete from talent.pegawai_diklat_kursus_2023;
+  insert into talent.pegawai_diklat_kursus_2023
+  (diklat_kursus_id, pegawai_id, diklat_kursus_nama, diklat_kursus_jp, bidang_terkait_nama, rumpun_a, rumpun_p, rumpun_m, rumpun_h, rumpun_e, rumpun_pu, rumpun_t)
+  select
+  dk.diklat_kursus_id, dk.pegawai_id, dk.nama diklat_kursus_nama, dk.jumlah_jam diklat_kursus_jp
+  , bt.nama bidang_terkait_nama
+  , case dk.rumpun_id when 1 then dk.jumlah_jam else 0 end rumpun_a
+  , case dk.rumpun_id when 2 then dk.jumlah_jam else 0 end rumpun_p
+  , case dk.rumpun_id when 3 then dk.jumlah_jam else 0 end rumpun_m
+  , case dk.rumpun_id when 4 then dk.jumlah_jam else 0 end rumpun_h
+  , case dk.rumpun_id when 5 then dk.jumlah_jam else 0 end rumpun_e
+  , case dk.rumpun_id when 6 then dk.jumlah_jam else 0 end rumpun_pu
+  , case dk.rumpun_id when 7 then dk.jumlah_jam else 0 end rumpun_t
+  from diklat_kursus dk
+  inner join talent.bidang_terkait bt on bt.bidang_terkait_id = dk.bidang_terkait_id
+  where (coalesce(nullif(dk.status, ''), null) is null or dk.status = '2')
+  and dk.tahun = '2023'
+  --and dk.pegawai_id in (8300)
+  order by dk.pegawai_id, dk.tanggal_sertifikat desc;
+
+  --untuk pendidikan riwayat
+  delete from talent.pegawai_pendidikan_riwayat_2023;
+  insert into talent.pegawai_pendidikan_riwayat_2023
+  (pendidikan_riwayat_id, pegawai_id, jenjang_nama, jurusan, tanggal_sttb, rumpun_a, rumpun_p, rumpun_m, rumpun_h, rumpun_e, rumpun_pu, rumpun_t)
+  select
+  a.pendidikan_riwayat_id, a.pegawai_id, a.jenjang_nama, a.jurusan
+  , a.tanggal_sttb
+  , a.rumpun_a, a.rumpun_p, a.rumpun_m, a.rumpun_h, a.rumpun_e, a.rumpun_pu, a.rumpun_t
+  from
+  (
+    select
+    a.pendidikan_riwayat_id, a.pegawai_id, a.jenjang_nama, a.jurusan
+    , max(a.tanggal_sttb) tanggal_sttb
+    , sum(case a.rumpun_new_id when 1 then a.jenjang_skor else 0 end) rumpun_a
+    , sum(case a.rumpun_new_id when 2 then a.jenjang_skor else 0 end) rumpun_p
+    , sum(case a.rumpun_new_id when 3 then a.jenjang_skor else 0 end) rumpun_m
+    , sum(case a.rumpun_new_id when 4 then a.jenjang_skor else 0 end) rumpun_h
+    , sum(case a.rumpun_new_id when 5 then a.jenjang_skor else 0 end) rumpun_e
+    , sum(case a.rumpun_new_id when 6 then a.jenjang_skor else 0 end) rumpun_pu
+    , sum(case a.rumpun_new_id when 7 then a.jenjang_skor else 0 end) rumpun_t
+    from
+    (
+      select
+      a.*
+      , unnest(string_to_array(a.rumpun_id, ','))::numeric rumpun_new_id
+      from
+      (
+        select
+        row_number () over (partition by a.pegawai_id, a.jenjang_nama order by a.ganti_urutan, a.tanggal_sttb) nomor
+        , a.*
+        from
+        (
+          select 
+          pr.pendidikan_riwayat_id, pr.pegawai_id, pn.jenjang_nama, pn.jenjang_skor, pr.tanggal_sttb
+          , pr.jurusan
+          , case when pr.rumpun_id = upper('null') then null else pr.rumpun_id end rumpun_id
+          , case pr.status_pendidikan when '2' then 1 when '1' then 2 else 3 end ganti_urutan
+          from pendidikan_riwayat pr 
+          inner join pendidikan pn on pr.pendidikan_id = pn.pendidikan_id
+          where (coalesce(nullif(pr.status, ''), null) is null or pr.status = '2')
+          and pr.status_pendidikan not in ('3')
+        ) a
+      ) a
+      where 1=1 and nomor = 1
+      and coalesce(nullif(a.rumpun_id, ''), null) is not null
+    ) a
+    where 1=1 
+    --and a.pegawai_id in (8300)
+    --and a.pegawai_id in (11761,8300)
+    group by a.pendidikan_riwayat_id, a.pegawai_id, a.jenjang_nama, a.jurusan
+  ) a;
+
+  --untuk peta
+  delete from talent.pegawai_2023;
+  insert into talent.pegawai_2023
+  (pegawai_id, satuan_kerja_id, eselon_id, pangkat_id, tmt_pangkat, satuan_kerja_nama, satuan_kerja_induk, nip_baru, nama_lengkap, penilaian_skp_id, predikat_kinerja, skor_kinerja, penghargaan_id, penghargaan_nama, penghargaan_nilai, hasil_penghargaan, hukuman_id, hukuman_nama, hukuman_nilai, hasil_hukuman, penilaian_kompetensi_id, skor_kompetensi, skor_konversi_kompetensi, hasil_kompetensi, hasil_jabatan_masa_kerja, hasil_jabatan_masa_jabatan_rumpun_a, hasil_jabatan_masa_jabatan_rumpun_p, hasil_jabatan_masa_jabatan_rumpun_m, hasil_jabatan_masa_jabatan_rumpun_h, hasil_jabatan_masa_jabatan_rumpun_e, hasil_jabatan_masa_jabatan_rumpun_pu, hasil_jabatan_masa_jabatan_rumpun_t, diklat_struktural_nama, diklat_struktural_nilai, hasil_diklat_struktural, hasil_diklat_kursus_rumpun_a, hasil_diklat_kursus_rumpun_p, hasil_diklat_kursus_rumpun_m, hasil_diklat_kursus_rumpun_h, hasil_diklat_kursus_rumpun_e, hasil_diklat_kursus_rumpun_pu, hasil_diklat_kursus_rumpun_t, hasil_pendidikan_rumpun_a, hasil_pendidikan_rumpun_p, hasil_pendidikan_rumpun_m, hasil_pendidikan_rumpun_h, hasil_pendidikan_rumpun_e, hasil_pendidikan_rumpun_pu, hasil_pendidikan_rumpun_t, skor_per_rumpun_a, skor_per_rumpun_p, skor_per_rumpun_m, skor_per_rumpun_h, skor_per_rumpun_e, skor_per_rumpun_pu, skor_per_rumpun_t, skor_potensial, kuadran_pegawai, nama_potensial)
+  SELECT
+  A.PEGAWAI_ID, A.SATUAN_KERJA_ID, A.ESELON_ID, A.PANGKAT_ID, A.TMT_PANGKAT
+  , A.SATUAN_KERJA_NAMA, A.SATUAN_KERJA_INDUK
+  , A.NIP_BARU, A.NAMA_LENGKAP, A.PENILAIAN_SKP_ID, A.PREDIKAT_KINERJA, A.SKOR_KINERJA
+  , A.PENGHARGAAN_ID, A.PENGHARGAAN_NAMA, A.PENGHARGAAN_NILAI, A.HASIL_PENGHARGAAN
+  , A.HUKUMAN_ID, A.HUKUMAN_NAMA, A.HUKUMAN_NILAI, A.HASIL_HUKUMAN
+  , A.PENILAIAN_KOMPETENSI_ID, A.SKOR_KOMPETENSI, A.SKOR_KONVERSI_KOMPETENSI, A.HASIL_KOMPETENSI
+  , A.HASIL_JABATAN_MASA_KERJA, A.HASIL_JABATAN_MASA_JABATAN_RUMPUN_A, A.HASIL_JABATAN_MASA_JABATAN_RUMPUN_P
+  , A.HASIL_JABATAN_MASA_JABATAN_RUMPUN_M, A.HASIL_JABATAN_MASA_JABATAN_RUMPUN_H, A.HASIL_JABATAN_MASA_JABATAN_RUMPUN_E
+  , A.HASIL_JABATAN_MASA_JABATAN_RUMPUN_PU, A.HASIL_JABATAN_MASA_JABATAN_RUMPUN_T
+  , A.DIKLAT_STRUKTURAL_NAMA, A.DIKLAT_STRUKTURAL_NILAI, A.HASIL_DIKLAT_STRUKTURAL, A.HASIL_DIKLAT_KURSUS_RUMPUN_A
+  , A.HASIL_DIKLAT_KURSUS_RUMPUN_P, A.HASIL_DIKLAT_KURSUS_RUMPUN_M, A.HASIL_DIKLAT_KURSUS_RUMPUN_H, A.HASIL_DIKLAT_KURSUS_RUMPUN_E
+  , A.HASIL_DIKLAT_KURSUS_RUMPUN_PU, A.HASIL_DIKLAT_KURSUS_RUMPUN_T, A.HASIL_PENDIDIKAN_RUMPUN_A, A.HASIL_PENDIDIKAN_RUMPUN_P
+  , A.HASIL_PENDIDIKAN_RUMPUN_M, A.HASIL_PENDIDIKAN_RUMPUN_H, A.HASIL_PENDIDIKAN_RUMPUN_E, A.HASIL_PENDIDIKAN_RUMPUN_PU
+  , A.HASIL_PENDIDIKAN_RUMPUN_T, A.SKOR_PER_RUMPUN_A, A.SKOR_PER_RUMPUN_P, A.SKOR_PER_RUMPUN_M, A.SKOR_PER_RUMPUN_H
+  , A.SKOR_PER_RUMPUN_E, A.SKOR_PER_RUMPUN_PU, A.SKOR_PER_RUMPUN_T, A.SKOR_POTENSIAL
+  , A.KUADRAN_PEGAWAI, A1.NAMA NAMA_POTENSIAL
+  FROM
+  (
+    SELECT
+    CAST
+    (
+      CASE WHEN
+      A.SKOR_POTENSIAL <= FTP.KUADRAN_X1 
+      THEN '1'
+      WHEN 
+      A.SKOR_POTENSIAL > FTP.KUADRAN_X1 AND A.SKOR_POTENSIAL <= FTP.KUADRAN_X2
+      THEN '2'
+      ELSE '3' END
+      ||
+      CASE 
+      WHEN (A.SKOR_KINERJA >= 0) AND A.SKOR_KINERJA <= FTP.KUADRAN_Y1 THEN '1'
+      WHEN (A.SKOR_KINERJA > FTP.KUADRAN_Y1) AND A.SKOR_KINERJA <= FTP.KUADRAN_Y2 THEN '2'
+      ELSE '3' END
+      AS INTEGER
+    ) KUADRAN_PEGAWAI
+    , A.*
+    FROM
+    (
+      SELECT
+      talent.rankrumpunskor(a.skor_per_rumpun_a, a.skor_per_rumpun_p, a.skor_per_rumpun_m, a.skor_per_rumpun_h, a.skor_per_rumpun_e, a.skor_per_rumpun_pu, a.skor_per_rumpun_t) SKOR_POTENSIAL
+      , A.*
+      FROM
+      (
+        SELECT
+        A.TOTAL_SUB_POTENSIAL + A.HASIL_JABATAN_A + A.HASIL_DIKLAT_KURSUS_RUMPUN_A + A.HASIL_PENDIDIKAN_RUMPUN_A SKOR_PER_RUMPUN_A
+        , A.TOTAL_SUB_POTENSIAL + A.HASIL_JABATAN_P + A.HASIL_DIKLAT_KURSUS_RUMPUN_P + A.HASIL_PENDIDIKAN_RUMPUN_A SKOR_PER_RUMPUN_P
+        , A.TOTAL_SUB_POTENSIAL + A.HASIL_JABATAN_M + A.HASIL_DIKLAT_KURSUS_RUMPUN_M + A.HASIL_PENDIDIKAN_RUMPUN_A SKOR_PER_RUMPUN_M
+        , A.TOTAL_SUB_POTENSIAL + A.HASIL_JABATAN_H + A.HASIL_DIKLAT_KURSUS_RUMPUN_H + A.HASIL_PENDIDIKAN_RUMPUN_A SKOR_PER_RUMPUN_H
+        , A.TOTAL_SUB_POTENSIAL + A.HASIL_JABATAN_E + A.HASIL_DIKLAT_KURSUS_RUMPUN_E + A.HASIL_PENDIDIKAN_RUMPUN_A SKOR_PER_RUMPUN_E
+        , A.TOTAL_SUB_POTENSIAL + A.HASIL_JABATAN_PU + A.HASIL_DIKLAT_KURSUS_RUMPUN_PU + A.HASIL_PENDIDIKAN_RUMPUN_A SKOR_PER_RUMPUN_PU
+        , A.TOTAL_SUB_POTENSIAL + A.HASIL_JABATAN_T + A.HASIL_DIKLAT_KURSUS_RUMPUN_T + A.HASIL_PENDIDIKAN_RUMPUN_A SKOR_PER_RUMPUN_T
+        , A.*
+        FROM
+        (
+          SELECT
+          talent.pembulatan(( (A.HASIL_JABATAN_MASA_KERJA + A.HASIL_JABATAN_MASA_JABATAN_RUMPUN_A) * (JABATAN_PERSENTASE / 100) )) HASIL_JABATAN_A
+          , talent.pembulatan(( (A.HASIL_JABATAN_MASA_KERJA + A.HASIL_JABATAN_MASA_JABATAN_RUMPUN_P) * (JABATAN_PERSENTASE / 100) )) HASIL_JABATAN_P
+          , talent.pembulatan(( (A.HASIL_JABATAN_MASA_KERJA + A.HASIL_JABATAN_MASA_JABATAN_RUMPUN_M) * (JABATAN_PERSENTASE / 100) )) HASIL_JABATAN_M
+          , talent.pembulatan(( (A.HASIL_JABATAN_MASA_KERJA + A.HASIL_JABATAN_MASA_JABATAN_RUMPUN_H) * (JABATAN_PERSENTASE / 100) )) HASIL_JABATAN_H
+          , talent.pembulatan(( (A.HASIL_JABATAN_MASA_KERJA + A.HASIL_JABATAN_MASA_JABATAN_RUMPUN_E) * (JABATAN_PERSENTASE / 100) )) HASIL_JABATAN_E
+          , talent.pembulatan(( (A.HASIL_JABATAN_MASA_KERJA + A.HASIL_JABATAN_MASA_JABATAN_RUMPUN_PU) * (JABATAN_PERSENTASE / 100) )) HASIL_JABATAN_PU
+          , talent.pembulatan(( (A.HASIL_JABATAN_MASA_KERJA + A.HASIL_JABATAN_MASA_JABATAN_RUMPUN_T) * (JABATAN_PERSENTASE / 100) )) HASIL_JABATAN_T
+          , A.*
+          FROM
+          (
+            SELECT
+            HASIL_PENGHARGAAN + HASIL_HUKUMAN + HASIL_KOMPETENSI + HASIL_DIKLAT_STRUKTURAL TOTAL_SUB_POTENSIAL
+            , A.*
+            FROM
+            (
+              SELECT
+              A.PEGAWAI_ID, A.SATUAN_KERJA_ID, A.ESELON_ID, A.PANGKAT_ID, A.TMT_PANGKAT
+              , A.SATUAN_KERJA_NAMA, A.SATUAN_KERJA_INDUK
+              , A.NIP_BARU, A.NAMA_LENGKAP
+              , A.PENILAIAN_SKP_ID, A.PREDIKAT_KINERJA, A.SKOR_KINERJA
+              , A.PENGHARGAAN_ID, A.PENGHARGAAN_NAMA, A.PENGHARGAAN_NILAI, talent.pembulatan(A.PENGHARGAAN_NILAI * (PENGHARGAAN_PERSENTASE / 100)) HASIL_PENGHARGAAN
+              , A.HUKUMAN_ID, A.HUKUMAN_NAMA, A.HUKUMAN_NILAI, talent.pembulatan(A.HUKUMAN_NILAI * (HUKUMAN_PERSENTASE / 100)) HASIL_HUKUMAN
+              , A.PENILAIAN_KOMPETENSI_ID, A.SKOR_KOMPETENSI, A.SKOR_KONVERSI_KOMPETENSI, talent.pembulatan(A.SKOR_KONVERSI_KOMPETENSI * (KOMPETENSI_PERSENTASE / 100)) HASIL_KOMPETENSI
+              , JABATAN_PERSENTASE
+              , talent.pembulatan(COALESCE(JABATAN_NILAI_JENJANG,0) * (JABATAN_MASA_KERJA_PERSENTASE / 100)) HASIL_JABATAN_MASA_KERJA
+              , talent.pembulatan(COALESCE(JABATAN_RUMPUN_A,0) * (JABATAN_MASA_JABATAN_PERSENTASE / 100)) HASIL_JABATAN_MASA_JABATAN_RUMPUN_A
+              , talent.pembulatan(COALESCE(JABATAN_RUMPUN_P,0) * (JABATAN_MASA_JABATAN_PERSENTASE / 100)) HASIL_JABATAN_MASA_JABATAN_RUMPUN_P
+              , talent.pembulatan(COALESCE(JABATAN_RUMPUN_M,0) * (JABATAN_MASA_JABATAN_PERSENTASE / 100)) HASIL_JABATAN_MASA_JABATAN_RUMPUN_M
+              , talent.pembulatan(COALESCE(JABATAN_RUMPUN_H,0) * (JABATAN_MASA_JABATAN_PERSENTASE / 100)) HASIL_JABATAN_MASA_JABATAN_RUMPUN_H
+              , talent.pembulatan(COALESCE(JABATAN_RUMPUN_E,0) * (JABATAN_MASA_JABATAN_PERSENTASE / 100)) HASIL_JABATAN_MASA_JABATAN_RUMPUN_E
+              , talent.pembulatan(COALESCE(JABATAN_RUMPUN_PU,0) * (JABATAN_MASA_JABATAN_PERSENTASE / 100)) HASIL_JABATAN_MASA_JABATAN_RUMPUN_PU
+              , talent.pembulatan(COALESCE(JABATAN_RUMPUN_T,0) * (JABATAN_MASA_JABATAN_PERSENTASE / 100)) HASIL_JABATAN_MASA_JABATAN_RUMPUN_T
+              , A.DIKLAT_STRUKTURAL_NAMA, A.DIKLAT_STRUKTURAL_NILAI, talent.pembulatan(A.DIKLAT_STRUKTURAL_NILAI * (DIKLAT_STRUKTURAL_PERSENTASE / 100)) HASIL_DIKLAT_STRUKTURAL
+              , talent.pembulatan(COALESCE(DIKLAT_KURSUS_RUMPUN_A,0) * (DIKLAT_KURSUS_PERSENTASE / 100)) HASIL_DIKLAT_KURSUS_RUMPUN_A
+              , talent.pembulatan(COALESCE(DIKLAT_KURSUS_RUMPUN_P,0) * (DIKLAT_KURSUS_PERSENTASE / 100)) HASIL_DIKLAT_KURSUS_RUMPUN_P
+              , talent.pembulatan(COALESCE(DIKLAT_KURSUS_RUMPUN_M,0) * (DIKLAT_KURSUS_PERSENTASE / 100)) HASIL_DIKLAT_KURSUS_RUMPUN_M
+              , talent.pembulatan(COALESCE(DIKLAT_KURSUS_RUMPUN_H,0) * (DIKLAT_KURSUS_PERSENTASE / 100)) HASIL_DIKLAT_KURSUS_RUMPUN_H
+              , talent.pembulatan(COALESCE(DIKLAT_KURSUS_RUMPUN_E,0) * (DIKLAT_KURSUS_PERSENTASE / 100)) HASIL_DIKLAT_KURSUS_RUMPUN_E
+              , talent.pembulatan(COALESCE(DIKLAT_KURSUS_RUMPUN_PU,0) * (DIKLAT_KURSUS_PERSENTASE / 100)) HASIL_DIKLAT_KURSUS_RUMPUN_PU
+              , talent.pembulatan(COALESCE(DIKLAT_KURSUS_RUMPUN_T,0) * (DIKLAT_KURSUS_PERSENTASE / 100)) HASIL_DIKLAT_KURSUS_RUMPUN_T
+              , talent.pembulatan(COALESCE(PENDIDIKAN_RUMPUN_A,0) * (PENDIDIKAN_PERSENTASE / 100)) HASIL_PENDIDIKAN_RUMPUN_A
+              , talent.pembulatan(COALESCE(PENDIDIKAN_RUMPUN_P,0) * (PENDIDIKAN_PERSENTASE / 100)) HASIL_PENDIDIKAN_RUMPUN_P
+              , talent.pembulatan(COALESCE(PENDIDIKAN_RUMPUN_M,0) * (PENDIDIKAN_PERSENTASE / 100)) HASIL_PENDIDIKAN_RUMPUN_M
+              , talent.pembulatan(COALESCE(PENDIDIKAN_RUMPUN_H,0) * (PENDIDIKAN_PERSENTASE / 100)) HASIL_PENDIDIKAN_RUMPUN_H
+              , talent.pembulatan(COALESCE(PENDIDIKAN_RUMPUN_E,0) * (PENDIDIKAN_PERSENTASE / 100)) HASIL_PENDIDIKAN_RUMPUN_E
+              , talent.pembulatan(COALESCE(PENDIDIKAN_RUMPUN_PU,0) * (PENDIDIKAN_PERSENTASE / 100)) HASIL_PENDIDIKAN_RUMPUN_PU
+              , talent.pembulatan(COALESCE(PENDIDIKAN_RUMPUN_T,0) * (PENDIDIKAN_PERSENTASE / 100)) HASIL_PENDIDIKAN_RUMPUN_T
+              FROM
+              (
+                SELECT
+                A.PEGAWAI_ID, A.SATUAN_KERJA_ID, COALESCE(JAB_RIW.ESELON_ID,99) ESELON_ID
+                , PANG_RIW.PANGKAT_ID, PANG_RIW.TMT_PANGKAT
+                , A.INFO_SATUAN_KERJA_NAMA SATUAN_KERJA_NAMA
+                , A.INFO_SATUAN_KERJA_INDUK SATUAN_KERJA_INDUK
+                , A.NIP_BARU, (CASE WHEN COALESCE(NULLIF(A.GELAR_DEPAN,'') , NULL ) IS NULL THEN '' ELSE A.GELAR_DEPAN || ' ' END) || A.NAMA || (CASE WHEN COALESCE(NULLIF(A.GELAR_BELAKANG,'') , NULL ) IS NULL THEN '' ELSE '' || A.GELAR_BELAKANG END) NAMA_LENGKAP
+                , COALESCE(A1.PENILAIAN_SKP_ID,0) PENILAIAN_SKP_ID
+                , CASE WHEN COALESCE(NULLIF(A1.PREDIKAT_KINERJA, ''), NULL) IS NULL THEN 'sangat kurang' ELSE A1.PREDIKAT_KINERJA END PREDIKAT_KINERJA, COALESCE(A1.SKOR_KINERJA,0) SKOR_KINERJA
+                , A2.PENGHARGAAN_ID, CASE WHEN COALESCE(NULLIF(A2.PREDIKAT, ''), NULL) IS NULL THEN 'Tidak' ELSE A2.PREDIKAT END PENGHARGAAN_NAMA, COALESCE(A2.NILAI,0) PENGHARGAAN_NILAI
+                , A3.HUKUMAN_ID, CASE WHEN A3.PEGAWAI_ID IS NULL THEN 'Tidak Pernah' ELSE 'Pernah' END HUKUMAN_NAMA, A31.NILAI HUKUMAN_NILAI
+                , A4.PENILAIAN_KOMPETENSI_ID, A4.SKOR_KOMPETENSI, A41.NILAI SKOR_KONVERSI_KOMPETENSI
+                , CASE WHEN A5.PEGAWAI_ID IS NULL THEN 'Tidak' ELSE 'Ya' END DIKLAT_STRUKTURAL_NAMA
+                , CASE WHEN A5.PEGAWAI_ID IS NULL THEN 50 ELSE 100 END DIKLAT_STRUKTURAL_NILAI
+                FROM pegawai A
+                LEFT JOIN
+                (
+                  SELECT A.PANGKAT_RIWAYAT_ID, B.KODE, A.TMT_PANGKAT, A.PANGKAT_ID
+                  FROM PANGKAT_RIWAYAT A
+                  LEFT JOIN PANGKAT B ON A.PANGKAT_ID = B.PANGKAT_ID
+                ) PANG_RIW ON A.PANGKAT_RIWAYAT_ID = PANG_RIW.PANGKAT_RIWAYAT_ID
+                LEFT JOIN
+                (
+                  SELECT A.JABATAN_RIWAYAT_ID, COALESCE(A.ESELON_ID,99) ESELON_ID, B.NAMA ESELON_NAMA, A.TMT_JABATAN, A.NAMA JABATAN_NAMA
+                  FROM JABATAN_RIWAYAT A
+                  LEFT JOIN ESELON B ON A.ESELON_ID = B.ESELON_ID
+                ) JAB_RIW ON A.JABATAN_RIWAYAT_ID = JAB_RIW.JABATAN_RIWAYAT_ID
+                LEFT JOIN
+                (
+                  SELECT
+                  PS.PEGAWAI_ID, PS.PENILAIAN_SKP_ID
+                  , A1.NAMA PREDIKAT_KINERJA
+                  , A1.NILAI SKOR_KINERJA
+                  --, PS.PRESTASI_HASIL SKOR_KINERJA
+                  FROM penilaian_skp PS
+                  INNER JOIN
+                  (
+                    SELECT COALESCE(NILAI,0) NILAI, KODE, NAMA
+                    FROM nilai_kuadran
+                  ) A1 ON A1.KODE = PS.NILAI_HASIL_KERJA::TEXT || PS.NILAI_HASIL_PERILAKU::TEXT
+                  WHERE PS.TAHUN = '2022'
+                  AND (COALESCE(NULLIF(PS.STATUS, ''), NULL) IS NULL OR PS.STATUS = '2')
+                ) A1 ON A.PEGAWAI_ID = A1.PEGAWAI_ID
+                LEFT JOIN
+                (
+                  SELECT *
+                  FROM
+                  (
+                    SELECT
+                    ROW_NUMBER () OVER (PARTITION BY P.PEGAWAI_ID ORDER BY RP.NILAI DESC, P.TANGGAL_SK) NOMOR
+                    , P.PENGHARGAAN_ID, P.PEGAWAI_ID, RP.NILAI, RP.PREDIKAT
+                    FROM penghargaan P
+                    INNER JOIN sapk.ref_penghargaan RP ON P.REF_PENGHARGAAN_ID = RP.REF_PENGHARGAAN_ID 
+                    WHERE P.TAHUN IN ('2022','2023')
+                    AND (COALESCE(NULLIF(P.STATUS, ''), NULL) IS NULL OR P.STATUS = '2')
+                  ) A
+                  WHERE NOMOR = 1
+                ) A2 ON A.PEGAWAI_ID = A2.PEGAWAI_ID
+                LEFT JOIN
+                (
+                  SELECT *
+                  FROM
+                  (
+                    SELECT
+                    ROW_NUMBER () OVER (PARTITION BY A.PEGAWAI_ID ORDER BY A.URUTAN DESC) NOMOR
+                    , *
+                    FROM
+                    (
+                      SELECT
+                      H.PEGAWAI_ID, H.HUKUMAN_ID, H.TINGKAT_HUKUMAN_ID
+                      , CASE
+                      WHEN H.TINGKAT_HUKUMAN_ID IN (1,4) THEN 1
+                      WHEN H.TINGKAT_HUKUMAN_ID IN (2,5) THEN 2
+                      WHEN H.TINGKAT_HUKUMAN_ID IN (3,6) THEN 3
+                      ELSE -1 END URUTAN
+                      FROM hukuman H
+                      WHERE (COALESCE(NULLIF(H.STATUS, ''), NULL) IS NULL OR H.STATUS = '2')
+                      AND TO_CHAR(H.TMT_SK, 'YYYY') IN ('2022', '2023')
+                    ) A
+                  ) A
+                  WHERE NOMOR = 1
+                ) A3 ON A.PEGAWAI_ID = A3.PEGAWAI_ID
+                LEFT JOIN tingkat_hukuman A31 ON COALESCE(A3.TINGKAT_HUKUMAN_ID,-1) = A31.TINGKAT_HUKUMAN_ID
+                LEFT JOIN
+                (
+                  SELECT *
+                  FROM
+                  (
+                    select
+                    ROW_NUMBER () OVER (PARTITION BY PK.PEGAWAI_ID ORDER BY PK.TANGGAL_KOMPETENSI DESC) NOMOR
+                    , PK.PEGAWAI_ID, PK.PENILAIAN_KOMPETENSI_ID, COALESCE(PK.SKOR_KOMPETENSI,0) SKOR_KOMPETENSI
+                    FROM penilaian_kompetensi PK
+                    WHERE (COALESCE(NULLIF(pk.STATUS, ''), NULL) IS NULL OR pk.STATUS = '2')
+                  ) A
+                  WHERE NOMOR = 1
+                ) A4 ON A.PEGAWAI_ID = A4.PEGAWAI_ID
+                LEFT JOIN penilaian_kompetensi_konversi A41 ON
+                (
+                  CASE WHEN A4.PEGAWAI_ID IS NULL THEN 1 ELSE COALESCE(A4.SKOR_KOMPETENSI,0) END
+                ) >= A41.X1
+                AND 
+                (
+                  CASE WHEN A4.PEGAWAI_ID IS NULL THEN 1 ELSE COALESCE(A4.SKOR_KOMPETENSI,0) END
+                ) < A41.X2
+                LEFT JOIN
+                (
+                  SELECT JR.PEGAWAI_ID
+                  FROM
+                  (
+                    SELECT JR.PEGAWAI_ID
+                    FROM
+                    (
+                      SELECT JR.PEGAWAI_ID, SUBSTRING(JR.ESELON_ID::TEXT, 1,1) GROUP_ESELON
+                      FROM jabatan_riwayat JR
+                      INNER JOIN
+                      (
+                        SELECT P.JABATAN_RIWAYAT_ID, P.PEGAWAI_ID FROM pegawai P
+                      ) P ON P.JABATAN_RIWAYAT_ID = JR.JABATAN_RIWAYAT_ID AND P.PEGAWAI_ID = JR.PEGAWAI_ID
+                      WHERE (COALESCE(NULLIF(JR.STATUS, ''), NULL) IS NULL OR JR.STATUS = '2')
+                    ) JR
+                    WHERE 1=1
+                    AND EXISTS
+                    (
+                      SELECT 1
+                      FROM
+                      (
+                        SELECT DS.PEGAWAI_ID, SUBSTRING(JR.ESELON_ID::TEXT, 1,1) GROUP_ESELON
+                        FROM diklat_struktural DS
+                        INNER JOIN jabatan_riwayat JR ON DS.DS_JABATAN_RIWAYAT_ID = JR.JABATAN_RIWAYAT_ID
+                        WHERE (COALESCE(NULLIF(DS.STATUS, ''), NULL) IS NULL OR DS.STATUS = '2')
+                      ) X where JR.PEGAWAI_ID = X.PEGAWAI_ID AND JR.GROUP_ESELON = X.GROUP_ESELON
+                    )
+                    UNION ALL
+                    SELECT
+                    JR.PEGAWAI_ID
+                    FROM jabatan_riwayat JR
+                    INNER JOIN
+                    (
+                      SELECT P.JABATAN_RIWAYAT_ID, P.PEGAWAI_ID FROM pegawai P
+                    ) P ON P.JABATAN_RIWAYAT_ID = JR.JABATAN_RIWAYAT_ID AND P.PEGAWAI_ID = JR.PEGAWAI_ID
+                    WHERE (COALESCE(NULLIF(JR.STATUS, ''), NULL) IS NULL OR JR.STATUS = '2')
+                    AND JR.ESELON_ID IS NULL
+                  ) JR
+                  WHERE 1=1
+                ) A5 ON A.PEGAWAI_ID = A5.PEGAWAI_ID
+                WHERE 1=1
+                AND A.STATUS_PEGAWAI_ID IN (1,2)
+              ) A
+              LEFT JOIN 
+              (
+                SELECT
+                PEGAWAI_ID
+                , SUM(NILAI_JENJANG) JABATAN_NILAI_JENJANG
+                , SUM(RUMPUN_A) JABATAN_RUMPUN_A, SUM(RUMPUN_P) JABATAN_RUMPUN_P, SUM(RUMPUN_M) JABATAN_RUMPUN_M
+                , SUM(RUMPUN_H) JABATAN_RUMPUN_H, SUM(RUMPUN_E) JABATAN_RUMPUN_E, SUM(RUMPUN_PU) JABATAN_RUMPUN_PU
+                , SUM(RUMPUN_T) JABATAN_RUMPUN_T
+                FROM talent.pegawai_jabatan_2023
+                GROUP BY PEGAWAI_ID
+              ) JB ON A.PEGAWAI_ID = JB.PEGAWAI_ID
+              LEFT JOIN 
+              (
+                SELECT
+                A.PEGAWAI_ID
+                , SUM(CASE WHEN DIKLAT_KURSUS_RUMPUN_A >= A1.X1 AND DIKLAT_KURSUS_RUMPUN_A < A1.X2 THEN A1.NILAI ELSE 0 END) DIKLAT_KURSUS_RUMPUN_A
+                , SUM(CASE WHEN DIKLAT_KURSUS_RUMPUN_P >= A1.X1 AND DIKLAT_KURSUS_RUMPUN_P < A1.X2 THEN A1.NILAI ELSE 0 END) DIKLAT_KURSUS_RUMPUN_P
+                , SUM(CASE WHEN DIKLAT_KURSUS_RUMPUN_M >= A1.X1 AND DIKLAT_KURSUS_RUMPUN_M < A1.X2 THEN A1.NILAI ELSE 0 END) DIKLAT_KURSUS_RUMPUN_M
+                , SUM(CASE WHEN DIKLAT_KURSUS_RUMPUN_H >= A1.X1 AND DIKLAT_KURSUS_RUMPUN_H < A1.X2 THEN A1.NILAI ELSE 0 END) DIKLAT_KURSUS_RUMPUN_H
+                , SUM(CASE WHEN DIKLAT_KURSUS_RUMPUN_E >= A1.X1 AND DIKLAT_KURSUS_RUMPUN_E < A1.X2 THEN A1.NILAI ELSE 0 END) DIKLAT_KURSUS_RUMPUN_E
+                , SUM(CASE WHEN DIKLAT_KURSUS_RUMPUN_PU >= A1.X1 AND DIKLAT_KURSUS_RUMPUN_PU < A1.X2 THEN A1.NILAI ELSE 0 END) DIKLAT_KURSUS_RUMPUN_PU
+                , SUM(CASE WHEN DIKLAT_KURSUS_RUMPUN_T >= A1.X1 AND DIKLAT_KURSUS_RUMPUN_T < A1.X2 THEN A1.NILAI ELSE 0 END) DIKLAT_KURSUS_RUMPUN_T
+                FROM
+                (
+                  SELECT
+                  PEGAWAI_ID
+                  , SUM(RUMPUN_A) DIKLAT_KURSUS_RUMPUN_A, SUM(RUMPUN_P) DIKLAT_KURSUS_RUMPUN_P, SUM(RUMPUN_M) DIKLAT_KURSUS_RUMPUN_M
+                  , SUM(RUMPUN_H) DIKLAT_KURSUS_RUMPUN_H, SUM(RUMPUN_E) DIKLAT_KURSUS_RUMPUN_E, SUM(RUMPUN_PU) DIKLAT_KURSUS_RUMPUN_PU
+                  , SUM(RUMPUN_T) DIKLAT_KURSUS_RUMPUN_T
+                  FROM talent.pegawai_diklat_kursus_2023
+                  GROUP BY PEGAWAI_ID
+                ) A
+                , diklat_kursus_konversi A1
+                GROUP BY A.PEGAWAI_ID
+              ) DK ON A.PEGAWAI_ID = DK.PEGAWAI_ID
+              LEFT JOIN 
+              (
+                SELECT
+                PEGAWAI_ID
+                , SUM(RUMPUN_A) PENDIDIKAN_RUMPUN_A, SUM(RUMPUN_P) PENDIDIKAN_RUMPUN_P, SUM(RUMPUN_M) PENDIDIKAN_RUMPUN_M
+                , SUM(RUMPUN_H) PENDIDIKAN_RUMPUN_H, SUM(RUMPUN_E) PENDIDIKAN_RUMPUN_E, SUM(RUMPUN_PU) PENDIDIKAN_RUMPUN_PU
+                , SUM(RUMPUN_T) PENDIDIKAN_RUMPUN_T
+                FROM talent.pegawai_pendidikan_riwayat_2023
+                GROUP BY PEGAWAI_ID
+              ) PN ON A.PEGAWAI_ID = PN.PEGAWAI_ID
+              ,
+              (
+                SELECT
+                SUM(CASE WHEN A.ASSESMENT_ATRIBUT_ID = '0201' THEN A.PERSENTASE ELSE 0 END) PENGHARGAAN_PERSENTASE
+                , SUM(CASE WHEN A.ASSESMENT_ATRIBUT_ID = '0202' THEN A.PERSENTASE ELSE 0 END) HUKUMAN_PERSENTASE
+                , SUM(CASE WHEN A.ASSESMENT_ATRIBUT_ID = '0203' THEN A.PERSENTASE ELSE 0 END) KOMPETENSI_PERSENTASE
+                , SUM(CASE WHEN A.ASSESMENT_ATRIBUT_ID = '0204' THEN A.PERSENTASE ELSE 0 END) JABATAN_PERSENTASE
+                , SUM(CASE WHEN A.ASSESMENT_ATRIBUT_ID = '020401' THEN A.PERSENTASE ELSE 0 END) JABATAN_MASA_KERJA_PERSENTASE
+                , SUM(CASE WHEN A.ASSESMENT_ATRIBUT_ID = '020402' THEN A.PERSENTASE ELSE 0 END) JABATAN_MASA_JABATAN_PERSENTASE
+                , SUM(CASE WHEN A.ASSESMENT_ATRIBUT_ID = '0205' THEN A.PERSENTASE ELSE 0 END) DIKLAT_STRUKTURAL_PERSENTASE
+                , SUM(CASE WHEN A.ASSESMENT_ATRIBUT_ID = '0206' THEN A.PERSENTASE ELSE 0 END) DIKLAT_KURSUS_PERSENTASE
+                , SUM(CASE WHEN A.ASSESMENT_ATRIBUT_ID = '0207' THEN A.PERSENTASE ELSE 0 END) PENDIDIKAN_PERSENTASE
+                FROM talent.assesment_atribut A
+                WHERE PERMEN_ID = 2
+              ) PR
+            ) A
+          ) A
+        ) A
+      ) A
+    ) A
+    ,
+    (
+      SELECT
+      COALESCE(GM_X0,0) KUADRAN_Y0, COALESCE(GM_Y0,0) KUADRAN_Y1, COALESCE(GM_Y1,0) KUADRAN_Y2
+      , COALESCE(SKP_Y0,0) KUADRAN_X0, COALESCE(SKP_X0,0) KUADRAN_X1, COALESCE(SKP_X1,0) KUADRAN_X2
+      , COALESCE(GM_Y2,0) MAX_DATA_Y, COALESCE(SKP_X2,0) MAX_DATA_X
+      FROM talent.formula_tp
+      WHERE PERMEN_ID = 2
+    ) FTP
+  ) A
+  LEFT JOIN
+  (
+    SELECT COALESCE(NILAI,0) NILAI, KODE, NAMA
+    FROM nilai_kuadran
+  ) A1 ON A1.KODE = A.KUADRAN_PEGAWAI::TEXT
+  WHERE 1=1;
+  
+  --execute sqlquery;
+  --select talent.ppetapegawai2023()
+exception
+when others
+then raise exception 'an error was encountered - '; 
+end;
+$body$
+language plpgsql volatile cost 100;
+alter function talent.ppetapegawai2023() owner to postgres;
+
+--select * from talent.pegawai_2023 --where pegawai_id = 8300
+
+SELECT
+A.PEGAWAI_ID, A.SATUAN_KERJA_ID, A.ESELON_ID, A.PANGKAT_ID, A.TMT_PANGKAT
+, A.SATUAN_KERJA_NAMA, A.SATUAN_KERJA_INDUK
+, A.NIP_BARU, A.NAMA_LENGKAP, A.PENILAIAN_SKP_ID, A.PREDIKAT_KINERJA, A.SKOR_KINERJA
+, A.PENGHARGAAN_ID, A.PENGHARGAAN_NAMA, A.PENGHARGAAN_NILAI, A.HUKUMAN_ID, A.HUKUMAN_NAMA, A.HUKUMAN_NILAI
+, A.PENILAIAN_KOMPETENSI_ID, A.SKOR_KOMPETENSI, A.SKOR_KONVERSI_KOMPETENSI, A.HASIL_KOMPETENSI
+, A.HASIL_JABATAN_MASA_KERJA, A.HASIL_JABATAN_MASA_JABATAN_RUMPUN_A, A.HASIL_JABATAN_MASA_JABATAN_RUMPUN_P
+, A.HASIL_JABATAN_MASA_JABATAN_RUMPUN_M, A.HASIL_JABATAN_MASA_JABATAN_RUMPUN_H, A.HASIL_JABATAN_MASA_JABATAN_RUMPUN_E
+, A.HASIL_JABATAN_MASA_JABATAN_RUMPUN_PU, A.HASIL_JABATAN_MASA_JABATAN_RUMPUN_T
+, A.DIKLAT_STRUKTURAL_NAMA, A.DIKLAT_STRUKTURAL_NILAI, A.HASIL_DIKLAT_STRUKTURAL, A.HASIL_DIKLAT_KURSUS_RUMPUN_A
+, A.HASIL_DIKLAT_KURSUS_RUMPUN_P, A.HASIL_DIKLAT_KURSUS_RUMPUN_M, A.HASIL_DIKLAT_KURSUS_RUMPUN_H, A.HASIL_DIKLAT_KURSUS_RUMPUN_E
+, A.HASIL_DIKLAT_KURSUS_RUMPUN_PU, A.HASIL_DIKLAT_KURSUS_RUMPUN_T, A.HASIL_PENDIDIKAN_RUMPUN_A, A.HASIL_PENDIDIKAN_RUMPUN_P
+, A.HASIL_PENDIDIKAN_RUMPUN_M, A.HASIL_PENDIDIKAN_RUMPUN_H, A.HASIL_PENDIDIKAN_RUMPUN_E, A.HASIL_PENDIDIKAN_RUMPUN_PU
+, A.HASIL_PENDIDIKAN_RUMPUN_T, A.SKOR_PER_RUMPUN_A, A.SKOR_PER_RUMPUN_P, A.SKOR_PER_RUMPUN_M, A.SKOR_PER_RUMPUN_H
+, A.SKOR_PER_RUMPUN_E, A.SKOR_PER_RUMPUN_PU, A.SKOR_PER_RUMPUN_T, A.SKOR_POTENSIAL
+, A.KUADRAN_PEGAWAI, A1.NAMA NAMA_POTENSIAL
+FROM
+(
+  SELECT
+  CAST
+  (
+    CASE WHEN
+    A.SKOR_KINERJA <= FTP.KUADRAN_X1 
+    THEN '1'
+    WHEN 
+    A.SKOR_KINERJA > FTP.KUADRAN_X1 AND A.SKOR_KINERJA <= FTP.KUADRAN_X2
+    THEN '2'
+    ELSE '3' END
+    ||
+    CASE 
+    WHEN (A.SKOR_KINERJA >= 0) AND A.SKOR_KINERJA <= FTP.KUADRAN_Y1 THEN '1'
+    WHEN (A.SKOR_KINERJA > FTP.KUADRAN_Y1) AND A.SKOR_KINERJA <= FTP.KUADRAN_Y2 THEN '2'
+    ELSE '3' END
+    AS INTEGER
+  ) KUADRAN_PEGAWAI
+  , A.*
+  FROM
+  (
+    SELECT
+    talent.rankrumpunskor(a.skor_per_rumpun_a, a.skor_per_rumpun_p, a.skor_per_rumpun_m, a.skor_per_rumpun_h, a.skor_per_rumpun_e, a.skor_per_rumpun_pu, a.skor_per_rumpun_t) SKOR_POTENSIAL
+    , A.*
+    FROM
+    (
+      SELECT
+      A.TOTAL_SUB_POTENSIAL + A.HASIL_JABATAN_A + A.HASIL_PENDIDIKAN_RUMPUN_A SKOR_PER_RUMPUN_A
+      , A.TOTAL_SUB_POTENSIAL + A.HASIL_JABATAN_P + A.HASIL_PENDIDIKAN_RUMPUN_A SKOR_PER_RUMPUN_P
+      , A.TOTAL_SUB_POTENSIAL + A.HASIL_JABATAN_M + A.HASIL_PENDIDIKAN_RUMPUN_A SKOR_PER_RUMPUN_M
+      , A.TOTAL_SUB_POTENSIAL + A.HASIL_JABATAN_H + A.HASIL_PENDIDIKAN_RUMPUN_A SKOR_PER_RUMPUN_H
+      , A.TOTAL_SUB_POTENSIAL + A.HASIL_JABATAN_E + A.HASIL_PENDIDIKAN_RUMPUN_A SKOR_PER_RUMPUN_E
+      , A.TOTAL_SUB_POTENSIAL + A.HASIL_JABATAN_PU + A.HASIL_PENDIDIKAN_RUMPUN_A SKOR_PER_RUMPUN_PU
+      , A.TOTAL_SUB_POTENSIAL + A.HASIL_JABATAN_T + A.HASIL_PENDIDIKAN_RUMPUN_A SKOR_PER_RUMPUN_T
+      , A.*
+      FROM
+      (
+        SELECT
+        talent.pembulatan(( (A.HASIL_JABATAN_MASA_KERJA + A.HASIL_JABATAN_MASA_JABATAN_RUMPUN_A) * (JABATAN_PERSENTASE / 100) )) HASIL_JABATAN_A
+        , talent.pembulatan(( (A.HASIL_JABATAN_MASA_KERJA + A.HASIL_JABATAN_MASA_JABATAN_RUMPUN_P) * (JABATAN_PERSENTASE / 100) )) HASIL_JABATAN_P
+        , talent.pembulatan(( (A.HASIL_JABATAN_MASA_KERJA + A.HASIL_JABATAN_MASA_JABATAN_RUMPUN_M) * (JABATAN_PERSENTASE / 100) )) HASIL_JABATAN_M
+        , talent.pembulatan(( (A.HASIL_JABATAN_MASA_KERJA + A.HASIL_JABATAN_MASA_JABATAN_RUMPUN_H) * (JABATAN_PERSENTASE / 100) )) HASIL_JABATAN_H
+        , talent.pembulatan(( (A.HASIL_JABATAN_MASA_KERJA + A.HASIL_JABATAN_MASA_JABATAN_RUMPUN_E) * (JABATAN_PERSENTASE / 100) )) HASIL_JABATAN_E
+        , talent.pembulatan(( (A.HASIL_JABATAN_MASA_KERJA + A.HASIL_JABATAN_MASA_JABATAN_RUMPUN_PU) * (JABATAN_PERSENTASE / 100) )) HASIL_JABATAN_PU
+        , talent.pembulatan(( (A.HASIL_JABATAN_MASA_KERJA + A.HASIL_JABATAN_MASA_JABATAN_RUMPUN_T) * (JABATAN_PERSENTASE / 100) )) HASIL_JABATAN_T
+        , A.*
+        FROM
+        (
+          SELECT
+          HASIL_PENGHARGAAN + HASIL_HUKUMAN + HASIL_KOMPETENSI + HASIL_DIKLAT_STRUKTURAL TOTAL_SUB_POTENSIAL
+          , A.*
+          FROM
+          (
+            SELECT
+            A.PEGAWAI_ID, A.SATUAN_KERJA_ID, A.ESELON_ID, A.PANGKAT_ID, A.TMT_PANGKAT
+            , A.SATUAN_KERJA_NAMA, A.SATUAN_KERJA_INDUK
+            , A.NIP_BARU, A.NAMA_LENGKAP
+            , A.PENILAIAN_SKP_ID, A.PREDIKAT_KINERJA, A.SKOR_KINERJA
+            , A.PENGHARGAAN_ID, A.PENGHARGAAN_NAMA, A.PENGHARGAAN_NILAI, talent.pembulatan(A.PENGHARGAAN_NILAI * (PENGHARGAAN_PERSENTASE / 100)) HASIL_PENGHARGAAN
+            , A.HUKUMAN_ID, A.HUKUMAN_NAMA, A.HUKUMAN_NILAI, talent.pembulatan(A.HUKUMAN_NILAI * (HUKUMAN_PERSENTASE / 100)) HASIL_HUKUMAN
+            , A.PENILAIAN_KOMPETENSI_ID, A.SKOR_KOMPETENSI, A.SKOR_KONVERSI_KOMPETENSI, talent.pembulatan(A.SKOR_KONVERSI_KOMPETENSI * (KOMPETENSI_PERSENTASE / 100)) HASIL_KOMPETENSI
+            , JABATAN_PERSENTASE
+            , talent.pembulatan(COALESCE(JABATAN_NILAI_JENJANG,0) * (JABATAN_MASA_KERJA_PERSENTASE / 100)) HASIL_JABATAN_MASA_KERJA
+            , talent.pembulatan(COALESCE(JABATAN_RUMPUN_A,0) * (JABATAN_MASA_JABATAN_PERSENTASE / 100)) HASIL_JABATAN_MASA_JABATAN_RUMPUN_A
+            , talent.pembulatan(COALESCE(JABATAN_RUMPUN_P,0) * (JABATAN_MASA_JABATAN_PERSENTASE / 100)) HASIL_JABATAN_MASA_JABATAN_RUMPUN_P
+            , talent.pembulatan(COALESCE(JABATAN_RUMPUN_M,0) * (JABATAN_MASA_JABATAN_PERSENTASE / 100)) HASIL_JABATAN_MASA_JABATAN_RUMPUN_M
+            , talent.pembulatan(COALESCE(JABATAN_RUMPUN_H,0) * (JABATAN_MASA_JABATAN_PERSENTASE / 100)) HASIL_JABATAN_MASA_JABATAN_RUMPUN_H
+            , talent.pembulatan(COALESCE(JABATAN_RUMPUN_E,0) * (JABATAN_MASA_JABATAN_PERSENTASE / 100)) HASIL_JABATAN_MASA_JABATAN_RUMPUN_E
+            , talent.pembulatan(COALESCE(JABATAN_RUMPUN_PU,0) * (JABATAN_MASA_JABATAN_PERSENTASE / 100)) HASIL_JABATAN_MASA_JABATAN_RUMPUN_PU
+            , talent.pembulatan(COALESCE(JABATAN_RUMPUN_T,0) * (JABATAN_MASA_JABATAN_PERSENTASE / 100)) HASIL_JABATAN_MASA_JABATAN_RUMPUN_T
+            , A.DIKLAT_STRUKTURAL_NAMA, A.DIKLAT_STRUKTURAL_NILAI, talent.pembulatan(A.DIKLAT_STRUKTURAL_NILAI * (DIKLAT_STRUKTURAL_PERSENTASE / 100)) HASIL_DIKLAT_STRUKTURAL
+            , talent.pembulatan(COALESCE(DIKLAT_KURSUS_RUMPUN_A,0) * (DIKLAT_KURSUS_PERSENTASE / 100)) HASIL_DIKLAT_KURSUS_RUMPUN_A
+            , talent.pembulatan(COALESCE(DIKLAT_KURSUS_RUMPUN_P,0) * (DIKLAT_KURSUS_PERSENTASE / 100)) HASIL_DIKLAT_KURSUS_RUMPUN_P
+            , talent.pembulatan(COALESCE(DIKLAT_KURSUS_RUMPUN_M,0) * (DIKLAT_KURSUS_PERSENTASE / 100)) HASIL_DIKLAT_KURSUS_RUMPUN_M
+            , talent.pembulatan(COALESCE(DIKLAT_KURSUS_RUMPUN_H,0) * (DIKLAT_KURSUS_PERSENTASE / 100)) HASIL_DIKLAT_KURSUS_RUMPUN_H
+            , talent.pembulatan(COALESCE(DIKLAT_KURSUS_RUMPUN_E,0) * (DIKLAT_KURSUS_PERSENTASE / 100)) HASIL_DIKLAT_KURSUS_RUMPUN_E
+            , talent.pembulatan(COALESCE(DIKLAT_KURSUS_RUMPUN_PU,0) * (DIKLAT_KURSUS_PERSENTASE / 100)) HASIL_DIKLAT_KURSUS_RUMPUN_PU
+            , talent.pembulatan(COALESCE(DIKLAT_KURSUS_RUMPUN_T,0) * (DIKLAT_KURSUS_PERSENTASE / 100)) HASIL_DIKLAT_KURSUS_RUMPUN_T
+            , talent.pembulatan(COALESCE(PENDIDIKAN_RUMPUN_A,0) * (PENDIDIKAN_PERSENTASE / 100)) HASIL_PENDIDIKAN_RUMPUN_A
+            , talent.pembulatan(COALESCE(PENDIDIKAN_RUMPUN_P,0) * (PENDIDIKAN_PERSENTASE / 100)) HASIL_PENDIDIKAN_RUMPUN_P
+            , talent.pembulatan(COALESCE(PENDIDIKAN_RUMPUN_M,0) * (PENDIDIKAN_PERSENTASE / 100)) HASIL_PENDIDIKAN_RUMPUN_M
+            , talent.pembulatan(COALESCE(PENDIDIKAN_RUMPUN_H,0) * (PENDIDIKAN_PERSENTASE / 100)) HASIL_PENDIDIKAN_RUMPUN_H
+            , talent.pembulatan(COALESCE(PENDIDIKAN_RUMPUN_E,0) * (PENDIDIKAN_PERSENTASE / 100)) HASIL_PENDIDIKAN_RUMPUN_E
+            , talent.pembulatan(COALESCE(PENDIDIKAN_RUMPUN_PU,0) * (PENDIDIKAN_PERSENTASE / 100)) HASIL_PENDIDIKAN_RUMPUN_PU
+            , talent.pembulatan(COALESCE(PENDIDIKAN_RUMPUN_T,0) * (PENDIDIKAN_PERSENTASE / 100)) HASIL_PENDIDIKAN_RUMPUN_T
+            FROM
+            (
+              SELECT
+              A.PEGAWAI_ID, A.SATUAN_KERJA_ID, COALESCE(JAB_RIW.ESELON_ID,99) ESELON_ID
+              , PANG_RIW.PANGKAT_ID, PANG_RIW.TMT_PANGKAT
+              , A.INFO_SATUAN_KERJA_NAMA SATUAN_KERJA_NAMA
+              , A.INFO_SATUAN_KERJA_INDUK SATUAN_KERJA_INDUK
+              , A.NIP_BARU, (CASE WHEN COALESCE(NULLIF(A.GELAR_DEPAN,'') , NULL ) IS NULL THEN '' ELSE A.GELAR_DEPAN || ' ' END) || A.NAMA || (CASE WHEN COALESCE(NULLIF(A.GELAR_BELAKANG,'') , NULL ) IS NULL THEN '' ELSE '' || A.GELAR_BELAKANG END) NAMA_LENGKAP
+              , COALESCE(A1.PENILAIAN_SKP_ID,0) PENILAIAN_SKP_ID
+              , CASE WHEN COALESCE(NULLIF(A1.PREDIKAT_KINERJA, ''), NULL) IS NULL THEN 'sangat kurang' ELSE A1.PREDIKAT_KINERJA END PREDIKAT_KINERJA, COALESCE(A1.SKOR_KINERJA,0) SKOR_KINERJA
+              , A2.PENGHARGAAN_ID, CASE WHEN COALESCE(NULLIF(A2.PREDIKAT, ''), NULL) IS NULL THEN 'Tidak' ELSE A2.PREDIKAT END PENGHARGAAN_NAMA, COALESCE(A2.NILAI,0) PENGHARGAAN_NILAI
+              , A3.HUKUMAN_ID, CASE WHEN A3.PEGAWAI_ID IS NULL THEN 'Tidak Pernah' ELSE 'Pernah' END HUKUMAN_NAMA, A31.NILAI HUKUMAN_NILAI
+              , A4.PENILAIAN_KOMPETENSI_ID, A4.SKOR_KOMPETENSI, A41.NILAI SKOR_KONVERSI_KOMPETENSI
+              , CASE WHEN A5.PEGAWAI_ID IS NULL THEN 'Tidak' ELSE 'Ya' END DIKLAT_STRUKTURAL_NAMA
+              , CASE WHEN A5.PEGAWAI_ID IS NULL THEN 50 ELSE 100 END DIKLAT_STRUKTURAL_NILAI
+              FROM pegawai A
+              LEFT JOIN
+              (
+                SELECT A.PANGKAT_RIWAYAT_ID, B.KODE, A.TMT_PANGKAT, A.PANGKAT_ID
+                FROM PANGKAT_RIWAYAT A
+                LEFT JOIN PANGKAT B ON A.PANGKAT_ID = B.PANGKAT_ID
+              ) PANG_RIW ON A.PANGKAT_RIWAYAT_ID = PANG_RIW.PANGKAT_RIWAYAT_ID
+              LEFT JOIN
+              (
+                SELECT A.JABATAN_RIWAYAT_ID, COALESCE(A.ESELON_ID,99) ESELON_ID, B.NAMA ESELON_NAMA, A.TMT_JABATAN, A.NAMA JABATAN_NAMA
+                FROM JABATAN_RIWAYAT A
+                LEFT JOIN ESELON B ON A.ESELON_ID = B.ESELON_ID
+              ) JAB_RIW ON A.JABATAN_RIWAYAT_ID = JAB_RIW.JABATAN_RIWAYAT_ID
+              LEFT JOIN
+              (
+                SELECT
+                PS.PEGAWAI_ID, PS.PENILAIAN_SKP_ID
+                , A1.NAMA PREDIKAT_KINERJA
+                , PS.PRESTASI_HASIL SKOR_KINERJA
+                FROM penilaian_skp PS
+                INNER JOIN
+                (
+                  SELECT COALESCE(NILAI,0) NILAI, KODE, NAMA
+                  FROM nilai_kuadran
+                ) A1 ON A1.KODE = PS.NILAI_HASIL_KERJA::TEXT || PS.NILAI_HASIL_PERILAKU::TEXT
+                WHERE PS.TAHUN = '2022'
+                AND (COALESCE(NULLIF(PS.STATUS, ''), NULL) IS NULL OR PS.STATUS = '2')
+              ) A1 ON A.PEGAWAI_ID = A1.PEGAWAI_ID
+              LEFT JOIN
+              (
+                SELECT *
+                FROM
+                (
+                  SELECT
+                  ROW_NUMBER () OVER (PARTITION BY P.PEGAWAI_ID ORDER BY RP.NILAI DESC, P.TANGGAL_SK) NOMOR
+                  , P.PENGHARGAAN_ID, P.PEGAWAI_ID, RP.NILAI, RP.PREDIKAT
+                  FROM penghargaan P
+                  INNER JOIN sapk.ref_penghargaan RP ON P.REF_PENGHARGAAN_ID = RP.REF_PENGHARGAAN_ID 
+                  WHERE P.TAHUN IN ('2022','2023')
+                  AND (COALESCE(NULLIF(P.STATUS, ''), NULL) IS NULL OR P.STATUS = '2')
+                ) A
+                WHERE NOMOR = 1
+              ) A2 ON A.PEGAWAI_ID = A2.PEGAWAI_ID
+              LEFT JOIN
+              (
+                SELECT *
+                FROM
+                (
+                  SELECT
+                  ROW_NUMBER () OVER (PARTITION BY A.PEGAWAI_ID ORDER BY A.URUTAN DESC) NOMOR
+                  , *
+                  FROM
+                  (
+                    SELECT
+                    H.PEGAWAI_ID, H.HUKUMAN_ID, H.TINGKAT_HUKUMAN_ID
+                    , CASE
+                    WHEN H.TINGKAT_HUKUMAN_ID IN (1,4) THEN 1
+                    WHEN H.TINGKAT_HUKUMAN_ID IN (2,5) THEN 2
+                    WHEN H.TINGKAT_HUKUMAN_ID IN (3,6) THEN 3
+                    ELSE -1 END URUTAN
+                    FROM hukuman H
+                    WHERE (COALESCE(NULLIF(H.STATUS, ''), NULL) IS NULL OR H.STATUS = '2')
+                    AND TO_CHAR(H.TMT_SK, 'YYYY') IN ('2022', '2023')
+                  ) A
+                ) A
+                WHERE NOMOR = 1
+              ) A3 ON A.PEGAWAI_ID = A3.PEGAWAI_ID
+              LEFT JOIN tingkat_hukuman A31 ON COALESCE(A3.TINGKAT_HUKUMAN_ID,-1) = A31.TINGKAT_HUKUMAN_ID
+              LEFT JOIN
+              (
+                SELECT *
+                FROM
+                (
+                  select
+                  ROW_NUMBER () OVER (PARTITION BY PK.PEGAWAI_ID ORDER BY PK.TANGGAL_KOMPETENSI DESC) NOMOR
+                  , PK.PEGAWAI_ID, PK.PENILAIAN_KOMPETENSI_ID, COALESCE(PK.SKOR_KOMPETENSI,0) SKOR_KOMPETENSI
+                  FROM penilaian_kompetensi PK
+                  WHERE (COALESCE(NULLIF(pk.STATUS, ''), NULL) IS NULL OR pk.STATUS = '2')
+                ) A
+                WHERE NOMOR = 1
+              ) A4 ON A.PEGAWAI_ID = A4.PEGAWAI_ID
+              LEFT JOIN penilaian_kompetensi_konversi A41 ON
+              (
+                CASE WHEN A4.PEGAWAI_ID IS NULL THEN 1 ELSE COALESCE(A4.SKOR_KOMPETENSI,0) END
+              ) >= A41.X1
+              AND 
+              (
+                CASE WHEN A4.PEGAWAI_ID IS NULL THEN 1 ELSE COALESCE(A4.SKOR_KOMPETENSI,0) END
+              ) < A41.X2
+              LEFT JOIN
+              (
+                SELECT JR.PEGAWAI_ID
+                FROM
+                (
+                  SELECT JR.PEGAWAI_ID
+                  FROM
+                  (
+                    SELECT JR.PEGAWAI_ID, SUBSTRING(JR.ESELON_ID::TEXT, 1,1) GROUP_ESELON
+                    FROM jabatan_riwayat JR
+                    INNER JOIN
+                    (
+                      SELECT P.JABATAN_RIWAYAT_ID, P.PEGAWAI_ID FROM pegawai P
+                    ) P ON P.JABATAN_RIWAYAT_ID = JR.JABATAN_RIWAYAT_ID AND P.PEGAWAI_ID = JR.PEGAWAI_ID
+                    WHERE (COALESCE(NULLIF(JR.STATUS, ''), NULL) IS NULL OR JR.STATUS = '2')
+                  ) JR
+                  WHERE 1=1
+                  AND EXISTS
+                  (
+                    SELECT 1
+                    FROM
+                    (
+                      SELECT DS.PEGAWAI_ID, SUBSTRING(JR.ESELON_ID::TEXT, 1,1) GROUP_ESELON
+                      FROM diklat_struktural DS
+                      INNER JOIN jabatan_riwayat JR ON DS.DS_JABATAN_RIWAYAT_ID = JR.JABATAN_RIWAYAT_ID
+                      WHERE (COALESCE(NULLIF(DS.STATUS, ''), NULL) IS NULL OR DS.STATUS = '2')
+                    ) X where JR.PEGAWAI_ID = X.PEGAWAI_ID AND JR.GROUP_ESELON = X.GROUP_ESELON
+                  )
+                  UNION ALL
+                  SELECT
+                  JR.PEGAWAI_ID
+                  FROM jabatan_riwayat JR
+                  INNER JOIN
+                  (
+                    SELECT P.JABATAN_RIWAYAT_ID, P.PEGAWAI_ID FROM pegawai P
+                  ) P ON P.JABATAN_RIWAYAT_ID = JR.JABATAN_RIWAYAT_ID AND P.PEGAWAI_ID = JR.PEGAWAI_ID
+                  WHERE (COALESCE(NULLIF(JR.STATUS, ''), NULL) IS NULL OR JR.STATUS = '2')
+                  AND JR.ESELON_ID IS NULL
+                ) JR
+                WHERE 1=1
+              ) A5 ON A.PEGAWAI_ID = A5.PEGAWAI_ID
+              WHERE 1=1
+              AND A.STATUS_PEGAWAI_ID IN (1,2)
+            ) A
+            LEFT JOIN 
+            (
+              SELECT
+              PEGAWAI_ID
+              , SUM(NILAI_JENJANG) JABATAN_NILAI_JENJANG
+              , SUM(RUMPUN_A) JABATAN_RUMPUN_A, SUM(RUMPUN_P) JABATAN_RUMPUN_P, SUM(RUMPUN_M) JABATAN_RUMPUN_M
+              , SUM(RUMPUN_H) JABATAN_RUMPUN_H, SUM(RUMPUN_E) JABATAN_RUMPUN_E, SUM(RUMPUN_PU) JABATAN_RUMPUN_PU
+              , SUM(RUMPUN_T) JABATAN_RUMPUN_T
+              FROM talent.pegawai_jabatan_2023
+              GROUP BY PEGAWAI_ID
+            ) JB ON A.PEGAWAI_ID = JB.PEGAWAI_ID
+            LEFT JOIN 
+            (
+              SELECT
+              A.PEGAWAI_ID
+              , SUM(CASE WHEN DIKLAT_KURSUS_RUMPUN_A >= A1.X1 AND DIKLAT_KURSUS_RUMPUN_A < A1.X2 THEN A1.NILAI ELSE 0 END) DIKLAT_KURSUS_RUMPUN_A
+              , SUM(CASE WHEN DIKLAT_KURSUS_RUMPUN_P >= A1.X1 AND DIKLAT_KURSUS_RUMPUN_P < A1.X2 THEN A1.NILAI ELSE 0 END) DIKLAT_KURSUS_RUMPUN_P
+              , SUM(CASE WHEN DIKLAT_KURSUS_RUMPUN_M >= A1.X1 AND DIKLAT_KURSUS_RUMPUN_M < A1.X2 THEN A1.NILAI ELSE 0 END) DIKLAT_KURSUS_RUMPUN_M
+              , SUM(CASE WHEN DIKLAT_KURSUS_RUMPUN_H >= A1.X1 AND DIKLAT_KURSUS_RUMPUN_H < A1.X2 THEN A1.NILAI ELSE 0 END) DIKLAT_KURSUS_RUMPUN_H
+              , SUM(CASE WHEN DIKLAT_KURSUS_RUMPUN_E >= A1.X1 AND DIKLAT_KURSUS_RUMPUN_E < A1.X2 THEN A1.NILAI ELSE 0 END) DIKLAT_KURSUS_RUMPUN_E
+              , SUM(CASE WHEN DIKLAT_KURSUS_RUMPUN_PU >= A1.X1 AND DIKLAT_KURSUS_RUMPUN_PU < A1.X2 THEN A1.NILAI ELSE 0 END) DIKLAT_KURSUS_RUMPUN_PU
+              , SUM(CASE WHEN DIKLAT_KURSUS_RUMPUN_T >= A1.X1 AND DIKLAT_KURSUS_RUMPUN_T < A1.X2 THEN A1.NILAI ELSE 0 END) DIKLAT_KURSUS_RUMPUN_T
+              FROM
+              (
+                SELECT
+                PEGAWAI_ID
+                , SUM(RUMPUN_A) DIKLAT_KURSUS_RUMPUN_A, SUM(RUMPUN_P) DIKLAT_KURSUS_RUMPUN_P, SUM(RUMPUN_M) DIKLAT_KURSUS_RUMPUN_M
+                , SUM(RUMPUN_H) DIKLAT_KURSUS_RUMPUN_H, SUM(RUMPUN_E) DIKLAT_KURSUS_RUMPUN_E, SUM(RUMPUN_PU) DIKLAT_KURSUS_RUMPUN_PU
+                , SUM(RUMPUN_T) DIKLAT_KURSUS_RUMPUN_T
+                FROM talent.pegawai_diklat_kursus_2023
+                GROUP BY PEGAWAI_ID
+              ) A
+              , diklat_kursus_konversi A1
+              GROUP BY A.PEGAWAI_ID
+            ) DK ON A.PEGAWAI_ID = DK.PEGAWAI_ID
+            LEFT JOIN 
+            (
+              SELECT
+              PEGAWAI_ID
+              , SUM(RUMPUN_A) PENDIDIKAN_RUMPUN_A, SUM(RUMPUN_P) PENDIDIKAN_RUMPUN_P, SUM(RUMPUN_M) PENDIDIKAN_RUMPUN_M
+              , SUM(RUMPUN_H) PENDIDIKAN_RUMPUN_H, SUM(RUMPUN_E) PENDIDIKAN_RUMPUN_E, SUM(RUMPUN_PU) PENDIDIKAN_RUMPUN_PU
+              , SUM(RUMPUN_T) PENDIDIKAN_RUMPUN_T
+              FROM talent.pegawai_pendidikan_riwayat_2023
+              GROUP BY PEGAWAI_ID
+            ) PN ON A.PEGAWAI_ID = PN.PEGAWAI_ID
+            ,
+            (
+              SELECT
+              SUM(CASE WHEN A.ASSESMENT_ATRIBUT_ID = '0201' THEN A.PERSENTASE ELSE 0 END) PENGHARGAAN_PERSENTASE
+              , SUM(CASE WHEN A.ASSESMENT_ATRIBUT_ID = '0202' THEN A.PERSENTASE ELSE 0 END) HUKUMAN_PERSENTASE
+              , SUM(CASE WHEN A.ASSESMENT_ATRIBUT_ID = '0203' THEN A.PERSENTASE ELSE 0 END) KOMPETENSI_PERSENTASE
+              , SUM(CASE WHEN A.ASSESMENT_ATRIBUT_ID = '0204' THEN A.PERSENTASE ELSE 0 END) JABATAN_PERSENTASE
+              , SUM(CASE WHEN A.ASSESMENT_ATRIBUT_ID = '020401' THEN A.PERSENTASE ELSE 0 END) JABATAN_MASA_KERJA_PERSENTASE
+              , SUM(CASE WHEN A.ASSESMENT_ATRIBUT_ID = '020402' THEN A.PERSENTASE ELSE 0 END) JABATAN_MASA_JABATAN_PERSENTASE
+              , SUM(CASE WHEN A.ASSESMENT_ATRIBUT_ID = '0205' THEN A.PERSENTASE ELSE 0 END) DIKLAT_STRUKTURAL_PERSENTASE
+              , SUM(CASE WHEN A.ASSESMENT_ATRIBUT_ID = '0206' THEN A.PERSENTASE ELSE 0 END) DIKLAT_KURSUS_PERSENTASE
+              , SUM(CASE WHEN A.ASSESMENT_ATRIBUT_ID = '0207' THEN A.PERSENTASE ELSE 0 END) PENDIDIKAN_PERSENTASE
+              FROM talent.assesment_atribut A
+              WHERE PERMEN_ID = 2
+            ) PR
+          ) A
+        ) A
+      ) A
+    ) A
+  ) A
+  ,
+  (
+    SELECT
+    COALESCE(GM_X0,0) KUADRAN_Y0, COALESCE(GM_Y0,0) KUADRAN_Y1, COALESCE(GM_Y1,0) KUADRAN_Y2
+    , COALESCE(SKP_Y0,0) KUADRAN_X0, COALESCE(SKP_X0,0) KUADRAN_X1, COALESCE(SKP_X1,0) KUADRAN_X2
+    , COALESCE(GM_Y2,0) MAX_DATA_Y, COALESCE(SKP_X2,0) MAX_DATA_X
+    FROM talent.formula_tp
+    WHERE PERMEN_ID = 2
+  ) FTP
+) A
+LEFT JOIN
+(
+  SELECT COALESCE(NILAI,0) NILAI, KODE, NAMA
+  FROM nilai_kuadran
+) A1 ON A1.KODE = A.KUADRAN_PEGAWAI::TEXT
+WHERE 1=1
+AND A.PEGAWAI_ID IN (8300,1862,4089,11761, 1)

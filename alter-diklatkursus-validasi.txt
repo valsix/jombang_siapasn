@@ -1,0 +1,339 @@
+drop table if exists validasi.diklat_kursus;
+create table validasi.diklat_kursus
+(
+  diklat_kursus_id numeric not null,
+  pegawai_id numeric,
+  tipe_kursus_id numeric,
+  ref_jenis_kursus_id numeric,
+  nama character varying,
+  no_sertifikat character varying,
+  tanggal_sertifikat date,
+  tanggal_mulai date,
+  tanggal_selesai date,
+  tahun numeric,
+  jumlah_jam numeric,
+  angkatan character varying,
+  tempat character varying,
+  nilai_rekam_jejak numeric,
+  rumpun_id integer,
+  ref_instansi_id numeric,
+  ref_instansi_nama character varying,
+  penyelenggara character varying,
+  status_lulus character varying(1),
+  last_user character varying,
+  last_date timestamp without time zone,
+  last_level numeric,
+  status character varying(1),
+  user_login_id numeric,
+  user_login_pegawai_id numeric,
+  last_create_user character varying,
+  last_create_date timestamp without time zone,
+  validasi integer,
+  validator character varying,
+  perubahan_data character varying,
+  perubahan_verifikator_data character varying,
+  tipe_perubahan_data character(1),
+  tanggal_validasi timestamp without time zone,
+  temp_validasi_id integer NOT NULL
+)
+with (oids=false );
+alter table validasi.diklat_kursus owner to postgres;
+
+CREATE OR REPLACE FUNCTION validasi.validasi_diklat_kursus()
+  RETURNS trigger AS
+$BODY$
+DECLARE
+
+    rec RECORD;
+    pinfoperubahan character varying;
+    thequery character varying;
+    
+    BEGIN
+
+  if new.validasi = 1 or new.validasi is null then
+    pinfoperubahan := '{ "0" : "0" ';
+    if NEW.DIKLAT_KURSUS_ID is null then
+        pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'TIPE_KURSUS_ID', ''::character varying, 'valsixdatabaru'::character varying);
+        pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'NAMA', ''::character varying, 'valsixdatabaru'::character varying);
+        pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'NO_SERTIFIKAT', ''::character varying, 'valsixdatabaru'::character varying);
+        pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'TANGGAL_SERTIFIKAT', ''::character varying, 'valsixdatabaru'::character varying);
+        pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'TANGGAL_MULAI', ''::character varying, 'valsixdatabaru'::character varying);
+        pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'TANGGAL_SELESAI', ''::character varying, 'valsixdatabaru'::character varying);
+        pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'TAHUN', ''::character varying, 'valsixdatabaru'::character varying);
+        pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'JUMLAH_JAM', ''::character varying, 'valsixdatabaru'::character varying);
+        pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'ANGKATAN', ''::character varying, 'valsixdatabaru'::character varying);
+        pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'TEMPAT', ''::character varying, 'valsixdatabaru'::character varying);
+        pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'PENYELENGGARA', ''::character varying, 'valsixdatabaru'::character varying);
+        pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'REF_JENIS_KURSUS_ID', ''::character varying, 'valsixdatabaru'::character varying);
+        pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'RUMPUN_ID', ''::character varying, 'valsixdatabaru'::character varying);
+        pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'STATUS_LULUS', ''::character varying, 'valsixdatabaru'::character varying);
+        pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'REF_INSTANSI_ID', ''::character varying, 'valsixdatabaru'::character varying);
+        pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'REF_INSTANSI_NAMA', ''::character varying, 'valsixdatabaru'::character varying);
+        pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'NILAI_REKAM_JEJAK', ''::character varying, 'valsixdatabaru'::character varying);
+    else
+      FOR rec IN SELECT * FROM diklat_kursus A WHERE A.PEGAWAI_ID = NEW.PEGAWAI_ID AND A.DIKLAT_KURSUS_ID = NEW.DIKLAT_KURSUS_ID
+      LOOP
+        if new.validasi is null then
+          pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'TIPE_KURSUS_ID', NEW.TIPE_KURSUS_ID::character varying, rec.TIPE_KURSUS_ID::character varying);
+          pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'NAMA', NEW.NAMA::character varying, rec.NAMA::character varying);
+          pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'NO_SERTIFIKAT', NEW.NO_SERTIFIKAT::character varying, rec.NO_SERTIFIKAT::character varying);
+          pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'TANGGAL_SERTIFIKAT', NEW.TANGGAL_SERTIFIKAT::character varying, rec.TANGGAL_SERTIFIKAT::character varying);
+          pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'TANGGAL_MULAI', NEW.TANGGAL_MULAI::character varying, rec.TANGGAL_MULAI::character varying);
+          pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'TANGGAL_SELESAI', NEW.TANGGAL_SELESAI::character varying, rec.TANGGAL_SELESAI::character varying);
+          pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'TAHUN', NEW.TAHUN::character varying, rec.TAHUN::character varying);
+          pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'JUMLAH_JAM', NEW.JUMLAH_JAM::character varying, rec.JUMLAH_JAM::character varying);
+          pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'ANGKATAN', NEW.ANGKATAN::character varying, rec.ANGKATAN::character varying);
+          pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'TEMPAT', NEW.TEMPAT::character varying, rec.TEMPAT::character varying);
+          pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'PENYELENGGARA', NEW.PENYELENGGARA::character varying, rec.PENYELENGGARA::character varying);
+          pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'REF_JENIS_KURSUS_ID', NEW.REF_JENIS_KURSUS_ID::character varying, rec.REF_JENIS_KURSUS_ID::character varying);
+          pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'RUMPUN_ID', NEW.RUMPUN_ID::character varying, rec.RUMPUN_ID::character varying);
+          pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'STATUS_LULUS', NEW.STATUS_LULUS::character varying, rec.STATUS_LULUS::character varying);
+          pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'REF_INSTANSI_ID', NEW.REF_INSTANSI_ID::character varying, rec.REF_INSTANSI_ID::character varying);
+          pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'REF_INSTANSI_NAMA', NEW.REF_INSTANSI_NAMA::character varying, rec.REF_INSTANSI_NAMA::character varying);
+          pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'NILAI_REKAM_JEJAK', NEW.NILAI_REKAM_JEJAK::character varying, rec.NILAI_REKAM_JEJAK::character varying);
+        else
+          pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'TIPE_KURSUS_ID', rec.TIPE_KURSUS_ID::character varying, NEW.TIPE_KURSUS_ID::character varying);
+          pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'NAMA', rec.NAMA::character varying, NEW.NAMA::character varying);
+          pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'NO_SERTIFIKAT', rec.NO_SERTIFIKAT::character varying, NEW.NO_SERTIFIKAT::character varying);
+          pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'TANGGAL_SERTIFIKAT', rec.TANGGAL_SERTIFIKAT::character varying, NEW.TANGGAL_SERTIFIKAT::character varying);
+          pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'TANGGAL_MULAI', rec.TANGGAL_MULAI::character varying, NEW.TANGGAL_MULAI::character varying);
+          pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'TANGGAL_SELESAI', rec.TANGGAL_SELESAI::character varying, NEW.TANGGAL_SELESAI::character varying);
+          pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'TAHUN', rec.TAHUN::character varying, NEW.TAHUN::character varying);
+          pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'JUMLAH_JAM', rec.JUMLAH_JAM::character varying, NEW.JUMLAH_JAM::character varying);
+          pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'ANGKATAN', rec.ANGKATAN::character varying, NEW.ANGKATAN::character varying);
+          pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'TEMPAT', rec.TEMPAT::character varying, NEW.TEMPAT::character varying);
+          pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'PENYELENGGARA', rec.PENYELENGGARA::character varying, NEW.PENYELENGGARA::character varying);
+          pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'REF_JENIS_KURSUS_ID', rec.REF_JENIS_KURSUS_ID::character varying, NEW.REF_JENIS_KURSUS_ID::character varying);
+          pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'RUMPUN_ID', rec.RUMPUN_ID::character varying, NEW.RUMPUN_ID::character varying);
+          pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'STATUS_LULUS', rec.STATUS_LULUS::character varying, NEW.STATUS_LULUS::character varying);
+          pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'REF_INSTANSI_ID', rec.REF_INSTANSI_ID::character varying, NEW.REF_INSTANSI_ID::character varying);
+          pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'REF_INSTANSI_NAMA', rec.REF_INSTANSI_NAMA::character varying, NEW.REF_INSTANSI_NAMA::character varying);
+          pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'NILAI_REKAM_JEJAK', rec.NILAI_REKAM_JEJAK::character varying, NEW.NILAI_REKAM_JEJAK::character varying);
+        end if;
+        
+      END LOOP;
+    end if;
+    
+    pinfoperubahan:= pinfoperubahan || ' }';
+    --raise notice 'sql %', pinfoperubahan;
+  end if;
+  
+  IF NEW.VALIDASI = 1 THEN 
+    if new.diklat_kursus_id is null then
+      if new.tanggal_validasi is null then
+        new.perubahan_verifikator_data= pinfoperubahan;
+      else
+        INSERT INTO diklat_kursus  
+        (
+          DIKLAT_KURSUS_ID, PEGAWAI_ID, TIPE_KURSUS_ID
+          , NAMA, NO_SERTIFIKAT, TANGGAL_SERTIFIKAT, TANGGAL_MULAI, TANGGAL_SELESAI
+          , TAHUN, JUMLAH_JAM, ANGKATAN, TEMPAT,PENYELENGGARA,REF_JENIS_KURSUS_ID, RUMPUN_ID
+          , STATUS_LULUS, REF_INSTANSI_ID, REF_INSTANSI_NAMA, NILAI_REKAM_JEJAK
+          , USER_LOGIN_ID, USER_LOGIN_PEGAWAI_ID, LAST_CREATE_USER, LAST_CREATE_DATE
+        )
+        VALUES 
+        (
+          (select coalesce(max(diklat_kursus_id), 0) + 1 from diklat_kursus)
+          , NEW.PEGAWAI_ID, NEW.TIPE_KURSUS_ID
+          , NEW.NAMA, NEW.NO_SERTIFIKAT, NEW.TANGGAL_SERTIFIKAT, NEW.TANGGAL_MULAI, NEW.TANGGAL_SELESAI
+          , NEW.TAHUN, NEW.JUMLAH_JAM, NEW.ANGKATAN, NEW.TEMPAT, NEW.PENYELENGGARA
+          , NEW.REF_JENIS_KURSUS_ID, NEW.RUMPUN_ID, NEW.STATUS_LULUS, NEW.REF_INSTANSI_ID
+          , NEW.REF_INSTANSI_NAMA, NEW.NILAI_REKAM_JEJAK
+          , NEW.USER_LOGIN_ID, NEW.USER_LOGIN_PEGAWAI_ID, NEW.LAST_CREATE_USER, NEW.LAST_CREATE_DATE
+        );
+      end if;
+      --raise notice 'sql %', '';
+    else
+      if new.tanggal_validasi is null then
+        new.perubahan_verifikator_data= pinfoperubahan;
+      else
+        select validasi.vupdateinfo('DIKLAT_KURSUS', new.diklat_kursus_id, new.temp_validasi_id, new.last_user, new.last_level) into thequery;
+
+        if thequery is not null then
+          --new.last_level:= old.last_level;
+          execute thequery;
+        end if;
+      end if;
+      --raise notice 'sql %', thequery;
+      --return null;
+    end if;
+  ELSIF NEW.VALIDASI = 2 THEN 
+    --raise notice 'sql %', '';
+  ELSE
+    new.perubahan_data := pinfoperubahan;
+  END IF;
+
+  RETURN NEW;
+    END;
+$BODY$
+LANGUAGE plpgsql VOLATILE COST 100;
+ALTER FUNCTION validasi.validasi_diklat_kursus() OWNER TO postgres;
+
+DROP TRIGGER if exists validasi_diklat_kursus_trigger ON validasi.diklat_kursus;
+CREATE TRIGGER validasi_diklat_kursus_trigger
+BEFORE INSERT OR UPDATE
+ON validasi.diklat_kursus
+FOR EACH ROW
+EXECUTE PROCEDURE validasi.validasi_diklat_kursus();
+
+CREATE OR REPLACE FUNCTION validasi.validasi_diklat_kursus_hapus()
+  RETURNS trigger AS
+$BODY$
+DECLARE
+    BEGIN
+  insert into validasi.hapus_log
+  (
+    temp_validasi_id, row_id, row_hapus_id, info_link, info_table, pegawai_id
+    , info_riwayat, info_jenis, info_keterangan
+    , info_tanggal, info_jenis_update, info_status, info_level, info_level_nama
+    , info_validasi
+    , info_create_date, perubahan_data
+  )
+  SELECT  
+  temp_validasi_id, row_id, row_hapus_id, info_link, info_table, pegawai_id
+  , info_riwayat, info_jenis, info_keterangan
+  , info_tanggal, info_jenis_update, 'Batal' info_status, info_level, info_level_nama
+  , -1 info_validasi
+  , now() info_create_date, old.perubahan_data
+  FROM validasi.validasi_pegawai_perubahandatavalidasi(old.pegawai_id) A
+  WHERE 1 = 1 and temp_validasi_id = old.temp_validasi_id and info_table = 'DIKLAT_KURSUS';
+
+  return old;
+    END;
+$BODY$
+LANGUAGE plpgsql VOLATILE COST 100;
+ALTER FUNCTION validasi.validasi_diklat_kursus_hapus() OWNER TO postgres;
+
+DROP TRIGGER if exists validasi_diklat_kursus_trigger_hapus ON validasi.diklat_kursus;
+CREATE TRIGGER validasi_diklat_kursus_trigger_hapus
+BEFORE DELETE
+ON validasi.diklat_kursus
+FOR EACH ROW
+EXECUTE PROCEDURE validasi.validasi_diklat_kursus_hapus();
+
+DROP TYPE IF EXISTS public.diklat_kursus_type;
+CREATE TYPE public.diklat_kursus_type AS
+(
+  diklat_kursus_id numeric,
+  pegawai_id numeric,
+  tipe_kursus_id numeric,
+  ref_jenis_kursus_id numeric,
+  nama character varying,
+  no_sertifikat character varying,
+  tanggal_sertifikat date,
+  tanggal_mulai date,
+  tanggal_selesai date,
+  tahun numeric,
+  jumlah_jam numeric,
+  angkatan character varying,
+  tempat character varying,
+  nilai_rekam_jejak numeric,
+  rumpun_id integer,
+  ref_instansi_id numeric,
+  ref_instansi_nama character varying,
+  penyelenggara character varying,
+  status_lulus character varying(1),
+  temp_validasi_id integer,
+  temp_validasi_hapus_id integer,
+  validasi integer,
+  validator character varying,
+  perubahan_data character varying,
+  tipe_perubahan_data character(1),
+  tanggal_validasi timestamp without time zone
+);
+
+CREATE OR REPLACE FUNCTION validasi.validasi_pegawai_diklat_kursus(pegawaiid numeric, id character varying, rowid character varying)
+  RETURNS SETOF diklat_kursus_type AS
+$BODY$
+DECLARE
+  cur refcursor;
+  QUERY TEXT;
+  rec diklat_kursus_type%ROWTYPE;
+BEGIN
+  if coalesce(nullif(rowid, ''), null) is not null then
+  QUERY := '
+  select
+  a.diklat_kursus_id, a.pegawai_id, a.tipe_kursus_id, a.ref_jenis_kursus_id, a.nama, a.no_sertifikat
+  , a.tanggal_sertifikat, a.tanggal_mulai, a.tanggal_selesai, a.tahun, a.jumlah_jam
+  , a.angkatan, a.tempat, a.nilai_rekam_jejak, a.rumpun_id, a.ref_instansi_id, a.ref_instansi_nama
+  , a.penyelenggara, a.status_lulus
+  , a.temp_validasi_id, a.temp_validasi_hapus_id, a.validasi, a.validator, a.perubahan_data, a.tipe_perubahan_data, a.tanggal_validasi
+  from
+  (
+    select
+    a.diklat_kursus_id, a.pegawai_id, a.tipe_kursus_id, a.ref_jenis_kursus_id, a.nama, a.no_sertifikat
+    , a.tanggal_sertifikat, a.tanggal_mulai, a.tanggal_selesai, a.tahun, a.jumlah_jam
+    , a.angkatan, a.tempat, a.nilai_rekam_jejak, a.rumpun_id, a.ref_instansi_id, a.ref_instansi_nama
+    , a.penyelenggara, a.status_lulus
+    , a.temp_validasi_id, null temp_validasi_hapus_id, a.validasi, a.validator, a.perubahan_data, a.tipe_perubahan_data, a.tanggal_validasi
+    from validasi.diklat_kursus a
+    where a.temp_validasi_id = '|| rowid ||'
+    and a.pegawai_id = '|| pegawaiid ||'
+  ) a
+  ';
+  else
+  QUERY := '
+  select
+  a.diklat_kursus_id, a.pegawai_id, a.tipe_kursus_id, a.ref_jenis_kursus_id, a.nama, a.no_sertifikat
+  , a.tanggal_sertifikat, a.tanggal_mulai, a.tanggal_selesai, a.tahun, a.jumlah_jam
+  , a.angkatan, a.tempat, a.nilai_rekam_jejak, a.rumpun_id, a.ref_instansi_id, a.ref_instansi_nama
+  , a.penyelenggara, a.status_lulus
+  , a.temp_validasi_id, a.temp_validasi_hapus_id, a.validasi, a.validator, a.perubahan_data, a.tipe_perubahan_data, a.tanggal_validasi
+  from
+  (
+    select
+    a.diklat_kursus_id, a.pegawai_id
+    , coalesce(b.tipe_kursus_id, a.tipe_kursus_id) tipe_kursus_id
+    , coalesce(b.ref_jenis_kursus_id, a.ref_jenis_kursus_id) ref_jenis_kursus_id
+    , coalesce(b.nama, a.nama) nama, coalesce(b.no_sertifikat, a.no_sertifikat) no_sertifikat
+    , coalesce(b.tanggal_sertifikat, a.tanggal_sertifikat) tanggal_sertifikat
+    , coalesce(b.tanggal_mulai, a.tanggal_mulai) tanggal_mulai
+    , coalesce(b.tanggal_selesai, a.tanggal_selesai) tanggal_selesai
+    , coalesce(b.tahun, a.tahun) tahun, coalesce(b.jumlah_jam, a.jumlah_jam) jumlah_jam
+    , coalesce(b.angkatan, a.angkatan) angkatan, coalesce(b.tempat, a.tempat) tempat
+    , coalesce(b.nilai_rekam_jejak, a.nilai_rekam_jejak) nilai_rekam_jejak
+    , coalesce(b.rumpun_id, a.rumpun_id) rumpun_id, coalesce(b.ref_instansi_id, a.ref_instansi_id) ref_instansi_id
+    , coalesce(b.ref_instansi_nama, a.ref_instansi_nama) ref_instansi_nama
+    , coalesce(b.penyelenggara, a.penyelenggara) penyelenggara, coalesce(b.status_lulus, a.status_lulus) status_lulus
+    , b.temp_validasi_id, c.temp_validasi_id temp_validasi_hapus_id, b.validasi, b.validator, b.perubahan_data, b.tipe_perubahan_data, b.tanggal_validasi
+    from diklat_kursus a
+    left join validasi.diklat_kursus b on a.diklat_kursus_id = b.diklat_kursus_id and b.validasi is null
+    left join validasi.hapus_data c on c.hapus_nama::text = ''DIKLAT_KURSUS''::text and a.diklat_kursus_id = c.temp_validasi_id::numeric AND c.validasi is null
+    where a.pegawai_id = '|| pegawaiid ||'
+    and (coalesce(nullif(a.status, ''''), null) is null or a.status = ''2'')
+    union all
+    select
+    a.diklat_kursus_id, a.pegawai_id, a.tipe_kursus_id, a.ref_jenis_kursus_id, a.nama, a.no_sertifikat
+    , a.tanggal_sertifikat, a.tanggal_mulai, a.tanggal_selesai, a.tahun, a.jumlah_jam
+    , a.angkatan, a.tempat, a.nilai_rekam_jejak, a.rumpun_id, a.ref_instansi_id, a.ref_instansi_nama
+    , a.penyelenggara, a.status_lulus
+    , a.temp_validasi_id, null temp_validasi_hapus_id, a.validasi, a.validator, a.perubahan_data, a.tipe_perubahan_data, a.tanggal_validasi
+    from validasi.diklat_kursus a
+    where a.validasi is null and a.diklat_kursus_id is null
+    and a.pegawai_id = '|| pegawaiid ||'
+  ) a
+  where 1=1
+  ';
+
+  if coalesce(nullif(id, ''), null) is not null then
+    QUERY := QUERY || ' and a.diklat_kursus_id = ' || id;
+  end if;
+  raise notice 'sql %', QUERY;
+  
+  end if;
+  
+  OPEN cur FOR EXECUTE QUERY;
+  
+  FETCH cur INTO rec;
+  WHILE FOUND LOOP
+    RETURN NEXT rec;
+    FETCH cur INTO rec;
+  END LOOP;
+  CLOSE cur;
+END;
+$BODY$
+LANGUAGE plpgsql VOLATILE STRICT
+  COST 100
+  ROWS 1000;
+ALTER FUNCTION validasi.validasi_pegawai_diklat_kursus(numeric, character varying, character varying)
+  OWNER TO postgres;

@@ -1,0 +1,1208 @@
+CREATE OR REPLACE FUNCTION validasi.validasi_diklat_kursus()
+  RETURNS trigger AS
+$BODY$
+DECLARE
+
+    rec RECORD;
+    pinfoperubahan character varying;
+    thequery character varying;
+    
+    BEGIN
+
+	if new.validasi = 1 or new.validasi is null then
+		pinfoperubahan := '{ "0" : "0" ';
+		if NEW.DIKLAT_KURSUS_ID is null then
+			pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'TIPE_KURSUS_ID', ''::character varying, 'valsixdatabaru'::character varying);
+			pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'REF_JENIS_KURSUS_ID', ''::character varying, 'valsixdatabaru'::character varying);
+			pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'BIDANG_TERKAIT_ID', ''::character varying, 'valsixdatabaru'::character varying);
+			pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'NAMA', ''::character varying, 'valsixdatabaru'::character varying);
+			pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'NO_SERTIFIKAT', ''::character varying, 'valsixdatabaru'::character varying);
+			pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'TANGGAL_SERTIFIKAT', ''::character varying, 'valsixdatabaru'::character varying);
+			pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'TANGGAL_MULAI', ''::character varying, 'valsixdatabaru'::character varying);
+			pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'TANGGAL_SELESAI', ''::character varying, 'valsixdatabaru'::character varying);
+			pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'TAHUN', ''::character varying, 'valsixdatabaru'::character varying);
+			pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'JUMLAH_JAM', ''::character varying, 'valsixdatabaru'::character varying);
+			pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'ANGKATAN', ''::character varying, 'valsixdatabaru'::character varying);
+			pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'TEMPAT', ''::character varying, 'valsixdatabaru'::character varying);
+			pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'NILAI_REKAM_JEJAK', ''::character varying, 'valsixdatabaru'::character varying);
+			pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'RUMPUN_ID', ''::character varying, 'valsixdatabaru'::character varying);
+			pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'REF_INSTANSI_ID', ''::character varying, 'valsixdatabaru'::character varying);
+			pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'REF_INSTANSI_NAMA', ''::character varying, 'valsixdatabaru'::character varying);
+			pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'PENYELENGGARA', ''::character varying, 'valsixdatabaru'::character varying);
+			pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'STATUS_LULUS', ''::character varying, 'valsixdatabaru'::character varying);
+		else
+			FOR rec IN SELECT * FROM DIKLAT_KURSUS A WHERE A.PEGAWAI_ID = NEW.PEGAWAI_ID AND A.DIKLAT_KURSUS_ID = NEW.DIKLAT_KURSUS_ID
+			LOOP
+				if new.validasi is null then
+					pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'TIPE_KURSUS_ID', NEW.TIPE_KURSUS_ID::character varying, rec.TIPE_KURSUS_ID::character varying);
+					pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'REF_JENIS_KURSUS_ID', NEW.REF_JENIS_KURSUS_ID::character varying, rec.REF_JENIS_KURSUS_ID::character varying);
+					pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'BIDANG_TERKAIT_ID', NEW.BIDANG_TERKAIT_ID::character varying, rec.BIDANG_TERKAIT_ID::character varying);
+					pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'NAMA', NEW.NAMA::character varying, rec.NAMA::character varying);
+					pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'NO_SERTIFIKAT', NEW.NO_SERTIFIKAT::character varying, rec.NO_SERTIFIKAT::character varying);
+					pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'TANGGAL_SERTIFIKAT', NEW.TANGGAL_SERTIFIKAT::character varying, rec.TANGGAL_SERTIFIKAT::character varying);
+					pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'TANGGAL_MULAI', NEW.TANGGAL_MULAI::character varying, rec.TANGGAL_MULAI::character varying);
+					pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'TANGGAL_SELESAI', NEW.TANGGAL_SELESAI::character varying, rec.TANGGAL_SELESAI::character varying);
+					pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'TAHUN', NEW.STATUS::character varying, rec.TAHUN::character varying);
+					pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'JUMLAH_JAM', NEW.JUMLAH_JAM::character varying, rec.JUMLAH_JAM::character varying);
+					pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'ANGKATAN', NEW.ANGKATAN::character varying, rec.ANGKATAN::character varying);
+					pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'TEMPAT', NEW.TEMPAT::character varying, rec.TEMPAT::character varying);
+					pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'NILAI_REKAM_JEJAK', NEW.NILAI_REKAM_JEJAK::character varying, rec.NILAI_REKAM_JEJAK::character varying);
+					pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'RUMPUN_ID', NEW.RUMPUN_ID::character varying, rec.RUMPUN_ID::character varying);
+					pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'REF_INSTANSI_ID', NEW.REF_INSTANSI_ID::character varying, rec.REF_INSTANSI_ID::character varying);
+					pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'REF_INSTANSI_NAMA', NEW.REF_INSTANSI_NAMA::character varying, rec.REF_INSTANSI_NAMA::character varying);
+					pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'PENYELENGGARA', NEW.PENYELENGGARA::character varying, rec.PENYELENGGARA::character varying);
+					pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'STATUS_LULUS', NEW.STATUS_LULUS::character varying, rec.STATUS_LULUS::character varying);
+				else
+					pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'TIPE_KURSUS_ID', rec.TIPE_KURSUS_ID::character varying, NEW.TIPE_KURSUS_ID::character varying);
+					pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'REF_JENIS_KURSUS_ID', rec.REF_JENIS_KURSUS_ID::character varying, NEW.REF_JENIS_KURSUS_ID::character varying);
+					pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'BIDANG_TERKAIT_ID', rec.BIDANG_TERKAIT_ID::character varying, NEW.BIDANG_TERKAIT_ID::character varying);
+					pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'NAMA', rec.NAMA::character varying, NEW.NAMA::character varying);
+					pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'NO_SERTIFIKAT', rec.NO_SERTIFIKAT::character varying, NEW.NO_SERTIFIKAT::character varying);
+					pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'TANGGAL_SERTIFIKAT', rec.TANGGAL_SERTIFIKAT::character varying, NEW.TANGGAL_SERTIFIKAT::character varying);
+					pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'TANGGAL_MULAI', rec.TANGGAL_MULAI::character varying, NEW.TANGGAL_MULAI::character varying);
+					pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'TANGGAL_SELESAI', rec.TANGGAL_SELESAI::character varying, NEW.TANGGAL_SELESAI::character varying);
+					pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'TAHUN', rec.STATUS::character varying, NEW.TAHUN::character varying);
+					pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'JUMLAH_JAM', rec.JUMLAH_JAM::character varying, NEW.JUMLAH_JAM::character varying);
+					pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'ANGKATAN', rec.ANGKATAN::character varying, NEW.ANGKATAN::character varying);
+					pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'TEMPAT', rec.TEMPAT::character varying, NEW.TEMPAT::character varying);
+					pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'NILAI_REKAM_JEJAK', rec.NILAI_REKAM_JEJAK::character varying, NEW.NILAI_REKAM_JEJAK::character varying);
+					pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'RUMPUN_ID', rec.RUMPUN_ID::character varying, NEW.RUMPUN_ID::character varying);
+					pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'REF_INSTANSI_ID', rec.REF_INSTANSI_ID::character varying, NEW.REF_INSTANSI_ID::character varying);
+					pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'REF_INSTANSI_NAMA', rec.REF_INSTANSI_NAMA::character varying, NEW.REF_INSTANSI_NAMA::character varying);
+					pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'PENYELENGGARA', rec.PENYELENGGARA::character varying, NEW.PENYELENGGARA::character varying);
+					pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'STATUS_LULUS', rec.STATUS_LULUS::character varying, NEW.STATUS_LULUS::character varying);
+				end if;
+				
+			END LOOP;
+		end if;
+		
+		pinfoperubahan:= pinfoperubahan || ' }';
+		--raise notice 'sql %', pinfoperubahan;
+	end if;
+	
+	IF NEW.VALIDASI = 1 THEN 
+		if new.diklat_kursus_id is null then
+			if new.tanggal_validasi is null then
+				new.perubahan_verifikator_data= pinfoperubahan;
+			else
+				INSERT INTO DIKLAT_KURSUS
+				(
+					DIKLAT_KURSUS_ID, PEGAWAI_ID
+					, TIPE_KURSUS_ID, REF_JENIS_KURSUS_ID, BIDANG_TERKAIT_ID, NAMA, NO_SERTIFIKAT, TANGGAL_SERTIFIKAT
+					, TANGGAL_MULAI, TANGGAL_SELESAI, TAHUN, JUMLAH_JAM, ANGKATAN, TEMPAT
+					, NILAI_REKAM_JEJAK, RUMPUN_ID, REF_INSTANSI_ID, REF_INSTANSI_NAMA
+					, PENYELENGGARA, STATUS_LULUS
+					, LAST_USER, LAST_DATE, LAST_LEVEL, USER_LOGIN_ID, USER_LOGIN_PEGAWAI_ID
+				)
+				VALUES 
+				(
+					(select coalesce(max(diklat_kursus_id), 0) + 1 from diklat_kursus)
+					, NEW.TIPE_KURSUS_ID, NEW.REF_JENIS_KURSUS_ID, NEW.BIDANG_TERKAIT_ID, NEW.NAMA, NEW.NO_SERTIFIKAT
+					, NEW.TANGGAL_SERTIFIKAT, NEW.TANGGAL_MULAI, NEW.TANGGAL_SELESAI, NEW.TAHUN
+					, NEW.JUMLAH_JAM, NEW.ANGKATAN, NEW.TEMPAT
+					, NEW.NILAI_REKAM_JEJAK, NEW.RUMPUN_ID, NEW.REF_INSTANSI_ID, NEW.REF_INSTANSI_NAMA
+					, NEW.PENYELENGGARA, NEW.STATUS_LULUS
+					, NEW.LAST_USER, NEW.LAST_DATE, NEW.LAST_LEVEL, NEW.USER_LOGIN_ID, NEW.USER_LOGIN_PEGAWAI_ID
+				);
+			end if;
+			--raise notice 'sql %', '';
+		else
+			if new.tanggal_validasi is null then
+				new.perubahan_verifikator_data= pinfoperubahan;
+			else
+				select validasi.vupdateinfo('diklat_kursus', new.diklat_kursus_id, new.temp_validasi_id, new.last_user, new.last_level) into thequery;
+
+				if thequery is not null then
+					--new.last_level:= old.last_level;
+					execute thequery;
+				end if;
+			end if;
+			--raise notice 'sql %', thequery;
+			--return null;
+		end if;
+	ELSIF NEW.VALIDASI = 2 THEN 
+		--raise notice 'sql %', '';
+	ELSE
+		new.perubahan_data := pinfoperubahan;
+	END IF;
+
+	RETURN NEW;
+    END;
+$BODY$
+LANGUAGE plpgsql VOLATILE COST 100;
+ALTER FUNCTION validasi.validasi_diklat_kursus() OWNER TO postgres;
+--=================================================================================================================================
+
+drop FUNCTION validasi.validasi_pegawai_diklat_struktural(numeric, character varying, character varying);
+drop type if exists diklat_struktural_type;
+create type diklat_struktural_type as
+(
+	diklat_struktural_id numeric,
+	pegawai_id numeric,
+	diklat_id numeric,
+	tempat character varying(100),
+	penyelenggara character varying(100),
+	angkatan character varying(20),
+	tahun numeric,
+	tanggal_mulai date,
+	tanggal_selesai date,
+	no_sttpp character varying(175),
+	tanggal_sttpp date,
+	jumlah_jam numeric,
+	temp_validasi_id integer,
+	temp_validasi_hapus_id integer,
+	validasi integer,
+	validator character varying,
+	perubahan_data character varying,
+	tipe_perubahan_data character(1),
+	tanggal_validasi timestamp without time zone,
+	ds_jabatan_riwayat_id numeric,
+	nilai_rekam_jejak numeric,
+	rumpun_id integer
+);
+alter type public.diklat_struktural_type owner to postgres;
+
+CREATE OR REPLACE FUNCTION validasi.validasi_pegawai_diklat_struktural(pegawaiid numeric, id character varying, rowid character varying)
+  RETURNS SETOF diklat_struktural_type AS
+$BODY$
+DECLARE
+  cur refcursor;
+  QUERY TEXT;
+  rec diklat_struktural_type%ROWTYPE;
+BEGIN
+  if coalesce(nullif(rowid, ''), null) is not null then
+	QUERY := '
+	select
+	a.diklat_struktural_id, a.pegawai_id
+	, a.diklat_id
+	, a.tempat, a.penyelenggara, a.angkatan
+	, a.tahun, a.tanggal_mulai, a.tanggal_selesai
+	, a.no_sttpp, a.tanggal_sttpp, a.jumlah_jam
+	, a.temp_validasi_id, a.temp_validasi_hapus_id, a.validasi, a.validator, a.perubahan_data, a.tipe_perubahan_data
+	, a.tanggal_validasi, a.ds_jabatan_riwayat_id, a.nilai_rekam_jejak, a.rumpun_id
+	from
+	(
+		select
+		a.diklat_struktural_id, a.pegawai_id
+		, a.diklat_id
+		, a.tempat, a.penyelenggara, a.angkatan
+		, a.tahun, a.tanggal_mulai, a.tanggal_selesai
+		, a.no_sttpp, a.tanggal_sttpp, a.jumlah_jam
+		, a.temp_validasi_id, null temp_validasi_hapus_id, a.validasi, a.validator, a.perubahan_data, a.tipe_perubahan_data
+		, a.tanggal_validasi, a.ds_jabatan_riwayat_id, a.nilai_rekam_jejak, a.rumpun_id
+		from validasi.diklat_struktural a
+		where a.temp_validasi_id = '|| rowid ||'
+		and a.pegawai_id = '|| pegawaiid ||'
+	) a
+	';
+  else
+	QUERY := '
+	select
+	a.diklat_struktural_id, a.pegawai_id
+	, a.diklat_id
+	, a.tempat, a.penyelenggara, a.angkatan
+	, a.tahun, a.tanggal_mulai, a.tanggal_selesai
+	, a.no_sttpp, a.tanggal_sttpp, a.jumlah_jam
+	, a.temp_validasi_id, a.temp_validasi_hapus_id, a.validasi, a.validator, a.perubahan_data, a.tipe_perubahan_data
+	, a.tanggal_validasi, a.ds_jabatan_riwayat_id, a.nilai_rekam_jejak, a.rumpun_id
+	from
+	(
+		select
+		a.diklat_struktural_id, a.pegawai_id
+		, coalesce(b.diklat_id, a.diklat_id) diklat_id
+		, coalesce(b.tempat, a.tempat) tempat
+		, coalesce(b.penyelenggara, a.penyelenggara) penyelenggara
+		, coalesce(b.angkatan, a.angkatan) angkatan
+		, coalesce(b.tahun, a.tahun) tahun
+		, coalesce(b.tanggal_mulai, a.tanggal_mulai) tanggal_mulai
+		, coalesce(b.tanggal_selesai, a.tanggal_selesai) tanggal_selesai
+		, coalesce(b.no_sttpp, a.no_sttpp) no_sttpp
+		, coalesce(b.tanggal_sttpp, a.tanggal_sttpp) tanggal_sttpp
+		, coalesce(b.jumlah_jam, a.jumlah_jam) jumlah_jam
+		, b.temp_validasi_id, c.temp_validasi_id temp_validasi_hapus_id, b.validasi, b.validator, b.perubahan_data
+		, b.tipe_perubahan_data, b.tanggal_validasi
+		, coalesce(b.ds_jabatan_riwayat_id, a.ds_jabatan_riwayat_id) ds_jabatan_riwayat_id
+		, coalesce(b.nilai_rekam_jejak, a.nilai_rekam_jejak) nilai_rekam_jejak
+		, coalesce(b.rumpun_id, a.rumpun_id) rumpun_id
+		from diklat_struktural a
+		left join validasi.diklat_struktural b on a.diklat_struktural_id = b.diklat_struktural_id and b.validasi is null
+		left join validasi.hapus_data c on c.hapus_nama::text = ''DIKLAT_STRUKTURAL''::text and a.diklat_struktural_id = c.temp_validasi_id::numeric AND c.validasi is null
+		where a.pegawai_id = '|| pegawaiid ||'
+		and (coalesce(nullif(a.status, ''''), null) is null or a.status = ''2'')
+		union all
+		select
+		a.diklat_struktural_id, a.pegawai_id
+		, a.diklat_id
+		, a.tempat, a.penyelenggara, a.angkatan
+		, a.tahun, a.tanggal_mulai, a.tanggal_selesai
+		, a.no_sttpp, a.tanggal_sttpp, a.jumlah_jam
+		, a.temp_validasi_id, null temp_validasi_hapus_id, a.validasi, a.validator, a.perubahan_data, a.tipe_perubahan_data
+		, a.tanggal_validasi, a.ds_jabatan_riwayat_id, a.nilai_rekam_jejak, a.rumpun_id
+		from validasi.diklat_struktural a
+		where a.validasi is null and a.diklat_struktural_id is null
+		and a.pegawai_id = '|| pegawaiid ||'
+	) a
+	where 1=1
+	';
+
+	if coalesce(nullif(id, ''), null) is not null then
+		QUERY := QUERY || ' and a.diklat_struktural_id = ' || id;
+	end if;
+	raise notice 'sql %', QUERY;
+	
+  end if;
+	
+  OPEN cur FOR EXECUTE QUERY;
+  
+  FETCH cur INTO rec;
+  WHILE FOUND LOOP
+    RETURN NEXT rec;
+    FETCH cur INTO rec;
+  END LOOP;
+  CLOSE cur;
+END;
+$BODY$
+LANGUAGE plpgsql VOLATILE STRICT COST 100 ROWS 1000;
+ALTER FUNCTION validasi.validasi_pegawai_diklat_struktural(numeric, character varying, character varying) OWNER TO postgres;
+
+CREATE OR REPLACE FUNCTION validasi.validasi_diklat_struktural()
+  RETURNS trigger AS
+$BODY$
+DECLARE
+
+    rec RECORD;
+    pinfoperubahan character varying;
+    thequery character varying;
+    
+    BEGIN
+
+	if new.validasi = 1 or new.validasi is null then
+		pinfoperubahan := '{ "0" : "0" ';
+		if NEW.DIKLAT_STRUKTURAL_ID is null then
+				pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'DIKLAT_ID', ''::character varying, 'valsixdatabaru'::character varying);
+				pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'TEMPAT', ''::character varying, 'valsixdatabaru'::character varying);
+				pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'PENYELENGGARA', ''::character varying, 'valsixdatabaru'::character varying);
+				pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'ANGKATAN', ''::character varying, 'valsixdatabaru'::character varying);
+				pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'TAHUN', ''::character varying, 'valsixdatabaru'::character varying);
+				pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'TANGGAL_MULAI', ''::character varying, 'valsixdatabaru'::character varying);
+				pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'TANGGAL_SELESAI', ''::character varying, 'valsixdatabaru'::character varying);
+				pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'NO_STTPP', ''::character varying, 'valsixdatabaru'::character varying);
+				pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'TANGGAL_STTPP', ''::character varying, 'valsixdatabaru'::character varying);
+				pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'JUMLAH_JAM', ''::character varying, 'valsixdatabaru'::character varying);
+				pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'DS_JABATAN_RIWAYAT_ID', ''::character varying, 'valsixdatabaru'::character varying);
+				pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'NILAI_REKAM_JEJAK', ''::character varying, 'valsixdatabaru'::character varying);
+				pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'RUMPUN_ID', ''::character varying, 'valsixdatabaru'::character varying);
+		else
+			FOR rec IN SELECT * FROM DIKLAT_STRUKTURAL A WHERE A.PEGAWAI_ID = NEW.PEGAWAI_ID AND A.DIKLAT_STRUKTURAL_ID = NEW.DIKLAT_STRUKTURAL_ID
+			LOOP
+				if new.validasi is null then
+					pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'DIKLAT_ID', NEW.DIKLAT_ID::character varying, rec.DIKLAT_ID::character varying);
+					pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'TEMPAT', NEW.TEMPAT::character varying, rec.TEMPAT::character varying);
+					pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'PENYELENGGARA', NEW.PENYELENGGARA::character varying, rec.PENYELENGGARA::character varying);
+					pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'ANGKATAN', NEW.ANGKATAN::character varying, rec.ANGKATAN::character varying);
+					pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'TAHUN', NEW.TAHUN::character varying, rec.TAHUN::character varying);
+					pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'TANGGAL_MULAI', NEW.TANGGAL_MULAI::character varying, rec.TANGGAL_MULAI::character varying);
+					pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'TANGGAL_SELESAI', NEW.TANGGAL_SELESAI::character varying, rec.TANGGAL_SELESAI::character varying);
+					pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'NO_STTPP', NEW.NO_STTPP::character varying, rec.NO_STTPP::character varying);
+					pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'TANGGAL_STTPP', NEW.TANGGAL_STTPP::character varying, rec.TANGGAL_STTPP::character varying);
+					pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'JUMLAH_JAM', NEW.JUMLAH_JAM::character varying, rec.JUMLAH_JAM::character varying);
+					pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'DS_JABATAN_RIWAYAT_ID', NEW.DS_JABATAN_RIWAYAT_ID::character varying, rec.DS_JABATAN_RIWAYAT_ID::character varying);
+					pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'NILAI_REKAM_JEJAK', NEW.NILAI_REKAM_JEJAK::character varying, rec.NILAI_REKAM_JEJAK::character varying);
+					pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'RUMPUN_ID', NEW.RUMPUN_ID::character varying, rec.RUMPUN_ID::character varying);
+				else
+					pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'DIKLAT_ID', rec.DIKLAT_ID::character varying, NEW.DIKLAT_ID::character varying);
+					pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'TEMPAT', rec.TEMPAT::character varying, NEW.TEMPAT::character varying);
+					pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'PENYELENGGARA', rec.PENYELENGGARA::character varying, rec.PENYELENGGARA::character varying);
+					pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'ANGKATAN', rec.ANGKATAN::character varying, NEW.ANGKATAN::character varying);
+					pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'TAHUN', rec.TAHUN::character varying, NEW.TAHUN::character varying);
+					pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'TANGGAL_MULAI', rec.TANGGAL_MULAI::character varying, NEW.TANGGAL_MULAI::character varying);
+					pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'TANGGAL_SELESAI', rec.TANGGAL_SELESAI::character varying, NEW.TANGGAL_SELESAI::character varying);
+					pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'NO_STTPP', rec.NO_STTPP::character varying, NEW.NO_STTPP::character varying);
+					pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'TANGGAL_STTPP', rec.TANGGAL_STTPP::character varying, rec.TANGGAL_STTPP::character varying);
+					pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'JUMLAH_JAM', rec.JUMLAH_JAM::character varying, NEW.JUMLAH_JAM::character varying);
+					pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'DS_JABATAN_RIWAYAT_ID', rec.DS_JABATAN_RIWAYAT_ID::character varying, NEW.DS_JABATAN_RIWAYAT_ID::character varying);
+					pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'NILAI_REKAM_JEJAK', rec.NILAI_REKAM_JEJAK::character varying, NEW.NILAI_REKAM_JEJAK::character varying);
+					pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'RUMPUN_ID', rec.RUMPUN_ID::character varying, NEW.RUMPUN_ID::character varying);
+				end if;
+				
+			END LOOP;
+		end if;
+		
+		pinfoperubahan:= pinfoperubahan || ' }';
+		--raise notice 'sql %', pinfoperubahan;
+	end if;
+	
+	IF NEW.VALIDASI = 1 THEN 
+		if new.diklat_struktural_id is null then
+			if new.tanggal_validasi is null then
+				new.perubahan_verifikator_data= pinfoperubahan;
+			else
+				INSERT INTO DIKLAT_STRUKTURAL 
+				(
+					DIKLAT_STRUKTURAL_ID, DIKLAT_ID, PEGAWAI_ID, TEMPAT, PENYELENGGARA, ANGKATAN, TAHUN, TANGGAL_MULAI
+					, TANGGAL_SELESAI, NO_STTPP, TANGGAL_STTPP, JUMLAH_JAM
+					, DS_JABATAN_RIWAYAT_ID, NILAI_REKAM_JEJAK, RUMPUN_ID
+					, LAST_USER, LAST_DATE, LAST_LEVEL, USER_LOGIN_ID, USER_LOGIN_PEGAWAI_ID
+				)
+				VALUES 
+				(
+					(select coalesce(max(diklat_struktural_id), 0) + 1 from diklat_struktural)
+					, NEW.DIKLAT_ID
+					, NEW.PEGAWAI_ID
+					, NEW.TEMPAT
+					, NEW.PENYELENGGARA
+					, NEW.ANGKATAN
+					, NEW.TAHUN
+					, NEW.TANGGAL_MULAI
+					, NEW.TANGGAL_SELESAI
+					, NEW.NO_STTPP
+					, NEW.TANGGAL_STTPP
+					, NEW.JUMLAH_JAM
+					, NEW.DS_JABATAN_RIWAYAT_ID, NEW.NILAI_REKAM_JEJAK, NEW.RUMPUN_ID
+					, NEW.LAST_USER, NEW.LAST_DATE, NEW.LAST_LEVEL, NEW.USER_LOGIN_ID, NEW.USER_LOGIN_PEGAWAI_ID
+				);
+			end if;
+			--raise notice 'sql %', '';
+		else
+			if new.tanggal_validasi is null then
+				new.perubahan_verifikator_data= pinfoperubahan;
+			else
+				select validasi.vupdateinfo('diklat_struktural', new.diklat_struktural_id, new.temp_validasi_id, new.last_user, new.last_level) into thequery;
+
+				if thequery is not null then
+					--new.last_level:= old.last_level;
+					execute thequery;
+				end if;
+			end if;
+			--raise notice 'sql %', thequery;
+			--return null;
+		end if;
+	ELSIF NEW.VALIDASI = 2 THEN 
+		--raise notice 'sql %', '';
+	ELSE
+		new.perubahan_data := pinfoperubahan;
+	END IF;
+
+	RETURN NEW;
+    END;
+$BODY$
+LANGUAGE plpgsql VOLATILE COST 100;
+ALTER FUNCTION validasi.validasi_diklat_struktural() OWNER TO postgres;
+
+alter table diklat_struktural drop constraint if exists ak_u_diklat_struktural;
+--ALTER TABLE diklat_struktural ADD CONSTRAINT ak_u_diklat_struktural UNIQUE(pegawai_id, tanggal_mulai);
+--alter table validasi.diklat_struktural add column ds_jabatan_riwayat_id numeric, add column nilai_rekam_jejak numeric, add column rumpun_id integer;
+--=================================================================================================================================
+create or replace function app.user_login_log_hapus_log()
+  returns trigger as
+$body$
+declare
+vnomor character varying;
+begin
+
+  	
+  	delete from app.user_login_log
+  	where user_login_log_id
+  	in
+  	(
+		select user_login_log_id from app.user_login_log ull
+		where 1=1
+		and ull.token not in ('dacbd7d6bc5dfe7d69434ee354633103', 'e6088b42e1f40f4083b0df2a349ed198', '1a51dcaec4c87133948f0a2a00b7ffbe')
+		and to_date(to_char(ull.waktu_login, 'ddmmyyyy'), 'ddmmyyyy') <= to_date(to_char((current_date - 7), 'ddmmyyyy'), 'ddmmyyyy')
+	);
+
+ 	return new;
+   
+end;
+$body$
+language plpgsql volatile cost 100;
+alter function app.user_login_log_hapus_log() owner to postgres;
+  
+drop trigger if exists user_login_log_t on app.user_login_log;
+create trigger user_login_log_t
+before insert or update
+on app.user_login_log
+for each row
+execute procedure app.user_login_log_hapus_log();
+
+CREATE OR REPLACE FUNCTION validasi.validasi_perubahandatavalidasi(vstatement character varying)
+  RETURNS SETOF perubahandatavalidasi_type AS
+$BODY$
+DECLARE
+  cur refcursor;
+  QUERY TEXT;
+  rec perubahandatavalidasi_type%ROWTYPE;
+BEGIN
+  QUERY := '
+	select
+	temp_validasi_id, row_id, row_hapus_id, info_link, info_table, pegawai_id
+	, validasi.tipejenisinfo(''riwayat'', info_riwayat::character varying) info_riwayat
+	, info_jenis, info_keterangan, info_tanggal
+	, case when row_hapus_id is null then validasi.tipejenisinfo(''jenis'', row_id::character varying) else validasi.tipejenisinfo(''jenis'', ''xxx''::character varying) end info_jenis_update
+	, validasi.tipejenisinfo(''status'', validasi::character varying) info_status
+	, info_level, validasi.tipejenisinfo(''hak'', info_level::character varying) info_level_nama
+	, info_validasi, info_create_date
+	from
+	(
+		select
+		temp_validasi_id, sk_cpns_id row_id, null::numeric row_hapus_id, ''pegawai_add_sk_cpns'' info_link, ''sk_cpns'' info_table, pegawai_id
+		, ''2'' info_riwayat, ''SK CPNS'' info_jenis, no_sk info_keterangan
+		, tmt_cpns info_tanggal, validasi, 30 info_level
+		, validasi info_validasi
+		, last_create_date info_create_date
+		from validasi.sk_cpns where 1=1
+		union all
+		select
+		temp_validasi_id, row_id, row_hapus_id, info_link, info_table, pegawai_id
+		, info_riwayat, info_jenis, info_keterangan
+		, info_tanggal::date, validasi, info_level, info_validasi, info_create_date
+		from
+		(
+			select
+			temp_validasi_id, bahasa_id row_id, null::numeric row_hapus_id, ''pegawai_add_bahasa_data'' info_link, ''bahasa'' info_table, pegawai_id
+			, ''14'' info_riwayat, ''Penguasaan Bahasa'' info_jenis, nama info_keterangan
+			, cast(null as date) info_tanggal, validasi, 1 info_level
+			, validasi info_validasi
+			, last_create_date info_create_date
+			from validasi.bahasa where 1=1
+			union all
+			select
+			temp_validasi_id, bahasa_id row_id, c.temp_validasi_id row_hapus_id, ''pegawai_add_bahasa_data'' info_link, ''bahasa'' info_table, a.pegawai_id
+			, ''14'' info_riwayat, ''Penguasaan Bahasa'' info_jenis, nama info_keterangan
+			, cast(null as date) info_tanggal, validasi, 1 info_level
+			, validasi info_validasi
+			, last_create_date info_create_date
+			from bahasa a
+			inner join validasi.hapus_data c on c.hapus_nama::text = ''BAHASA''::text and a.bahasa_id = c.temp_validasi_id::numeric AND c.validasi is null
+			where 1=1
+			and (coalesce(nullif(a.status, ''''), null) is null or a.status = ''2'')
+			union all
+			select
+			temp_validasi_id, pak_id row_id, null::numeric row_hapus_id, ''pegawai_add_pak_data'' info_link, ''pak'' info_table, pegawai_id
+			, ''9'' info_riwayat, ''PAK'' info_jenis, no_sk info_keterangan
+			, tanggal_sk info_tanggal, validasi, 1 info_level
+			, validasi info_validasi
+			, last_create_date info_create_date
+			from validasi.pak where 1=1
+			union all
+			select
+			temp_validasi_id, pak_id row_id, c.temp_validasi_id row_hapus_id, ''pegawai_add_pak_data'' info_link, ''pak'' info_table, a.pegawai_id
+			, ''9'' info_riwayat, ''PAK'' info_jenis, no_sk info_keterangan
+			, tanggal_sk info_tanggal, validasi, 1 info_level
+			, validasi info_validasi
+			, A.last_create_date info_create_date
+			from pak a
+			inner join validasi.hapus_data c on c.hapus_nama::text = ''PAK''::text and a.pak_id = c.temp_validasi_id::numeric AND c.validasi is null
+			where 1=1
+			and (coalesce(nullif(a.status, ''''), null) is null or a.status = ''2'')
+			union all
+			select
+			temp_validasi_id, tambahan_masa_kerja_id row_id, null::numeric row_hapus_id, ''pegawai_add_tambahan_masa_kerja'' info_link, ''tambahan_masa_kerja'' info_table, pegawai_id
+			, ''13'' info_riwayat, ''PMK'' info_jenis, no_sk info_keterangan
+			, tanggal_sk info_tanggal, validasi, 30 info_level
+			, validasi info_validasi
+			, last_create_date info_create_date
+			from validasi.tambahan_masa_kerja where 1=1
+			union all
+			select
+			temp_validasi_id, tambahan_masa_kerja_id row_id, c.temp_validasi_id row_hapus_id, ''pegawai_add_tambahan_masa_kerja'' info_link, ''tambahan_masa_kerja'' info_table, a.pegawai_id
+			, ''13'' info_riwayat, ''PMK'' info_jenis, no_sk info_keterangan
+			, tanggal_sk info_tanggal, validasi, 30 info_level
+			, validasi info_validasi
+			, A.last_create_date info_create_date
+			from tambahan_masa_kerja a
+			inner join validasi.hapus_data c on c.hapus_nama::text = ''TAMBAHAN_MASA_KERJA''::text and a.tambahan_masa_kerja_id = c.temp_validasi_id::numeric AND c.validasi is null
+			where 1=1
+			and (coalesce(nullif(a.status, ''''), null) is null or a.status = ''2'')
+			union all
+			select
+			temp_validasi_id, gaji_riwayat_id row_id, null::numeric row_hapus_id, ''pegawai_add_gaji_data'' info_link, ''gaji_riwayat'' info_table, pegawai_id
+			, ''4'' info_riwayat, ''KGB'' info_jenis, no_sk info_keterangan
+			, tanggal_sk info_tanggal, validasi, 30 info_level
+			, validasi info_validasi
+			, last_create_date info_create_date
+			from validasi.gaji_riwayat where 1=1
+			union all
+			select
+			temp_validasi_id, gaji_riwayat_id row_id, c.temp_validasi_id row_hapus_id, ''pegawai_add_gaji_data'' info_link, ''gaji_riwayat'' info_table, a.pegawai_id
+			, ''4'' info_riwayat, ''KGB'' info_jenis, no_sk info_keterangan
+			, tanggal_sk info_tanggal, validasi, 30 info_level
+			, validasi info_validasi
+			, A.last_create_date info_create_date
+			from gaji_riwayat a
+			inner join validasi.hapus_data c on c.hapus_nama::text = ''GAJI_RIWAYAT''::text and a.gaji_riwayat_id = c.temp_validasi_id::numeric AND c.validasi is null
+			where 1=1
+			and (coalesce(nullif(a.status, ''''), null) is null or a.status = ''2'')
+			union all
+			select
+			temp_validasi_id, penghargaan_id row_id, null::numeric row_hapus_id, ''pegawai_add_penghargaan_data'' info_link, ''penghargaan'' info_table, pegawai_id
+			, ''11'' info_riwayat, ''Penghargaan'' info_jenis,  tahun || '' - '' || nama info_keterangan
+			, tanggal_sk info_tanggal, validasi, 30 info_level
+			, validasi info_validasi
+			, last_create_date info_create_date
+			from validasi.penghargaan where 1=1
+			union all
+			select
+			temp_validasi_id, penghargaan_id row_id, c.temp_validasi_id row_hapus_id, ''pegawai_add_penghargaan_data'' info_link, ''penghargaan'' info_table, a.pegawai_id
+			, ''11'' info_riwayat, ''Penghargaan'' info_jenis, tahun || '' - '' || nama info_keterangan
+			, tanggal_sk info_tanggal, validasi, 30 info_level
+			, validasi info_validasi
+			, A.last_create_date info_create_date
+			from penghargaan a
+			inner join validasi.hapus_data c on c.hapus_nama::text = ''PENGHARGAAN''::text and a.penghargaan_id = c.temp_validasi_id::numeric AND c.validasi is null
+			where 1=1
+			and (coalesce(nullif(a.status, ''''), null) is null or a.status = ''2'')
+
+			union all
+			select
+			temp_validasi_id, pangkat_riwayat_id row_id, null::numeric row_hapus_id, ''pegawai_add_pangkat_data'' info_link, ''pangkat_riwayat'' info_table, pegawai_id
+			, ''3'' info_riwayat, ''Reguler'' info_jenis,  no_sk info_keterangan
+			, tmt_pangkat info_tanggal, validasi, 30 info_level
+			, validasi info_validasi
+			, last_create_date info_create_date
+			from validasi.pangkat_riwayat where 1=1 and jenis_riwayat = 4
+			union all
+			select
+			temp_validasi_id, pangkat_riwayat_id row_id, c.temp_validasi_id row_hapus_id, ''pegawai_add_pangkat_data'' info_link, ''pangkat_riwayat'' info_table, a.pegawai_id
+			, ''3'' info_riwayat, ''Reguler'' info_jenis, no_sk info_keterangan
+			, tmt_pangkat info_tanggal, validasi, 30 info_level
+			, validasi info_validasi
+			, A.last_create_date info_create_date
+			from pangkat_riwayat a
+			inner join validasi.hapus_data c on c.hapus_nama::text = ''PANGKAT_RIWAYAT''::text and a.pangkat_riwayat_id = c.temp_validasi_id::numeric AND c.validasi is null
+			where 1=1 and jenis_riwayat = 4
+			and (coalesce(nullif(a.status, ''''), null) is null or a.status = ''2'')
+
+			union all
+			select
+			temp_validasi_id, pangkat_riwayat_id row_id, null::numeric row_hapus_id, ''pegawai_add_pangkat_data'' info_link, ''pangkat_riwayat'' info_table, pegawai_id
+			, ''3'' info_riwayat, ''Pilihan Struktural'' info_jenis,  no_sk info_keterangan
+			, tmt_pangkat info_tanggal, validasi, 30 info_level
+			, validasi info_validasi
+			, last_create_date info_create_date
+			from validasi.pangkat_riwayat where 1=1 and jenis_riwayat = 5
+			union all
+			select
+			temp_validasi_id, pangkat_riwayat_id row_id, c.temp_validasi_id row_hapus_id, ''pegawai_add_pangkat_data'' info_link, ''pangkat_riwayat'' info_table, a.pegawai_id
+			, ''3'' info_riwayat, ''Pilihan Struktural'' info_jenis, no_sk info_keterangan
+			, tmt_pangkat info_tanggal, validasi, 30 info_level
+			, validasi info_validasi
+			, A.last_create_date info_create_date
+			from pangkat_riwayat a
+			inner join validasi.hapus_data c on c.hapus_nama::text = ''PANGKAT_RIWAYAT''::text and a.pangkat_riwayat_id = c.temp_validasi_id::numeric AND c.validasi is null
+			where 1=1 and jenis_riwayat = 5
+			and (coalesce(nullif(a.status, ''''), null) is null or a.status = ''2'')
+
+			union all
+			select
+			temp_validasi_id, pangkat_riwayat_id row_id, null::numeric row_hapus_id, ''pegawai_add_pangkat_data'' info_link, ''pangkat_riwayat'' info_table, pegawai_id
+			, ''3'' info_riwayat, ''Pilihan JFT'' info_jenis,  no_sk info_keterangan
+			, tmt_pangkat info_tanggal, validasi, 30 info_level
+			, validasi info_validasi
+			, last_create_date info_create_date
+			from validasi.pangkat_riwayat where 1=1 and jenis_riwayat = 6
+			union all
+			select
+			temp_validasi_id, pangkat_riwayat_id row_id, c.temp_validasi_id row_hapus_id, ''pegawai_add_pangkat_data'' info_link, ''pangkat_riwayat'' info_table, a.pegawai_id
+			, ''3'' info_riwayat, ''Pilihan JFT'' info_jenis, no_sk info_keterangan
+			, tmt_pangkat info_tanggal, validasi, 30 info_level
+			, validasi info_validasi
+			, A.last_create_date info_create_date
+			from pangkat_riwayat a
+			inner join validasi.hapus_data c on c.hapus_nama::text = ''PANGKAT_RIWAYAT''::text and a.pangkat_riwayat_id = c.temp_validasi_id::numeric AND c.validasi is null
+			where 1=1 and jenis_riwayat = 6
+			and (coalesce(nullif(a.status, ''''), null) is null or a.status = ''2'')
+
+			union all
+			select
+			temp_validasi_id, pangkat_riwayat_id row_id, null::numeric row_hapus_id, ''pegawai_add_pangkat_data'' info_link, ''pangkat_riwayat'' info_table, pegawai_id
+			, ''3'' info_riwayat, ''Pilihan UD/PI'' info_jenis,  no_sk info_keterangan
+			, tmt_pangkat info_tanggal, validasi, 30 info_level
+			, validasi info_validasi
+			, last_create_date info_create_date
+			from validasi.pangkat_riwayat where 1=1 and jenis_riwayat = 7
+			union all
+			select
+			temp_validasi_id, pangkat_riwayat_id row_id, c.temp_validasi_id row_hapus_id, ''pegawai_add_pangkat_data'' info_link, ''pangkat_riwayat'' info_table, a.pegawai_id
+			, ''3'' info_riwayat, ''Pilihan UD/PI'' info_jenis, no_sk info_keterangan
+			, tmt_pangkat info_tanggal, validasi, 30 info_level
+			, validasi info_validasi
+			, A.last_create_date info_create_date
+			from pangkat_riwayat a
+			inner join validasi.hapus_data c on c.hapus_nama::text = ''PANGKAT_RIWAYAT''::text and a.pangkat_riwayat_id = c.temp_validasi_id::numeric AND c.validasi is null
+			where 1=1 and jenis_riwayat = 7
+			and (coalesce(nullif(a.status, ''''), null) is null or a.status = ''2'')
+
+			union all
+			select
+			temp_validasi_id, diklat_struktural_id row_id, null::numeric row_hapus_id, ''pegawai_add_diklat_struktural_data'' info_link, ''diklat_struktural'' info_table, pegawai_id
+			, ''8'' info_riwayat, ''Struktural'' info_jenis,  nama info_keterangan
+			, tanggal_mulai info_tanggal, validasi, 30 info_level
+			, validasi info_validasi
+			, last_create_date info_create_date
+			from validasi.diklat_struktural a
+			left join diklat b on a.diklat_id = b.diklat_id
+			where 1=1 
+			union all
+			select
+			temp_validasi_id, diklat_struktural_id row_id, c.temp_validasi_id row_hapus_id, ''pegawai_add_diklat_struktural_data'' info_link, ''diklat_struktural'' info_table, a.pegawai_id
+			, ''8'' info_riwayat, ''Struktural'' info_jenis, nama info_keterangan
+			, tanggal_mulai info_tanggal, validasi, 30 info_level
+			, validasi info_validasi
+			, A.last_create_date info_create_date
+			from diklat_struktural a
+			left join diklat b on a.diklat_id = b.diklat_id
+			inner join validasi.hapus_data c on c.hapus_nama::text = ''DIKLAT_STRUKTURAL''::text and a.diklat_struktural_id = c.temp_validasi_id::numeric AND c.validasi is null
+			where 1=1 
+			and (coalesce(nullif(a.status, ''''), null) is null or a.status = ''2'')
+
+			union all
+			select
+			temp_validasi_id, diklat_teknis_id row_id, null::numeric row_hapus_id, ''pegawai_add_diklat_teknis_data'' info_link, ''diklat_teknis'' info_table, pegawai_id
+			, ''8'' info_riwayat, ''Teknis'' info_jenis,  nama info_keterangan
+			, tanggal_mulai info_tanggal, validasi, 30 info_level
+			, validasi info_validasi
+			, last_create_date info_create_date
+			from validasi.diklat_teknis 
+			where 1=1 
+			union all
+			select
+			temp_validasi_id, diklat_teknis_id row_id, c.temp_validasi_id row_hapus_id, ''pegawai_add_diklat_teknis_data'' info_link, ''diklat_teknis'' info_table, a.pegawai_id
+			, ''8'' info_riwayat, ''Teknis'' info_jenis, nama info_keterangan
+			, tanggal_mulai info_tanggal, validasi, 30 info_level
+			, validasi info_validasi
+			, A.last_create_date info_create_date
+			from diklat_teknis a
+			inner join validasi.hapus_data c on c.hapus_nama::text = ''DIKLAT_TEKNIS''::text and a.diklat_teknis_id = c.temp_validasi_id::numeric AND c.validasi is null
+			where 1=1 
+			and (coalesce(nullif(a.status, ''''), null) is null or a.status = ''2'')
+
+			union all
+			select
+			temp_validasi_id, diklat_fungsional_id row_id, null::numeric row_hapus_id, ''pegawai_add_diklat_fungsional_data'' info_link, ''diklat_fungsional'' info_table, pegawai_id
+			, ''8'' info_riwayat, ''Fungsional'' info_jenis,  nama info_keterangan
+			, tanggal_mulai info_tanggal, validasi, 30 info_level
+			, validasi info_validasi
+			, last_create_date info_create_date
+			from validasi.diklat_fungsional 
+			where 1=1 
+			union all
+			select
+			temp_validasi_id, diklat_fungsional_id row_id, c.temp_validasi_id row_hapus_id, ''pegawai_add_diklat_fungsional_data'' info_link, ''diklat_fungsional'' info_table, a.pegawai_id
+			, ''8'' info_riwayat, ''Fungsional'' info_jenis, nama info_keterangan
+			, tanggal_mulai info_tanggal, validasi, 30 info_level
+			, validasi info_validasi
+			, A.last_create_date info_create_date
+			from diklat_fungsional a
+			inner join validasi.hapus_data c on c.hapus_nama::text = ''DIKLAT_FUNGSIONAL''::text and a.diklat_fungsional_id = c.temp_validasi_id::numeric AND c.validasi is null
+			where 1=1 
+			and (coalesce(nullif(a.status, ''''), null) is null or a.status = ''2'')
+
+			union all
+			select
+			temp_validasi_id, diklat_kursus_id row_id, null::numeric row_hapus_id, ''pegawai_add_diklat_kursus_data'' info_link, ''diklat_kursus'' info_table, pegawai_id
+			, ''8'' info_riwayat, ''Kursus'' info_jenis,  nama info_keterangan
+			, tanggal_mulai info_tanggal, validasi, 30 info_level
+			, validasi info_validasi
+			, last_create_date info_create_date
+			from validasi.diklat_kursus
+			where 1=1 
+			union all
+			select
+			temp_validasi_id, diklat_kursus_id row_id, c.temp_validasi_id row_hapus_id, ''pegawai_add_diklat_kursus_data'' info_link, ''diklat_fungsional'' info_table, a.pegawai_id
+			, ''8'' info_riwayat, ''Kursus'' info_jenis, nama info_keterangan
+			, tanggal_mulai info_tanggal, validasi, 30 info_level
+			, validasi info_validasi
+			, A.last_create_date info_create_date
+			from diklat_kursus a
+			inner join validasi.hapus_data c on c.hapus_nama::text = ''DIKLAT_KURSUS''::text and a.diklat_kursus_id = c.temp_validasi_id::numeric AND c.validasi is null
+			where 1=1 
+			and (coalesce(nullif(a.status, ''''), null) is null or a.status = ''2'')
+
+			union all
+			select
+			temp_validasi_id, cuti_id row_id, null::numeric row_hapus_id, ''pegawai_add_cuti_data'' info_link, ''cuti'' info_table, pegawai_id
+			, ''10'' info_riwayat, ''Cuti'' info_jenis,  jenis_cuti || ''-'' || tanggal_mulai info_keterangan
+			, tanggal_surat info_tanggal, validasi, 30 info_level
+			, validasi info_validasi
+			, last_create_date info_create_date
+			from validasi.cuti 
+			where 1=1 
+			union all
+			select
+			temp_validasi_id, cuti_id row_id, c.temp_validasi_id row_hapus_id, ''pegawai_add_cuti_data'' info_link, ''cuti'' info_table, a.pegawai_id
+			, ''10'' info_riwayat, ''Cuti'' info_jenis, jenis_cuti || ''-'' || tanggal_mulai info_keterangan
+			, tanggal_surat info_tanggal, validasi, 30 info_level
+			, validasi info_validasi
+			, A.last_create_date info_create_date
+			from cuti a
+			inner join validasi.hapus_data c on c.hapus_nama::text = ''CUTI''::text and a.cuti_id = c.temp_validasi_id::numeric AND c.validasi is null
+			where 1=1 
+			and (coalesce(nullif(a.status, ''''), null) is null or a.status = ''2'')
+
+			union all
+			select
+			temp_validasi_id, penilaian_skp_id row_id, null::numeric row_hapus_id, ''pegawai_add_skp_data'' info_link, ''penilaian_skp'' info_table, pegawai_id
+			, ''9'' info_riwayat, ''SKP/PPK'' info_jenis,  tahun || ''-'' || prestasi_hasil info_keterangan
+			, null info_tanggal, validasi, 1 info_level
+			, validasi info_validasi
+			, last_create_date info_create_date
+			from validasi.penilaian_skp 
+			where 1=1 
+			union all
+			select
+			temp_validasi_id, penilaian_skp_id row_id, c.temp_validasi_id row_hapus_id, ''pegawai_add_skp_data'' info_link, ''penilaian_skp'' info_table, a.pegawai_id
+			, ''9'' info_riwayat, ''SKP/PPK'' info_jenis, tahun || ''-'' || prestasi_hasil info_keterangan
+			, null info_tanggal, validasi, 1 info_level
+			, validasi info_validasi
+			, A.last_create_date info_create_date
+			from penilaian_skp a
+			inner join validasi.hapus_data c on c.hapus_nama::text = ''PENILAIAN_SKP''::text and a.penilaian_skp_id = c.temp_validasi_id::numeric AND c.validasi is null
+			where 1=1 
+			and (coalesce(nullif(a.status, ''''), null) is null or a.status = ''2'')
+
+			union all
+			select
+			temp_validasi_id, jabatan_tambahan_id row_id, null::numeric row_hapus_id, ''pegawai_add_tugas_data'' info_link, ''jabatan_tambahan'' info_table, pegawai_id
+			, ''6'' info_riwayat, ''Plt.'' info_jenis,  nama info_keterangan
+			, tmt_jabatan info_tanggal, validasi, 20 info_level
+			, validasi info_validasi
+			, last_create_date info_create_date
+			from validasi.jabatan_tambahan
+			where 1=1 and status_plt = ''plt''
+			union all
+			select
+			temp_validasi_id, jabatan_tambahan_id row_id, c.temp_validasi_id row_hapus_id, ''pegawai_add_tugas_data'' info_link, ''jabatan_tambahan'' info_table, a.pegawai_id
+			, ''6'' info_riwayat, ''Plt.'' info_jenis, nama info_keterangan
+			, tmt_jabatan info_tanggal, validasi, 20 info_level
+			, validasi info_validasi
+			, A.last_create_date info_create_date
+			from jabatan_tambahan a
+			inner join validasi.hapus_data c on c.hapus_nama::text = ''JABATAN_TAMBAHAN''::text and a.jabatan_tambahan_id = c.temp_validasi_id::numeric AND c.validasi is null
+			where 1=1 and a.status_plt = ''plt''
+			and (coalesce(nullif(a.status, ''''), null) is null or a.status = ''2'')
+
+			union all
+			select
+			temp_validasi_id, jabatan_tambahan_id row_id, null::numeric row_hapus_id, ''pegawai_add_tugas_data'' info_link, ''jabatan_tambahan'' info_table, pegawai_id
+			, ''6'' info_riwayat, ''Plh.'' info_jenis,  nama info_keterangan
+			, tmt_jabatan info_tanggal, validasi, 20 info_level
+			, validasi info_validasi
+			, last_create_date info_create_date
+			from validasi.jabatan_tambahan
+			where 1=1 and status_plt = ''plh''
+			union all
+			select
+			temp_validasi_id, jabatan_tambahan_id row_id, c.temp_validasi_id row_hapus_id, ''pegawai_add_tugas_data'' info_link, ''jabatan_tambahan'' info_table, a.pegawai_id
+			, ''6'' info_riwayat, ''Plh.'' info_jenis, nama info_keterangan
+			, tmt_jabatan info_tanggal, validasi, 20 info_level
+			, validasi info_validasi
+			, A.last_create_date info_create_date
+			from jabatan_tambahan a
+			inner join validasi.hapus_data c on c.hapus_nama::text = ''JABATAN_TAMBAHAN''::text and a.jabatan_tambahan_id = c.temp_validasi_id::numeric AND c.validasi is null
+			where 1=1 and a.status_plt = ''plh''
+			and (coalesce(nullif(a.status, ''''), null) is null or a.status = ''2'')
+
+			union all
+			select
+			temp_validasi_id, jabatan_tambahan_id row_id, null::numeric row_hapus_id, ''pegawai_add_tugas_data'' info_link, ''jabatan_tambahan'' info_table, pegawai_id
+			, ''6'' info_riwayat, ''Pendidikan.'' info_jenis,  nama info_keterangan
+			, tmt_jabatan info_tanggal, validasi, 20 info_level
+			, validasi info_validasi
+			, last_create_date info_create_date
+			from validasi.jabatan_tambahan
+			where 1=1 and status_plt = ''21''
+			union all
+			select
+			temp_validasi_id, jabatan_tambahan_id row_id, c.temp_validasi_id row_hapus_id, ''pegawai_add_tugas_data'' info_link, ''jabatan_tambahan'' info_table, a.pegawai_id
+			, ''6'' info_riwayat, ''Pendidikan'' info_jenis, nama info_keterangan
+			, tmt_jabatan info_tanggal, validasi, 20 info_level
+			, validasi info_validasi
+			, A.last_create_date info_create_date
+			from jabatan_tambahan a
+			inner join validasi.hapus_data c on c.hapus_nama::text = ''JABATAN_TAMBAHAN''::text and a.jabatan_tambahan_id = c.temp_validasi_id::numeric AND c.validasi is null
+			where 1=1 and a.status_plt = ''21''
+			and (coalesce(nullif(a.status, ''''), null) is null or a.status = ''2'')
+
+			union all
+			select
+			temp_validasi_id, jabatan_tambahan_id row_id, null::numeric row_hapus_id, ''pegawai_add_tugas_data'' info_link, ''jabatan_tambahan'' info_table, pegawai_id
+			, ''6'' info_riwayat, ''Kesehatan.'' info_jenis,  nama info_keterangan
+			, tmt_jabatan info_tanggal, validasi, 20 info_level
+			, validasi info_validasi
+			, last_create_date info_create_date
+			from validasi.jabatan_tambahan
+			where 1=1 and status_plt = ''22''
+			union all
+			select
+			temp_validasi_id, jabatan_tambahan_id row_id, c.temp_validasi_id row_hapus_id, ''pegawai_add_tugas_data'' info_link, ''jabatan_tambahan'' info_table, a.pegawai_id
+			, ''6'' info_riwayat, ''Kesehatan'' info_jenis, nama info_keterangan
+			, tmt_jabatan info_tanggal, validasi, 20 info_level
+			, validasi info_validasi
+			, A.last_create_date info_create_date
+			from jabatan_tambahan a
+			inner join validasi.hapus_data c on c.hapus_nama::text = ''JABATAN_TAMBAHAN''::text and a.jabatan_tambahan_id = c.temp_validasi_id::numeric AND c.validasi is null
+			where 1=1 and a.status_plt = ''22''
+			and (coalesce(nullif(a.status, ''''), null) is null or a.status = ''2'')
+
+			union all
+			select
+			temp_validasi_id, jabatan_tambahan_id row_id, null::numeric row_hapus_id, ''pegawai_add_tugas_data'' info_link, ''jabatan_tambahan'' info_table, pegawai_id
+			, ''6'' info_riwayat, ''Lainnya.'' info_jenis,  nama info_keterangan
+			, tmt_jabatan info_tanggal, validasi, 20 info_level
+			, validasi info_validasi
+			, last_create_date info_create_date
+			from validasi.jabatan_tambahan
+			where 1=1 and status_plt = ''23''
+			union all
+			select
+			temp_validasi_id, jabatan_tambahan_id row_id, c.temp_validasi_id row_hapus_id, ''pegawai_add_tugas_data'' info_link, ''jabatan_tambahan'' info_table, a.pegawai_id
+			, ''6'' info_riwayat, ''Lainnya'' info_jenis, nama info_keterangan
+			, tmt_jabatan info_tanggal, validasi, 20 info_level
+			, validasi info_validasi
+			, A.last_create_date info_create_date
+			from jabatan_tambahan a
+			inner join validasi.hapus_data c on c.hapus_nama::text = ''JABATAN_TAMBAHAN''::text and a.jabatan_tambahan_id = c.temp_validasi_id::numeric AND c.validasi is null
+			where 1=1 and a.status_plt = ''23''
+			and (coalesce(nullif(a.status, ''''), null) is null or a.status = ''2'')
+
+			union all
+			select
+			temp_validasi_id, anak_id row_id, null::numeric row_hapus_id, ''pegawai_add_anak_data'' info_link, ''anak'' info_table, pegawai_id
+			, ''12'' info_riwayat, ''Anak'' info_jenis,  nama info_keterangan
+			, tanggal_lahir info_tanggal, validasi, 1 info_level
+			, validasi info_validasi
+			, last_create_date info_create_date
+			from validasi.anak 
+			where 1=1 
+			union all
+			select
+			temp_validasi_id, anak_id row_id, c.temp_validasi_id row_hapus_id, ''pegawai_add_anak_data'' info_link, ''anak'' info_table, a.pegawai_id
+			, ''12'' info_riwayat, ''Anak'' info_jenis, nama info_keterangan
+			, tanggal_lahir info_tanggal, validasi, 1 info_level
+			, validasi info_validasi
+			, A.last_create_date info_create_date
+			from anak a
+			inner join validasi.hapus_data c on c.hapus_nama::text = ''ANAK''::text and a.anak_id = c.temp_validasi_id::numeric AND c.validasi is null
+			where 1=1 
+			and (coalesce(nullif(a.status, ''''), null) is null or a.status = ''2'')
+
+			union all
+			select
+			temp_validasi_id, pendidikan_riwayat_id row_id, null::numeric row_hapus_id, ''pegawai_add_pendidikan_data'' info_link, ''pendidikan_riwayat'' info_table, pegawai_id
+			, ''7'' info_riwayat, ''Riwayat'' info_jenis,  b.nama || ''-'' || jurusan info_keterangan
+			, tanggal_sttb info_tanggal, validasi, 1 info_level
+			, validasi info_validasi
+			, last_create_date info_create_date
+			from validasi.pendidikan_riwayat a 
+			left join pendidikan b on a.pendidikan_id = b.pendidikan_id
+			where 1=1 and status_pendidikan = ''4''
+			union all
+			select
+			temp_validasi_id, pendidikan_riwayat_id row_id, c.temp_validasi_id row_hapus_id, ''pegawai_add_pendidikan_data'' info_link, ''pendidikan_riwayat'' info_table, a.pegawai_id
+			, ''7'' info_riwayat, ''Riwayat'' info_jenis, b.nama || ''-'' || jurusan info_keterangan
+			, tanggal_sttb info_tanggal, validasi, 1 info_level
+			, validasi info_validasi
+			, A.last_create_date info_create_date
+			from pendidikan_riwayat a
+			left join pendidikan b on a.pendidikan_id = b.pendidikan_id
+			inner join validasi.hapus_data c on c.hapus_nama::text = ''PENDIDIKAN_RIWAYAT''::text and a.pendidikan_riwayat_id = c.temp_validasi_id::numeric AND c.validasi is null
+			where 1=1 and a.status_pendidikan = ''4''
+			and (coalesce(nullif(a.status, ''''), null) is null or a.status = ''2'')
+
+			union all
+			select
+			temp_validasi_id, pendidikan_riwayat_id row_id, null::numeric row_hapus_id, ''pegawai_add_pendidikan_data'' info_link, ''pendidikan_riwayat'' info_table, pegawai_id
+			, ''7'' info_riwayat, ''Belum Diakui'' info_jenis,  b.nama || ''-'' || jurusan info_keterangan
+			, tanggal_sttb info_tanggal, validasi, 1 info_level
+			, validasi info_validasi
+			, last_create_date info_create_date
+			from validasi.pendidikan_riwayat a 
+			left join pendidikan b on a.pendidikan_id = b.pendidikan_id
+			where 1=1 and status_pendidikan = ''3''
+			union all
+			select
+			temp_validasi_id, pendidikan_riwayat_id row_id, c.temp_validasi_id row_hapus_id, ''pegawai_add_pendidikan_data'' info_link, ''pendidikan_riwayat'' info_table, a.pegawai_id
+			, ''7'' info_riwayat, ''Belum Diakui'' info_jenis, b.nama || ''-'' || jurusan info_keterangan
+			, tanggal_sttb info_tanggal, validasi, 1 info_level
+			, validasi info_validasi
+			, A.last_create_date info_create_date
+			from pendidikan_riwayat a
+			left join pendidikan b on a.pendidikan_id = b.pendidikan_id
+			inner join validasi.hapus_data c on c.hapus_nama::text = ''PENDIDIKAN_RIWAYAT''::text and a.pendidikan_riwayat_id = c.temp_validasi_id::numeric AND c.validasi is null
+			where 1=1 and a.status_pendidikan = ''3''
+			and (coalesce(nullif(a.status, ''''), null) is null or a.status = ''2'')
+
+			union all
+			select
+			temp_validasi_id, pendidikan_riwayat_id row_id, null::numeric row_hapus_id, ''pegawai_add_pendidikan_data'' info_link, ''pendidikan_riwayat'' info_table, pegawai_id
+			, ''7'' info_riwayat, ''Pendidikan CPNS'' info_jenis,  b.nama || ''-'' || jurusan info_keterangan
+			, tanggal_sttb info_tanggal, validasi, 30 info_level
+			, validasi info_validasi
+			, last_create_date info_create_date
+			from validasi.pendidikan_riwayat a 
+			left join pendidikan b on a.pendidikan_id = b.pendidikan_id
+			where 1=1 and status_pendidikan = ''1''
+			union all
+			select
+			temp_validasi_id, pendidikan_riwayat_id row_id, c.temp_validasi_id row_hapus_id, ''pegawai_add_pendidikan_data'' info_link, ''pendidikan_riwayat'' info_table, a.pegawai_id
+			, ''7'' info_riwayat, ''Pendidikan CPNS'' info_jenis, b.nama || ''-'' || jurusan info_keterangan
+			, tanggal_sttb info_tanggal, validasi, 30 info_level
+			, validasi info_validasi
+			, A.last_create_date info_create_date
+			from pendidikan_riwayat a
+			left join pendidikan b on a.pendidikan_id = b.pendidikan_id
+			inner join validasi.hapus_data c on c.hapus_nama::text = ''PENDIDIKAN_RIWAYAT''::text and a.pendidikan_riwayat_id = c.temp_validasi_id::numeric AND c.validasi is null
+			where 1=1 and a.status_pendidikan = ''1''
+			and (coalesce(nullif(a.status, ''''), null) is null or a.status = ''2'')
+
+			union all
+			select
+			temp_validasi_id, pendidikan_riwayat_id row_id, null::numeric row_hapus_id, ''pegawai_add_pendidikan_data'' info_link, ''pendidikan_riwayat'' info_table, pegawai_id
+			, ''7'' info_riwayat, ''Diakui'' info_jenis,  b.nama || ''-'' || jurusan info_keterangan
+			, tanggal_sttb info_tanggal, validasi, 30 info_level
+			, validasi info_validasi
+			, last_create_date info_create_date
+			from validasi.pendidikan_riwayat a 
+			left join pendidikan b on a.pendidikan_id = b.pendidikan_id
+			where 1=1 and status_pendidikan = ''2''
+			union all
+			select
+			temp_validasi_id, pendidikan_riwayat_id row_id, c.temp_validasi_id row_hapus_id, ''pegawai_add_pendidikan_data'' info_link, ''pendidikan_riwayat'' info_table, a.pegawai_id
+			, ''7'' info_riwayat, ''Diakui'' info_jenis, b.nama || ''-'' || jurusan info_keterangan
+			, tanggal_sttb info_tanggal, validasi, 30 info_level
+			, validasi info_validasi
+			, A.last_create_date info_create_date
+			from pendidikan_riwayat a
+			left join pendidikan b on a.pendidikan_id = b.pendidikan_id
+			inner join validasi.hapus_data c on c.hapus_nama::text = ''PENDIDIKAN_RIWAYAT''::text and a.pendidikan_riwayat_id = c.temp_validasi_id::numeric AND c.validasi is null
+			where 1=1 and a.status_pendidikan = ''2''
+			and (coalesce(nullif(a.status, ''''), null) is null or a.status = ''2'')
+
+			union all
+			select
+			temp_validasi_id, orang_tua_id row_id, null::numeric row_hapus_id, ''pegawai_orang_tua'' info_link, ''orang_tua'' info_table, pegawai_id
+			, ''12'' info_riwayat, ''Orang Tua'' info_jenis,  nama info_keterangan
+			, tanggal_lahir info_tanggal, validasi, 1 info_level
+			, validasi info_validasi
+			, last_create_date info_create_date
+			from validasi.orang_tua a 
+			where 1=1
+			union all
+			select
+			temp_validasi_id, orang_tua_id row_id, c.temp_validasi_id row_hapus_id, ''pegawai_orang_tua'' info_link, ''orang_tua'' info_table, a.pegawai_id
+			, ''12'' info_riwayat, ''Orang Tua'' info_jenis, nama info_keterangan
+			, tanggal_lahir info_tanggal, validasi, 1 info_level
+			, validasi info_validasi
+			, A.last_create_date info_create_date
+			from orang_tua a
+			inner join validasi.hapus_data c on c.hapus_nama::text = ''ORANG_TUA''::text and a.orang_tua_id = c.temp_validasi_id::numeric AND c.validasi is null
+			where 1=1
+
+			union all
+			select
+			temp_validasi_id, jabatan_riwayat_id row_id, null::numeric row_hapus_id, ''pegawai_add_jabatan_struktural_data'' info_link, ''jabatan_riwayat'' info_table, pegawai_id
+			, ''5'' info_riwayat, ''Struktural'' info_jenis,  a.nama || ''-'' || b.nama info_keterangan
+			, tmt_jabatan info_tanggal, validasi, 30 info_level
+			, validasi info_validasi
+			, last_create_date info_create_date
+			from validasi.jabatan_riwayat a 
+			left join eselon b on a.eselon_id = b.eselon_id
+			where 1=1 and jenis_jabatan_id = ''1''
+			union all
+			select
+			temp_validasi_id, jabatan_riwayat_id row_id, c.temp_validasi_id row_hapus_id, ''pegawai_add_jabatan_struktural_data'' info_link, ''jabatan_riwayat'' info_table, a.pegawai_id
+			, ''5'' info_riwayat, ''Struktural'' info_jenis, a.nama || ''-'' || b.nama info_keterangan
+			, tmt_jabatan info_tanggal, validasi, 30 info_level
+			, validasi info_validasi
+			, A.last_create_date info_create_date
+			from jabatan_riwayat a
+			left join eselon b on a.eselon_id = b.eselon_id
+			inner join validasi.hapus_data c on c.hapus_nama::text = ''JABATAN_RIWAYAT''::text and a.jabatan_riwayat_id = c.temp_validasi_id::numeric AND c.validasi is null
+			where 1=1 and a.jenis_jabatan_id = ''1''
+			and (coalesce(nullif(a.status, ''''), null) is null or a.status = ''2'') 
+
+			union all
+			select
+			temp_validasi_id, jabatan_riwayat_id row_id, null::numeric row_hapus_id, ''pegawai_add_jabatan_fungsional_data'' info_link, ''jabatan_riwayat'' info_table, pegawai_id
+			, ''5'' info_riwayat, ''Umum/ Pelaksana'' info_jenis,  a.nama || ''-'' || b.nama info_keterangan
+			, tmt_jabatan info_tanggal, validasi, 30 info_level
+			, validasi info_validasi
+			, last_create_date info_create_date
+			from validasi.jabatan_riwayat a 
+			left join eselon b on a.eselon_id = b.eselon_id
+			where 1=1 and jenis_jabatan_id = ''2''
+			union all
+			select
+			temp_validasi_id, jabatan_riwayat_id row_id, c.temp_validasi_id row_hapus_id, ''pegawai_add_jabatan_fungsional_data'' info_link, ''jabatan_riwayat'' info_table, a.pegawai_id
+			, ''5'' info_riwayat, ''Umum/ Pelaksana'' info_jenis, a.nama || ''-'' || b.nama info_keterangan
+			, tmt_jabatan info_tanggal, validasi, 30 info_level
+			, validasi info_validasi
+			, A.last_create_date info_create_date
+			from jabatan_riwayat a
+			left join eselon b on a.eselon_id = b.eselon_id
+			inner join validasi.hapus_data c on c.hapus_nama::text = ''JABATAN_RIWAYAT''::text and a.jabatan_riwayat_id = c.temp_validasi_id::numeric AND c.validasi is null
+			where 1=1 and a.jenis_jabatan_id = ''2''
+			and (coalesce(nullif(a.status, ''''), null) is null or a.status = ''2'')
+
+			union all
+			select
+			temp_validasi_id, jabatan_riwayat_id row_id, null::numeric row_hapus_id, ''pegawai_add_jabatan_tertentu_data'' info_link, ''jabatan_riwayat'' info_table, pegawai_id
+			, ''5'' info_riwayat, ''JFT'' info_jenis,  a.nama || ''-'' || b.nama info_keterangan
+			, tmt_jabatan info_tanggal, validasi, 30 info_level
+			, validasi info_validasi
+			, last_create_date info_create_date
+			from validasi.jabatan_riwayat a 
+			left join eselon b on a.eselon_id = b.eselon_id
+			where 1=1 and jenis_jabatan_id = ''3''
+			union all
+			select
+			temp_validasi_id, jabatan_riwayat_id row_id, c.temp_validasi_id row_hapus_id, ''pegawai_add_jabatan_tertentu_data'' info_link, ''jabatan_riwayat'' info_table, a.pegawai_id
+			, ''5'' info_riwayat, ''JFT'' info_jenis, a.nama || ''-'' || b.nama info_keterangan
+			, tmt_jabatan info_tanggal, validasi, 30 info_level
+			, validasi info_validasi
+			, A.last_create_date info_create_date
+			from jabatan_riwayat a
+			left join eselon b on a.eselon_id = b.eselon_id
+			inner join validasi.hapus_data c on c.hapus_nama::text = ''JABATAN_RIWAYAT''::text and a.jabatan_riwayat_id = c.temp_validasi_id::numeric AND c.validasi is null
+			where 1=1 and a.jenis_jabatan_id = ''3''
+			and (coalesce(nullif(a.status, ''''), null) is null or a.status = ''2'')
+
+			union all
+			select
+			temp_validasi_id, surat_tanda_lulus_id row_id, null::numeric row_hapus_id, ''pegawai_add_surat_tanda_lulus_add'' info_link, ''surat_tanda_lulus'' info_table, pegawai_id
+			, ''15'' info_riwayat, ''STR UD/PI'' info_jenis
+			, CASE
+			WHEN jenis_id = 1 THEN ''STL Ujian Dinas I''
+			WHEN jenis_id = 2 THEN ''STL Ujian Dinas II''
+			WHEN jenis_id = 3 THEN ''STL Ujian Kenaikan Pangkat Penyesuaian Ijazah SMA''
+			WHEN jenis_id = 4 THEN ''STL Ujian Kenaikan Pangkat Penyesuaian Ijazah D-4/S-1''
+			WHEN jenis_id = 5 THEN ''STL Ujian Kenaikan Pangkat Penyesuaian Ijazah S-2''
+			END AS info_keterangan
+			, tanggal_stlud info_tanggal, validasi, 1 info_level
+			, validasi info_validasi
+			, last_create_date info_create_date
+			from validasi.surat_tanda_lulus where 1=1 
+			union all
+			select
+			temp_validasi_id, surat_tanda_lulus_id row_id, c.temp_validasi_id row_hapus_id, ''pegawai_add_surat_tanda_lulus_add'' info_link, ''surat_tanda_lulus'' info_table, a.pegawai_id
+			, ''15'' info_riwayat, ''STR UD/PI'' info_jenis
+			, CASE
+			WHEN jenis_id = 1 THEN ''STL Ujian Dinas I''
+			WHEN jenis_id = 2 THEN ''STL Ujian Dinas II''
+			WHEN jenis_id = 3 THEN ''STL Ujian Kenaikan Pangkat Penyesuaian Ijazah SMA''
+			WHEN jenis_id = 4 THEN ''STL Ujian Kenaikan Pangkat Penyesuaian Ijazah D-4/S-1''
+			WHEN jenis_id = 5 THEN ''STL Ujian Kenaikan Pangkat Penyesuaian Ijazah S-2''
+			END AS info_keteranga
+			, tanggal_stlud info_tanggal, validasi, 1 info_level
+			, validasi info_validasi
+			, a.last_create_date info_create_date
+			from surat_tanda_lulus a
+			inner join validasi.hapus_data c on c.hapus_nama::text = ''SURAT_TANDA_LULUS''::text and a.surat_tanda_lulus_id = c.temp_validasi_id::numeric AND c.validasi is null
+			where 1=1 
+			and (coalesce(nullif(a.status, ''''), null) is null or a.status = ''2'')
+
+			
+			union all
+			select
+			temp_validasi_id, mertua_id row_id, null::numeric row_hapus_id, ''pegawai_mertua'' info_link, ''mertua'' info_table, pegawai_id
+			, ''12'' info_riwayat, ''Mertua'' info_jenis,  nama info_keterangan
+			, tanggal_lahir info_tanggal, validasi, 1 info_level
+			, validasi info_validasi
+			, last_create_date info_create_date
+			from validasi.mertua a 
+			where 1=1
+			union all
+			select
+			temp_validasi_id, mertua_id row_id, c.temp_validasi_id row_hapus_id, ''pegawai_mertua'' info_link, ''mertua'' info_table, a.pegawai_id
+			, ''12'' info_riwayat, ''Mertua'' info_jenis, nama info_keterangan
+			, tanggal_lahir info_tanggal, validasi, 1 info_level
+			, validasi info_validasi
+			, A.last_create_date info_create_date
+			from mertua a
+			inner join validasi.hapus_data c on c.hapus_nama::text = ''MERTUA''::text and a.mertua_id = c.temp_validasi_id::numeric AND c.validasi is null
+			where 1=1 
+
+			union all
+			select
+			temp_validasi_id, sk_pns_id row_id, null::numeric row_hapus_id, ''pegawai_add_sk_pns'' info_link, ''sk_pns'' info_table, pegawai_id
+			, ''2'' info_riwayat, ''SK PNS'' info_jenis,  no_sk info_keterangan
+			, tmt_pns info_tanggal, validasi, 30 info_level
+			, validasi info_validasi
+			, last_create_date info_create_date
+			from validasi.sk_pns a 
+			where 1=1
+			union all
+			select
+			temp_validasi_id, sk_pns_id row_id, c.temp_validasi_id row_hapus_id, ''pegawai_add_sk_pns'' info_link, ''sk_pns'' info_table, a.pegawai_id
+			, ''2'' info_riwayat, ''SK PNS'' info_jenis, no_sk info_keterangan
+			, tmt_pns info_tanggal, validasi, 30 info_level
+			, validasi info_validasi
+			, A.last_create_date info_create_date
+			from sk_pns a
+			inner join validasi.hapus_data c on c.hapus_nama::text = ''SK_PNS''::text and a.sk_pns_id = c.temp_validasi_id::numeric AND c.validasi is null
+			where 1=1
+
+			union all
+			select
+			temp_validasi_id, sk_pppk_id row_id, null::numeric row_hapus_id, ''pegawai_add_pppk_data'' info_link, ''sk_pppk'' info_table, pegawai_id
+			, ''2'' info_riwayat, ''SK PPPK'' info_jenis,  no_sk info_keterangan
+			, tmt_pppk info_tanggal, validasi, 30 info_level
+			, validasi info_validasi
+			, last_create_date info_create_date
+			from validasi.sk_pppk a 
+			where 1=1 
+			union all
+			select
+			temp_validasi_id, sk_pppk_id row_id, c.temp_validasi_id row_hapus_id, ''pegawai_add_pppk_data'' info_link, ''sk_pppk'' info_table, a.pegawai_id
+			, ''2'' info_riwayat, ''SK PPPK'' info_jenis, no_sk info_keterangan
+			, tmt_pppk info_tanggal, validasi, 30 info_level
+			, validasi info_validasi
+			, A.last_create_date info_create_date
+			from sk_pppk a
+			inner join validasi.hapus_data c on c.hapus_nama::text = ''SK_PPPK''::text and a.sk_pppk_id = c.temp_validasi_id::numeric AND c.validasi is null
+			where 1=1
+
+			union all
+			select
+			temp_validasi_id, a.pegawai_id row_id, null::numeric row_hapus_id, ''pegawai_add_data'' info_link, ''pegawai'' info_table, pegawai_id
+			, ''1'' info_riwayat, ''Data Utama'' info_jenis,  nama info_keterangan
+			, tanggal_lahir info_tanggal, validasi, 1 info_level
+			, validasi info_validasi
+			, last_create_date info_create_date
+			from validasi.pegawai a 
+			where 1=1 
+			union all
+			select
+			temp_validasi_id, a.pegawai_id row_id, c.temp_validasi_id row_hapus_id, ''pegawai_add_data'' info_link, ''pegawai'' info_table, a.pegawai_id
+			, ''1'' info_riwayat, ''Data Utama'' info_jenis, nama info_keterangan
+			, tanggal_lahir info_tanggal, validasi, 30 info_level
+			, validasi info_validasi
+			, last_create_date info_create_date
+			from pegawai a
+			inner join validasi.hapus_data c on c.hapus_nama::text = ''PEGAWAI''::text and a.pegawai_id = c.temp_validasi_id::numeric AND c.validasi is null
+			where 1=1 
+ 
+			
+			
+		) a
+	
+	) a
+	';
+	--raise notice 'sql %', QUERY;
+	
+  OPEN cur FOR EXECUTE QUERY;
+  
+  FETCH cur INTO rec;
+  WHILE FOUND LOOP
+    RETURN NEXT rec;
+    FETCH cur INTO rec;
+  END LOOP;
+  CLOSE cur;
+END;
+$BODY$
+  LANGUAGE plpgsql VOLATILE STRICT
+  COST 100
+  ROWS 1000;
+ALTER FUNCTION validasi.validasi_perubahandatavalidasi(character varying)
+  OWNER TO postgres;

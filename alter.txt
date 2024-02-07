@@ -1,0 +1,3162 @@
+CREATE OR REPLACE FUNCTION pegawai_pangkat_riwayat()
+  RETURNS trigger AS
+$BODY$
+DECLARE
+    VAR_ID INTEGER;
+    
+BEGIN
+  IF TG_OP = 'INSERT' OR TG_OP = 'UPDATE' THEN
+  SELECT pangkat_riwayat_id INTO VAR_ID FROM pangkat_terakhir_riwayat WHERE pegawai_id = NEW.PEGAWAI_ID;
+  UPDATE PEGAWAI  SET PANGKAT_RIWAYAT_ID= VAR_ID WHERE pegawai_id = NEW.PEGAWAI_ID;
+  
+  SELECT pangkat_riwayat_id INTO VAR_ID FROM pangkat_terakhir_pensiun_riwayat WHERE pegawai_id = NEW.PEGAWAI_ID;
+  UPDATE PEGAWAI  SET pangkat_riwayat_pensiun_id= VAR_ID WHERE pegawai_id = NEW.PEGAWAI_ID;
+  
+  ELSIF TG_OP = 'DELETE' THEN
+  SELECT pangkat_riwayat_id INTO VAR_ID FROM pangkat_terakhir_riwayat WHERE pegawai_id = OLD.PEGAWAI_ID;
+  UPDATE PEGAWAI  SET PANGKAT_RIWAYAT_ID= VAR_ID WHERE pegawai_id = OLD.PEGAWAI_ID;
+
+  SELECT pangkat_riwayat_id INTO VAR_ID FROM pangkat_terakhir_pensiun_riwayat WHERE pegawai_id = OLD.PEGAWAI_ID;
+  UPDATE PEGAWAI  SET pangkat_riwayat_pensiun_id= VAR_ID WHERE pegawai_id = OLD.PEGAWAI_ID;
+  
+  END IF;
+  RETURN null;
+   
+END;
+$BODY$
+LANGUAGE plpgsql VOLATILE COST 100;
+ALTER FUNCTION pegawai_pangkat_riwayat() OWNER TO postgres;
+
+create or replace view pangkat_terakhir_pensiun_riwayat as 
+select a.pegawai_id, a.pangkat_riwayat_id
+from pangkat_riwayat a
+join
+(
+  select c.pegawai_id,
+  max(c.tmt_pangkat) as tmt_pangkat,
+  max(c.tanggal_sk) as tanggal_sk
+  from pangkat_riwayat c
+  where (coalesce(nullif(c.status::text, ''::text), null::text) is null or c.status::text = '2'::text) and (c.jenis_riwayat = any (array[4::numeric, 5::numeric, 6::numeric, 7::numeric]))
+  group by c.pegawai_id
+) b1 on a.pegawai_id = b1.pegawai_id and a.tmt_pangkat = b1.tmt_pangkat and a.tanggal_sk = b1.tanggal_sk
+where (coalesce(nullif(a.status::text, ''::text), null::text) is null or a.status::text = '2'::text);
+alter table pangkat_terakhir_pensiun_riwayat owner to postgres;
+
+alter table pegawai add column pangkat_riwayat_pensiun_id numeric;
+update pegawai as u
+set
+pangkat_riwayat_pensiun_id= aggr.pangkat_riwayat_id
+from
+(
+  select a.pegawai_id, a.pangkat_riwayat_id
+  from pangkat_riwayat a
+  join
+  (
+    select c.pegawai_id,
+    max(c.tmt_pangkat) as tmt_pangkat,
+    max(c.tanggal_sk) as tanggal_sk
+    from pangkat_riwayat c
+    where (coalesce(nullif(c.status::text, ''::text), null::text) is null or c.status::text = '2'::text) and (c.jenis_riwayat = any (array[4::numeric, 5::numeric, 6::numeric, 7::numeric]))
+    group by c.pegawai_id
+  ) b1 on a.pegawai_id = b1.pegawai_id and a.tmt_pangkat = b1.tmt_pangkat and a.tanggal_sk = b1.tanggal_sk
+  where (coalesce(nullif(a.status::text, ''::text), null::text) is null or a.status::text = '2'::text)
+) as aggr
+where u.pegawai_id = aggr.pegawai_id;
+
+create or replace function pegawai_info_satuan_kerja()
+  returns trigger as
+$body$
+declare
+  var_id integer;
+  varcheck integer;
+  info_satuan_kerja_nama character varying;
+  info_satuan_kerja_induk character varying;
+begin
+
+  if new.satuan_kerja_id is not null then
+    select ambil_satker_nama_dynamic(new.satuan_kerja_id) into info_satuan_kerja_nama;
+    select ambil_satker_induk(new.satuan_kerja_id) into info_satuan_kerja_induk;
+
+    new.info_satuan_kerja_nama:= info_satuan_kerja_nama;
+    new.info_satuan_kerja_induk:= info_satuan_kerja_induk;
+  end if;
+  return new;
+   
+end;
+$body$
+language plpgsql volatile cost 100;
+alter function pegawai_info_satuan_kerja() owner to postgres;
+
+drop trigger if exists pegawai_tbeforelamajabatan on pegawai;
+create trigger pegawai_tbeforelamajabatan
+before insert or update
+on pegawai
+for each row
+execute procedure pegawai_info_satuan_kerja();
+
+update pegawai as u
+set
+pegawai_id= aggr.pegawai_id
+from
+(
+  select pegawai_id from pegawai
+) as aggr
+where u.pegawai_id = aggr.pegawai_id;
+
+alter table pegawai add column info_satuan_kerja_nama character varying, add column info_satuan_kerja_induk character varying;
+alter table pegawai add column info_satuan_kerja_detil character varying;
+
+DROP FUNCTION IF EXISTS pinfoakhir();
+DROP TYPE IF EXISTS pinfoakhir_type;
+CREATE TYPE public.pinfoakhir_type AS
+(
+  pegawai_id numeric,
+  nip_lama character varying,
+  nip_baru character varying,
+  nama_lengkap character varying,
+  pangkat_riwayat_id numeric,
+  pangkat_riwayat_kode character varying,
+  pangkat_riwayat_tmt date,
+  jabatan_riwayat_id numeric,
+  jabatan_riwayat_nama character varying,
+  jabatan_riwayat_eselon character varying,
+  jabatan_riwayat_tmt timestamp without time zone,
+  eselon_id numeric,
+  pangkat_id numeric,
+  satuan_kerja_id numeric,
+  status_pegawai_id numeric,
+  pegawai_status_id numeric,
+  pegawai_status_tmt date,
+  info_satuan_kerja_nama character varying,
+  info_satuan_kerja_induk character varying,
+  info_satuan_kerja_detil character varying
+);
+ALTER TYPE pinfoakhir_type OWNER TO postgres;
+
+CREATE OR REPLACE FUNCTION pinfoakhir()
+  RETURNS SETOF pinfoakhir_type AS
+$BODY$
+DECLARE
+  cur refcursor;
+  QUERY TEXT;
+  rec pinfoakhir_type%ROWTYPE;
+BEGIN
+  QUERY := ' 
+  SELECT 
+  A.PEGAWAI_ID, A.NIP_LAMA, A.NIP_BARU
+  , (CASE WHEN COALESCE(NULLIF(A.GELAR_DEPAN,'''') , NULL ) IS NULL THEN '''' ELSE A.GELAR_DEPAN || '' '' END) || A.NAMA || (CASE WHEN COALESCE(NULLIF(A.GELAR_BELAKANG,'''') , NULL ) IS NULL THEN '''' ELSE '''' || A.GELAR_BELAKANG END) NAMA_LENGKAP
+  , A.PANGKAT_RIWAYAT_ID
+  , COALESCE(PANG_RIW.KODE, PPPK_RIW.KODE) PANGKAT_RIWAYAT_KODE
+  , COALESCE(PANG_RIW.TMT_PANGKAT, PPPK_RIW.TMT_PPPK) PANGKAT_RIWAYAT_TMT
+  , A.JABATAN_RIWAYAT_ID
+  , COALESCE(JAB_RIW.JABATAN_NAMA, PPPK_RIW.JABATAN_TUGAS) JABATAN_RIWAYAT_NAMA
+  , JAB_RIW.ESELON_NAMA JABATAN_RIWAYAT_ESELON, JAB_RIW.TMT_JABATAN JABATAN_RIWAYAT_TMT
+  , JAB_RIW.ESELON_ID, PANG_RIW.PANGKAT_ID, A.SATUAN_KERJA_ID, A.STATUS_PEGAWAI_ID
+  , A.PEGAWAI_STATUS_ID, PS.PEGAWAI_STATUS_TMT
+  , A.INFO_SATUAN_KERJA_NAMA, A.INFO_SATUAN_KERJA_INDUK, A.INFO_SATUAN_KERJA_DETIL
+  FROM PEGAWAI A
+  LEFT JOIN
+  (
+    SELECT A.PANGKAT_RIWAYAT_ID, B.KODE, A.TMT_PANGKAT, A.PANGKAT_ID
+    FROM PANGKAT_RIWAYAT A
+    LEFT JOIN PANGKAT B ON A.PANGKAT_ID = B.PANGKAT_ID
+  ) PANG_RIW ON A.PANGKAT_RIWAYAT_ID = PANG_RIW.PANGKAT_RIWAYAT_ID
+  LEFT JOIN
+  (
+    SELECT A.JABATAN_RIWAYAT_ID, COALESCE(A.ESELON_ID,99) ESELON_ID, B.NAMA ESELON_NAMA, A.TMT_JABATAN, A.NAMA JABATAN_NAMA
+    FROM JABATAN_RIWAYAT A
+    LEFT JOIN ESELON B ON A.ESELON_ID = B.ESELON_ID
+  ) JAB_RIW ON A.JABATAN_RIWAYAT_ID = JAB_RIW.JABATAN_RIWAYAT_ID
+  LEFT JOIN
+  (
+    SELECT PEGAWAI_STATUS_ID, TMT PEGAWAI_STATUS_TMT FROM PEGAWAI_STATUS
+  ) PS ON A.PEGAWAI_STATUS_ID = PS.PEGAWAI_STATUS_ID
+  LEFT JOIN
+  (
+    SELECT
+    A.SK_PPPK_ID, B.KODE, A.TMT_PPPK, A.GOLONGAN_PPPK_ID
+    , A.JABATAN_TUGAS
+    FROM SK_PPPK A
+    LEFT JOIN GOLONGAN_PPPK B ON A.GOLONGAN_PPPK_ID = B.GOLONGAN_PPPK_ID
+  ) PPPK_RIW ON A.SK_PPPK_ID = PPPK_RIW.SK_PPPK_ID
+  WHERE 1 = 1
+  ';
+  --raise notice '-,%', QUERY;
+  OPEN cur FOR EXECUTE QUERY;
+  
+  FETCH cur INTO rec;
+  WHILE FOUND LOOP
+    RETURN NEXT rec;
+    FETCH cur INTO rec;
+  END LOOP;
+  CLOSE cur;
+END;
+$BODY$
+LANGUAGE plpgsql VOLATILE STRICT COST 100 ROWS 1000;
+ALTER FUNCTION pinfoakhir() OWNER TO postgres;
+
+DROP FUNCTION IF EXISTS presensi.pinfoperiode(character varying, character varying);
+DROP FUNCTION IF EXISTS presensi2.pinfoperiode(character varying, character varying);
+DROP FUNCTION IF EXISTS presensi.pinfoperiode(character varying);
+DROP FUNCTION IF EXISTS presensi2.pinfoperiode(character varying);
+DROP TYPE IF EXISTS pinfoperiode_type;
+CREATE TYPE pinfoperiode_type AS
+(
+  pegawai_id numeric,
+  nip_lama character varying,
+  nip_baru character varying,
+  nama_lengkap character varying,
+  eselon_id numeric,
+  pangkat_id numeric,
+  pangkat_riwayat_tmt date,
+  jabatan_riwayat_nama character varying,
+  satuan_kerja_id numeric,
+  info_satuan_kerja_nama character varying,
+  info_satuan_kerja_induk character varying,
+  info_satuan_kerja_detil character varying
+);
+ALTER TYPE public.pinfoperiode_type OWNER TO postgres;
+
+CREATE OR REPLACE FUNCTION presensi.pinfoperiode(tmt character varying, statustpp character varying)
+  RETURNS SETOF pinfoperiode_type AS
+$BODY$
+DECLARE
+  cur refcursor;
+  QUERY TEXT;
+  rec pinfoperiode_type%ROWTYPE;
+BEGIN
+  QUERY := ' 
+  SELECT 
+  A.PEGAWAI_ID, A.NIP_LAMA, A.NIP_BARU
+  , (CASE WHEN COALESCE(NULLIF(A.GELAR_DEPAN,'''') , NULL ) IS NULL THEN '''' ELSE A.GELAR_DEPAN || '' '' END) || A.NAMA || (CASE WHEN COALESCE(NULLIF(A.GELAR_BELAKANG,'''') , NULL ) IS NULL THEN '''' ELSE '''' || A.GELAR_BELAKANG END) NAMA_LENGKAP
+  , JAB_RIW.ESELON_ID, PANG_RIW.PANGKAT_ID, PANG_RIW.TMT_PANGKAT PANGKAT_RIWAYAT_TMT
+  , JAB_RIW.JABATAN_NAMA JABATAN_RIWAYAT_NAMA, A.SATUAN_KERJA_ID
+  , A.INFO_SATUAN_KERJA_NAMA, A.INFO_SATUAN_KERJA_INDUK, A.INFO_SATUAN_KERJA_DETIL
+  FROM PEGAWAI A
+  LEFT JOIN
+  (
+    SELECT A.PANGKAT_RIWAYAT_ID, B.KODE, A.TMT_PANGKAT, A.PANGKAT_ID
+    FROM PANGKAT_RIWAYAT A
+    LEFT JOIN PANGKAT B ON A.PANGKAT_ID = B.PANGKAT_ID
+  ) PANG_RIW ON A.PANGKAT_RIWAYAT_ID = PANG_RIW.PANGKAT_RIWAYAT_ID
+  LEFT JOIN
+  (
+    SELECT A.JABATAN_RIWAYAT_ID, COALESCE(A.ESELON_ID,99) ESELON_ID, B.NAMA ESELON_NAMA, A.TMT_JABATAN, A.NAMA JABATAN_NAMA
+    FROM JABATAN_RIWAYAT A
+    LEFT JOIN ESELON B ON A.ESELON_ID = B.ESELON_ID
+  ) JAB_RIW ON A.JABATAN_RIWAYAT_ID = JAB_RIW.JABATAN_RIWAYAT_ID
+  WHERE 1 = 1
+  AND
+  (
+    A.STATUS_PEGAWAI_ID IN (1,2,6)
+    OR
+    (
+        A.STATUS_PEGAWAI_ID IN (3,4,5)
+        AND 
+        EXISTS
+        (
+      SELECT 1
+      FROM
+      (
+          SELECT PEGAWAI_STATUS_ID
+          FROM pegawai_status
+          --WHERE TMT >= TO_DATE(''' || tmt || ''', ''DDMMYYYY'')
+          WHERE TMT > TO_DATE(''' || tmt || ''', ''DDMMYYYY'')
+      ) XXX WHERE A.PEGAWAI_STATUS_ID = XXX.PEGAWAI_STATUS_ID
+        )
+    )
+  )
+  ';
+
+  if statustpp != '' then
+    QUERY := QUERY || '
+    AND A.STATUS_TPP = '''||statustpp||'''
+    ';
+  end if;
+
+  /*, A.PANGKAT_RIWAYAT_ID
+  , PANG_RIW.KODE PANGKAT_RIWAYAT_KODE
+  , A.JABATAN_RIWAYAT_ID
+  , JAB_RIW.ESELON_NAMA JABATAN_RIWAYAT_ESELON, JAB_RIW.TMT_JABATAN JABATAN_RIWAYAT_TMT
+  , A.STATUS_PEGAWAI_ID*/
+  --raise notice '-,%', QUERY;
+  OPEN cur FOR EXECUTE QUERY;
+  
+  FETCH cur INTO rec;
+  WHILE FOUND LOOP
+    RETURN NEXT rec;
+    FETCH cur INTO rec;
+  END LOOP;
+  CLOSE cur;
+END;
+$BODY$
+LANGUAGE plpgsql VOLATILE STRICT COST 100 ROWS 1000;
+ALTER FUNCTION presensi.pinfoperiode(character varying, character varying) OWNER TO postgres;
+
+CREATE OR REPLACE FUNCTION presensi.pinfoperiode(tmt character varying)
+  RETURNS SETOF pinfoperiode_type AS
+$BODY$
+DECLARE
+  cur refcursor;
+  QUERY TEXT;
+  rec pinfoperiode_type%ROWTYPE;
+BEGIN
+  QUERY := ' 
+  SELECT 
+  A.PEGAWAI_ID, A.NIP_LAMA, A.NIP_BARU
+  , (CASE WHEN COALESCE(NULLIF(A.GELAR_DEPAN,'''') , NULL ) IS NULL THEN '''' ELSE A.GELAR_DEPAN || '' '' END) || A.NAMA || (CASE WHEN COALESCE(NULLIF(A.GELAR_BELAKANG,'''') , NULL ) IS NULL THEN '''' ELSE '''' || A.GELAR_BELAKANG END) NAMA_LENGKAP
+  , JAB_RIW.ESELON_ID, PANG_RIW.PANGKAT_ID, PANG_RIW.TMT_PANGKAT PANGKAT_RIWAYAT_TMT
+  , JAB_RIW.JABATAN_NAMA JABATAN_RIWAYAT_NAMA, A.SATUAN_KERJA_ID
+  , A.INFO_SATUAN_KERJA_NAMA, A.INFO_SATUAN_KERJA_INDUK, A.INFO_SATUAN_KERJA_DETIL
+  FROM PEGAWAI A
+  LEFT JOIN
+  (
+    SELECT A.PANGKAT_RIWAYAT_ID, B.KODE, A.TMT_PANGKAT, A.PANGKAT_ID
+    FROM PANGKAT_RIWAYAT A
+    LEFT JOIN PANGKAT B ON A.PANGKAT_ID = B.PANGKAT_ID
+  ) PANG_RIW ON A.PANGKAT_RIWAYAT_ID = PANG_RIW.PANGKAT_RIWAYAT_ID
+  LEFT JOIN
+  (
+    SELECT A.JABATAN_RIWAYAT_ID, COALESCE(A.ESELON_ID,99) ESELON_ID, B.NAMA ESELON_NAMA, A.TMT_JABATAN, A.NAMA JABATAN_NAMA
+    FROM JABATAN_RIWAYAT A
+    LEFT JOIN ESELON B ON A.ESELON_ID = B.ESELON_ID
+  ) JAB_RIW ON A.JABATAN_RIWAYAT_ID = JAB_RIW.JABATAN_RIWAYAT_ID
+  WHERE 1 = 1
+  AND
+  (
+    A.STATUS_PEGAWAI_ID IN (1,2,6)
+    OR
+    (
+        A.STATUS_PEGAWAI_ID IN (3,4,5)
+        AND 
+        EXISTS
+        (
+          SELECT 1
+          FROM
+          (
+              SELECT PEGAWAI_STATUS_ID--, STATUS_PEGAWAI_ID
+              FROM pegawai_status
+              --WHERE TMT >= TO_DATE(''' || tmt || ''', ''DDMMYYYY'')
+              WHERE TMT > TO_DATE(''' || tmt || ''', ''DDMMYYYY'')
+          ) XXX WHERE A.PEGAWAI_STATUS_ID = XXX.PEGAWAI_STATUS_ID --AND A.STATUS_PEGAWAI_ID = XXX.STATUS_PEGAWAI_ID
+        )
+    )
+  )
+  ';
+
+  /*, A.PANGKAT_RIWAYAT_ID
+  , PANG_RIW.KODE PANGKAT_RIWAYAT_KODE
+  , A.JABATAN_RIWAYAT_ID
+  , JAB_RIW.ESELON_NAMA JABATAN_RIWAYAT_ESELON, JAB_RIW.TMT_JABATAN JABATAN_RIWAYAT_TMT
+  , A.STATUS_PEGAWAI_ID*/
+  --raise notice '-,%', QUERY;
+  OPEN cur FOR EXECUTE QUERY;
+  
+  FETCH cur INTO rec;
+  WHILE FOUND LOOP
+    RETURN NEXT rec;
+    FETCH cur INTO rec;
+  END LOOP;
+  CLOSE cur;
+END;
+$BODY$
+LANGUAGE plpgsql VOLATILE STRICT COST 100 ROWS 1000;
+ALTER FUNCTION presensi.pinfoperiode(character varying) OWNER TO postgres;
+
+CREATE OR REPLACE VIEW pangkat_riwayat_pensiun_data AS 
+ SELECT
+a.pangkat_riwayat_id, a.pegawai_id, a.pejabat_penetap_id, a.pejabat_penetap, a.pangkat_id, a.stlud
+, a.no_stlud, a.tanggal_stlud, a.no_nota, a.tanggal_nota, a.no_sk, a.tanggal_sk
+, a.tmt_pangkat, a.kredit, a.jenis_riwayat, a.keterangan, a.masa_kerja_tahun, a.masa_kerja_bulan
+, a.gaji_pokok, a.status, b.kode AS pangkat_kode, b.nama AS pangkat_nama
+,
+CASE a.jenis_riwayat
+WHEN 1 THEN 'CPNS'::text
+WHEN 2 THEN 'PNS'::text
+WHEN 4 THEN 'Reguler'::text
+WHEN 5 THEN 'Pilihan Struktural'::text
+WHEN 6 THEN 'Pilihan JFT'::text
+WHEN 7 THEN 'Pilihan PI/UD'::text
+WHEN 8 THEN 'Hukuman disiplin'::text
+WHEN 9 THEN 'Pemulihan hukuman disiplin'::text
+ELSE '-'::text
+END AS jenis_riwayat_nama
+, pp.nama AS pejabat_penetap_nama
+,
+CASE a.status
+WHEN '1'::text THEN 'Tidak Aktif'::text
+ELSE 'Aktif'::text
+END AS status_nama
+, a.last_user, a.last_date, a.no_urut_cetak
+, COALESCE(hk.hukuman_id, hk1.hukuman_id, 0::numeric) AS data_hukuman
+FROM pangkat_riwayat a
+inner join
+(
+    select c.pegawai_id, max(c.tmt_pangkat) tmt_pangkat, max(c.tanggal_sk) tanggal_sk
+    from pangkat_riwayat c
+    where (coalesce(nullif(c.status::text, ''::text), null::text) is null or c.status::text = '2'::text)
+    and c.jenis_riwayat in (4,5,6,7)
+    group by c.pegawai_id
+) b1 ON a.pegawai_id = b1.pegawai_id AND a.tmt_pangkat = b1.tmt_pangkat AND a.tanggal_sk = b1.tanggal_sk
+LEFT JOIN pangkat b ON a.pangkat_id = b.pangkat_id
+LEFT JOIN pejabat_penetap pp ON a.pejabat_penetap_id = pp.pejabat_penetap_id
+LEFT JOIN hukuman hk ON a.pangkat_riwayat_id = hk.pangkat_riwayat_turun_id
+LEFT JOIN hukuman hk1 ON a.pangkat_riwayat_id = hk1.pangkat_riwayat_kembali_id
+WHERE 1 = 1;
+ALTER TABLE pangkat_riwayat_pensiun_data OWNER TO postgres;
+
+drop table if exists pegawai_data_akhir;
+create table pegawai_data_akhir
+(
+  pegawai_id numeric not null,
+  info_mode character varying,
+  v_id numeric not null,
+  constraint pk_pegawai_data_akhir primary key (pegawai_id, info_mode)
+) with (oids=false);
+alter table pegawai_data_akhir owner to postgres;
+
+alter table pegawai add column path_foto character varying;
+/*
+update pegawai as u
+set
+path_foto= aggr.PATH
+from
+(
+  SELECT A.PEGAWAI_ID, A1.PATH
+  FROM pegawai_data_akhir A
+  INNER JOIN pegawai_file A1 ON A.PEGAWAI_ID = A1.PEGAWAI_ID AND A1.PEGAWAI_FILE_ID = A.V_ID
+  WHERE A.INFO_MODE = 'FOTO_PEGAWAI'
+) as aggr
+where u.pegawai_id = aggr.pegawai_id;
+*/
+CREATE OR REPLACE FUNCTION pegawai_file_akhir_p()
+  RETURNS trigger AS
+$BODY$
+DECLARE
+vcheck numeric;
+vid numeric;
+thequery TEXT;
+BEGIN
+  
+  IF TG_OP = 'INSERT' THEN
+    RETURN NEW;
+  ELSIF TG_OP = 'UPDATE' THEN
+
+    --untuk ambil data akhir foto
+    IF NEW.RIWAYAT_ID = 1 AND NEW.RIWAYAT_TABLE = 'PEGAWAI' THEN
+      SELECT
+      PEGAWAI_ID INTO vcheck
+      FROM pegawai_data_akhir A
+      WHERE 1=1 AND A.PEGAWAI_ID = NEW.PEGAWAI_ID AND INFO_MODE = 'FOTO_PEGAWAI'
+      ;
+      
+      IF vcheck > 0 THEN
+        SELECT
+        MAX(PEGAWAI_FILE_ID) INTO vid
+        FROM
+        (
+          SELECT
+          A.PEGAWAI_FILE_ID, A.PEGAWAI_ID
+          ,
+          ROW_NUMBER () OVER 
+          (
+            PARTITION BY A.PEGAWAI_ID, A.RIWAYAT_TABLE, A.RIWAYAT_FIELD, A.RIWAYAT_ID
+            ORDER BY CASE WHEN COALESCE(NULLIF(A.PRIORITAS, ''), NULL) IS NULL THEN '2' ELSE A.PRIORITAS END::NUMERIC, A.LAST_DATE DESC
+          )
+          INFOPOSISI
+          FROM pegawai_file A
+          WHERE 1=1
+          AND RIWAYAT_TABLE = 'PEGAWAI' AND RIWAYAT_ID = 1
+          AND PEGAWAI_ID = NEW.PEGAWAI_ID
+        ) X WHERE INFOPOSISI = 1;
+
+        --raise notice 'sql %',vcheck;
+        UPDATE pegawai_data_akhir SET V_ID = vid WHERE PEGAWAI_ID = NEW.PEGAWAI_ID AND INFO_MODE = 'FOTO_PEGAWAI';
+      ELSE
+        vid:= NEW.PEGAWAI_FILE_ID;
+        INSERT INTO pegawai_data_akhir(PEGAWAI_ID, INFO_MODE, V_ID)
+        VALUES
+        (
+          NEW.PEGAWAI_ID
+          , 'FOTO_PEGAWAI'
+          , vid
+        );
+      END IF;
+
+      update pegawai set path_foto = new.path where pegawai_id = new.pegawai_id;
+    END IF;
+    RETURN NEW;
+
+  END IF;
+  
+END;
+$BODY$
+LANGUAGE plpgsql VOLATILE COST 100;
+ALTER FUNCTION pegawai_file_akhir_p() OWNER TO postgres;
+
+DROP TRIGGER if exists pegawai_file_akhir_t ON pegawai_file;
+CREATE TRIGGER pegawai_file_akhir_t
+BEFORE UPDATE
+ON pegawai_file
+FOR EACH ROW
+EXECUTE PROCEDURE pegawai_file_akhir_p();
+
+/*
+delete FROM pegawai_data_akhir;
+INSERT INTO pegawai_data_akhir(PEGAWAI_ID, INFO_MODE, V_ID)
+SELECT PEGAWAI_ID, INFO_MODE, MAX(PEGAWAI_FILE_ID) PEGAWAI_FILE_ID
+FROM
+(
+  SELECT
+  PEGAWAI_ID, 'FOTO_PEGAWAI'::text INFO_MODE, PEGAWAI_FILE_ID
+  FROM
+  (
+    SELECT
+    A.PEGAWAI_FILE_ID, A.PEGAWAI_ID
+    ,
+    ROW_NUMBER () OVER 
+    (
+      PARTITION BY A.PEGAWAI_ID, A.RIWAYAT_TABLE, A.RIWAYAT_FIELD, A.RIWAYAT_ID
+      ORDER BY CASE WHEN COALESCE(NULLIF(A.PRIORITAS, ''), NULL) IS NULL THEN '2' ELSE A.PRIORITAS END::NUMERIC, A.LAST_DATE DESC, A.PEGAWAI_FILE_ID DESC
+    )
+    INFOPOSISI
+    FROM pegawai_file A
+    WHERE 1=1
+    AND RIWAYAT_TABLE = 'PEGAWAI' AND RIWAYAT_ID = 1
+  ) X WHERE INFOPOSISI = 1
+) A
+WHERE 1=1 
+--AND PEGAWAI_ID IN (28)
+GROUP BY PEGAWAI_ID, INFO_MODE
+*/
+--====================================================================================
+DROP type if exists info_pegawai_simple_type;
+create type info_pegawai_simple_type as (pegawai_id numeric, nip_lama character varying, nip_baru character varying, nama_lengkap text, status_pegawai_id numeric, satuan_kerja_id numeric);
+
+DROP FUNCTION if exists info_pegawai_simple_type();
+--select * from info_pegawai_simple();
+CREATE or replace FUNCTION info_pegawai_simple() RETURNS SETOF info_pegawai_simple_type AS $$
+DECLARE
+  cur refcursor;
+  QUERY TEXT;
+  rec info_pegawai_simple_type%ROWTYPE;
+BEGIN
+  QUERY := '
+  SELECT 
+  A.PEGAWAI_ID, A.NIP_LAMA, A.NIP_BARU
+  , (CASE WHEN COALESCE(NULLIF(A.GELAR_DEPAN,'''') , NULL ) IS NULL THEN '''' ELSE A.GELAR_DEPAN || '' '' END) || A.NAMA || (CASE WHEN COALESCE(NULLIF(A.GELAR_BELAKANG,'''') , NULL ) IS NULL THEN '''' ELSE '''' || A.GELAR_BELAKANG END) NAMA_LENGKAP
+  , A.STATUS_PEGAWAI_ID, A.SATUAN_KERJA_ID
+  FROM PEGAWAI A
+  WHERE 1=1';
+  
+  OPEN cur FOR EXECUTE QUERY;
+  
+  FETCH cur INTO rec;
+  WHILE FOUND LOOP
+    RETURN NEXT rec;
+    FETCH cur INTO rec;
+  END LOOP;
+  CLOSE cur;
+END;
+$$ LANGUAGE plpgsql STRICT;
+
+drop table if exists persuratan.log_download;
+create table persuratan.log_download
+(
+  last_user character varying,
+  info_mode character varying,
+  info_link character varying,
+  last_create_date timestamp without time zone,
+  last_update_date timestamp without time zone,
+  status numeric,
+  constraint pk_log_download primary key (last_user, info_mode)
+) with (oids=false);
+alter table persuratan.log_download owner to postgres;
+
+CREATE OR REPLACE VIEW public.gaji_terakhir_riwayat AS 
+select
+max(a.gaji_riwayat_id) gaji_riwayat_id, a.pegawai_id
+from
+(
+ SELECT
+ a.gaji_riwayat_id,
+    a.pegawai_id
+   FROM gaji_riwayat a
+     JOIN ( SELECT y.gaji_riwayat_id,
+            y.pegawai_id,
+            y.tmt_sk,
+            y.tanggal_sk
+           FROM gaji_riwayat y
+             JOIN ( SELECT a_1.pegawai_id,
+                    a_1.tmt_sk,
+                    max(a_1.tanggal_sk) AS tanggal_sk
+                   FROM gaji_riwayat a_1
+                     JOIN ( SELECT a_2.pegawai_id,
+                            max(a_2.tmt_sk) AS tmt_sk
+                           FROM gaji_riwayat a_2
+                          WHERE (COALESCE(NULLIF(a_2.status::text, ''::text), NULL::text) IS NULL OR a_2.status::text = '2'::text)
+                          AND a_2.jenis_kenaikan = 3::numeric
+                          GROUP BY a_2.pegawai_id) b_1 ON a_1.pegawai_id = b_1.pegawai_id AND a_1.tmt_sk = b_1.tmt_sk
+                  WHERE (COALESCE(NULLIF(a_1.status::text, ''::text), NULL::text) IS NULL OR a_1.status::text = '2'::text)
+                  AND a_1.jenis_kenaikan = 3::numeric
+                  GROUP BY a_1.pegawai_id, a_1.tmt_sk) x ON x.pegawai_id = y.pegawai_id AND x.tmt_sk = y.tmt_sk AND x.tanggal_sk = y.tanggal_sk) b ON a.gaji_riwayat_id = b.gaji_riwayat_id
+  GROUP BY a.gaji_riwayat_id, a.pegawai_id
+) a group by a.pegawai_id;
+
+ALTER TABLE public.gaji_terakhir_riwayat
+  OWNER TO postgres;
+GRANT ALL ON TABLE public.gaji_terakhir_riwayat TO postgres;
+
+update gaji_riwayat as u
+set gaji_riwayat_id = aggr.gaji_riwayat_id
+from 
+(
+  select gaji_riwayat_id, pegawai_id from gaji_terakhir_riwayat
+  where 1=1 --and pegawai_id = 5615
+) as aggr
+where u.gaji_riwayat_id = aggr.gaji_riwayat_id;
+
+alter table persuratan.surat_masuk_pegawai add column kp_status_pendidikan_riwayat_cantum_gelar numeric;
+alter table persuratan.surat_masuk_pegawai add column kp_status_pendidikan_riwayat_ijin_tugas numeric;
+
+update sk_pppk as u
+set
+jabatan_ft_id= x.jabatan_ft_id
+, jabatan_tugas = x.jabatan_tugas
+from
+(
+  select
+  a.sk_pppk_id, b.jabatan_ft_pppk_id jabatan_ft_id, b.nama jabatan_tugas
+  from sk_pppk a
+  inner join jabatan_ft_pppk b on initcap(lower(b.nama)) = initcap(lower(a.jabatan_tugas))
+  where jabatan_ft_id is null
+
+) as x
+where u.sk_pppk_id = x.sk_pppk_id;
+
+CREATE OR REPLACE VIEW pak_terakhir_riwayat AS 
+SELECT
+a.pak_id, a.pegawai_id
+FROM pak a
+JOIN
+(
+  SELECT c.pegawai_id,
+  max(c.tanggal_sk) AS tanggal_sk
+  FROM pak c
+  WHERE COALESCE(NULLIF(c.status::text, ''::text), NULL::text) IS NULL OR c.status::text = '2'::text
+  GROUP BY c.pegawai_id
+) b ON a.pegawai_id = b.pegawai_id AND a.tanggal_sk = b.tanggal_sk;
+
+ALTER TABLE pak_terakhir_riwayat
+OWNER TO postgres;
+
+alter table pegawai add column pak_id numeric;
+
+CREATE OR REPLACE FUNCTION pegawai_status_pak_riwayat()
+  RETURNS trigger AS
+$BODY$
+DECLARE
+    VAR_ID INTEGER;
+    temprowid integer;
+BEGIN
+  IF TG_OP = 'INSERT' OR TG_OP = 'UPDATE' THEN
+    select pak_id into var_id from pak_terakhir_riwayat where pegawai_id = new.pegawai_id;
+    update pegawai set pak_id = var_id where pegawai_id = new.pegawai_id;
+  END IF;
+  
+  RETURN new;
+END;
+$BODY$
+LANGUAGE plpgsql VOLATILE COST 100;
+ALTER FUNCTION pegawai_status_pak_riwayat() OWNER TO postgres;
+
+DROP TRIGGER if exists pegawai_status_riwayat_pak_after ON pak;
+CREATE TRIGGER pegawai_status_riwayat_pak_after
+AFTER INSERT OR UPDATE
+ON pak
+FOR EACH ROW
+EXECUTE PROCEDURE pegawai_status_pak_riwayat();
+
+update pak as u
+set
+pegawai_id= x.pegawai_id
+from
+(
+  select * from pak_terakhir_riwayat
+) as x
+where u.pak_id = x.pak_id;
+
+/*
+select * from user_login where
+user_group_id
+in
+(
+  select user_group_id from user_group
+  where akses_app_simpeg_id
+  in
+  (
+    select akses_app_simpeg_id from akses_app_simpeg
+    where akses_app_simpeg_id
+    in
+    (
+    select akses_app_simpeg_id from akses_app_simpeg_menu where menu_id = '0111' and akses = 'R'
+    )
+  )
+)
+*/
+
+ALTER TABLE cuti DROP CONSTRAINT if exists ak_u1_cuti_tglawal;
+CREATE OR REPLACE FUNCTION cuti_unik_p()
+  RETURNS trigger AS
+$BODY$
+DECLARE
+temprowid integer;
+tempstatus CHARACTER VARYING(1);
+tempinfo TEXT;
+tempquery TEXT;
+BEGIN
+  
+  IF TG_OP = 'INSERT' THEN
+    SELECT
+    CASE WHEN COUNT(1) > 0 THEN 1 ELSE 0 END INTO temprowid
+    FROM CUTI A
+    WHERE 1=1 AND A.PEGAWAI_ID = NEW.PEGAWAI_ID
+    AND A.TANGGAL_MULAI = NEW.TANGGAL_MULAI
+    AND (COALESCE(NULLIF(A.STATUS, ''), NULL) IS NULL OR A.STATUS = '2')
+    ;
+
+    IF temprowid >= 1 AND temprowid IS NOT NULL THEN
+      RETURN FALSE;
+    ELSE
+      RETURN NEW;
+    END IF;
+  ELSIF TG_OP = 'UPDATE' THEN
+    SELECT
+    CUTI_ID INTO temprowid
+    FROM CUTI A
+    WHERE 1=1 AND A.PEGAWAI_ID = NEW.PEGAWAI_ID
+    AND A.TANGGAL_MULAI = NEW.TANGGAL_MULAI
+    AND (COALESCE(NULLIF(A.STATUS, ''), NULL) IS NULL OR A.STATUS = '2')
+    ;
+    --raise notice 'sql %',NEW.CUTI_ID || '-' || temprowid;
+      
+    IF NEW.CUTI_ID = temprowid OR temprowid IS NULL THEN
+    temprowid:= 0;
+    ELSE
+    temprowid:= 1;
+    END IF;
+    --raise notice 'sql %','-xx-' || temprowid;
+      
+    IF temprowid >= 1 AND temprowid IS NOT NULL THEN
+      RETURN FALSE;
+    ELSE
+      RETURN NEW;
+    END IF;
+  ELSIF TG_OP = 'UPDATE' AND NEW.STATUS IS NOT NULL THEN
+  RETURN NEW;
+  END IF;
+  
+END;
+$BODY$
+LANGUAGE plpgsql VOLATILE COST 100;
+ALTER FUNCTION cuti_unik_p() OWNER TO postgres;
+
+DROP TRIGGER if exists cuti_unik_t ON cuti;
+CREATE TRIGGER cuti_unik_t
+BEFORE INSERT OR UPDATE
+ON cuti
+FOR EACH ROW
+EXECUTE PROCEDURE cuti_unik_p();
+
+DROP TRIGGER if exists cuti_table_trigger_log ON cuti;
+CREATE TRIGGER cuti_table_trigger_log
+AFTER INSERT OR UPDATE --OR DELETE
+ON cuti
+FOR EACH ROW
+EXECUTE PROCEDURE cuti_triger_log();
+
+CREATE OR REPLACE FUNCTION unique_penilaian_skp()
+  RETURNS trigger AS
+$BODY$
+DECLARE
+temprowid integer;
+tempstatus CHARACTER VARYING(1);
+tempinfo TEXT;
+tempquery TEXT;
+BEGIN
+  
+  IF TG_OP = 'INSERT' OR (TG_OP = 'UPDATE' AND (COALESCE(NULLIF(NEW.STATUS, ''), NULL) IS NULL OR NEW.STATUS = '2')) THEN
+    -- CHECK VALIDASI TMT DAN TANGGAL SK PEGAWAI TIDAK BOLEH SAMA DALAM STATUS AKTIF
+    IF TG_OP = 'INSERT' THEN
+      SELECT
+      CASE WHEN COUNT(1) > 0 THEN 1 ELSE 0 END INTO temprowid
+      FROM PENILAIAN_SKP A
+      WHERE 1=1 AND A.PEGAWAI_ID = NEW.PEGAWAI_ID
+      AND A.TAHUN = NEW.TAHUN
+      AND (COALESCE(NULLIF(A.STATUS, ''), NULL) IS NULL OR A.STATUS = '2')
+      ;
+    ELSE
+      SELECT
+      PENILAIAN_SKP_ID INTO temprowid
+      FROM PENILAIAN_SKP A
+      WHERE 1=1 AND A.PEGAWAI_ID = NEW.PEGAWAI_ID
+      AND A.TAHUN = NEW.TAHUN
+      AND (COALESCE(NULLIF(A.STATUS, ''), NULL) IS NULL OR A.STATUS = '2')
+      ;
+
+      IF NEW.PENILAIAN_SKP_ID = temprowid OR temprowid IS NULL THEN
+      temprowid:= 0;
+      ELSE
+      temprowid:= 1;
+      END IF;
+      
+    END IF;
+    --raise notice 'sql %',temprowid;
+    IF temprowid >= 1 AND temprowid IS NOT NULL THEN
+      RETURN FALSE; 
+    ELSE
+      RETURN NEW;
+    END IF;
+  ELSE
+  RETURN NEW;
+  END IF;
+  
+END;
+$BODY$
+  LANGUAGE plpgsql VOLATILE
+  COST 100;
+ALTER FUNCTION unique_penilaian_skp()
+  OWNER TO postgres;
+
+
+alter table pegawai_file
+add column path_asli character varying,
+add column create_user character varying,
+add column ext character varying,
+add column prioritas character varying(1);
+
+alter table persuratan.surat_keluar_bkd
+add column is_sediaan character varying(1)
+, add column keterangan character varying
+, add column status_kirim character varying(1)
+, add column last_user character varying
+, add column last_date timestamp without time zone
+, add column user_login_id numeric
+, add column user_login_pegawai_id numeric
+;
+
+drop table if exists persuratan.surat_keluar_bkd_sediaan;
+create table persuratan.surat_keluar_bkd_sediaan
+(
+  surat_keluar_bkd_sediaan_id numeric NOT NULL,
+  surat_keluar_bkd_sediaan_parent_id numeric,
+  surat_keluar_bkd_id numeric,
+  jenis_id numeric,
+  satuan_kerja_asal_id numeric,
+  satuan_kerja_asal_nama character varying,
+  satuan_kerja_tujuan_id numeric,
+  satuan_kerja_tujuan_nama character varying,
+  tanggal date,
+  tanggal_disposisi date,
+  terbaca numeric,
+  terbalas numeric,
+  terdisposisi numeric,
+  terparaf numeric,
+  isi text,
+  surat_awal numeric,
+  status_posisi_surat numeric,
+  posisi_teknis numeric,
+  last_user character varying,
+  last_date timestamp without time zone,
+  user_login_id numeric,
+  user_login_pegawai_id numeric,
+  CONSTRAINT pk_surat_keluar_bkd_sediaan PRIMARY KEY (surat_keluar_bkd_sediaan_id),
+  CONSTRAINT fk_ksmbdtosmb FOREIGN KEY (surat_keluar_bkd_id)
+  REFERENCES persuratan.surat_keluar_bkd (surat_keluar_bkd_id) MATCH SIMPLE ON UPDATE RESTRICT ON DELETE RESTRICT
+)
+WITH (OIDS=FALSE);
+ALTER TABLE persuratan.surat_keluar_bkd_sediaan OWNER TO postgres;
+
+create or replace function persuratan.surat_keluar_bkd_psediaan()
+  returns trigger as
+$body$
+declare
+temprowid integer;
+tempstatus character varying(1);
+tempinfo text;
+tempquery text;
+
+vsatuan_kerja_asal_id numeric;
+vsatuan_kerja_asal_nama character varying;
+vsatuan_kerja_tujuan_id numeric;
+vsatuan_kerja_tujuan_nama character varying;
+
+begin
+  
+  --set status pegawai
+  if lower(tg_op) = 'insert' or lower(tg_op) = 'update' then
+    if new.is_sediaan = '1' then
+      select
+      new.satuan_kerja_terima_surat_id vsatuan_kerja_asal_id, ambil_satker_nama(new.satuan_kerja_terima_surat_id) vsatuan_kerja_asal_nama
+      , satuan_kerja_id vsatuan_kerja_tujuan_id, nama vsatuan_kerja_tujuan_nama
+      into vsatuan_kerja_asal_id, vsatuan_kerja_asal_nama, vsatuan_kerja_tujuan_id, vsatuan_kerja_tujuan_nama
+      from satuan_kerja where status_sediaan = '2';
+
+      if new.jenis_id is null then
+        select
+        case when count(1) > 0 then 1 else 0 end into temprowid
+        from persuratan.surat_keluar_bkd_sediaan a where 1=1 and a.surat_keluar_bkd_sediaan_parent_id = 0 and a.surat_keluar_bkd_id = new.surat_keluar_bkd_id
+        and a.jenis_id is null;
+        --raise notice 'sql %',temprowid;
+
+        if temprowid = 0 then
+          insert into persuratan.surat_keluar_bkd_sediaan
+          (
+            surat_keluar_bkd_sediaan_id, surat_keluar_bkd_sediaan_parent_id
+            , surat_keluar_bkd_id, jenis_id
+            , satuan_kerja_asal_id, satuan_kerja_asal_nama
+            , satuan_kerja_tujuan_id, satuan_kerja_tujuan_nama
+            , tanggal, terbaca, terdisposisi
+          )
+          values (
+          (select coalesce(max(surat_keluar_bkd_sediaan_id),0) + 1 from persuratan.surat_keluar_bkd_sediaan), 0,
+          new.surat_keluar_bkd_id, null
+          , vsatuan_kerja_asal_id, vsatuan_kerja_asal_nama
+          , vsatuan_kerja_tujuan_id, vsatuan_kerja_tujuan_nama
+          , new.tanggal, 1, 1
+          );
+        else
+          update persuratan.surat_keluar_bkd_sediaan
+             set 
+             satuan_kerja_asal_id= vsatuan_kerja_asal_id,
+             satuan_kerja_asal_nama= vsatuan_kerja_asal_nama,
+             satuan_kerja_tujuan_id= vsatuan_kerja_tujuan_id, 
+             satuan_kerja_tujuan_nama= vsatuan_kerja_tujuan_nama, 
+             tanggal= new.tanggal,
+             terbaca= 1,
+             terdisposisi= 1
+          where surat_keluar_bkd_sediaan_id = 
+          (
+          select surat_keluar_bkd_sediaan_id from persuratan.surat_keluar_bkd_sediaan where 
+          surat_keluar_bkd_sediaan_parent_id = 0
+          and surat_keluar_bkd_id = new.surat_keluar_bkd_id and jenis_id is null
+          )
+          ;
+          --raise notice 'sql %',new.surat_keluar_bkd_id;
+        end if;
+      else
+        return new;
+      end if;
+    end if;
+  end if;
+  return new;
+  
+end;
+$body$
+language plpgsql volatile cost 100;
+alter function persuratan.surat_keluar_bkd_psediaan() owner to postgres;
+
+drop trigger if exists surat_keluar_bkd_sediaan on persuratan.surat_keluar_bkd;
+create trigger surat_keluar_bkd_sediaan
+after insert or update
+on persuratan.surat_keluar_bkd
+for each row
+execute procedure persuratan.surat_keluar_bkd_psediaan();
+
+create or replace function persuratan.surat_keluar_bkd_teruskan_sediaan()
+  returns trigger as
+$body$
+declare
+temprowid integer;
+tempstatus character varying(1);
+tempinfo text;
+tempquery text;
+
+vsatuan_kerja_asal_id numeric;
+vsatuan_kerja_asal_nama character varying;
+
+begin
+  
+  --set status pegawai
+  if lower(tg_op) = 'insert' or lower(tg_op) = 'update' then
+    if new.terdisposisi = '1' then
+
+      select
+      new.satuan_kerja_tujuan_id vsatuan_kerja_asal_id, ambil_satker_nama(new.satuan_kerja_tujuan_id) vsatuan_kerja_asal_nama
+      into vsatuan_kerja_asal_id, vsatuan_kerja_asal_nama;
+
+      if new.jenis_id is null then 
+        select
+        case when count(1) > 0 then 1 else 0 end into temprowid
+        from persuratan.surat_keluar_bkd_sediaan a where 1=1 and a.surat_keluar_bkd_sediaan_parent_id = new.surat_keluar_bkd_sediaan_id and a.surat_keluar_bkd_id = new.surat_keluar_bkd_id
+        and a.jenis_id is null;
+        --raise notice 'sql %',temprowid;
+
+        if temprowid = 0 then
+          insert into persuratan.surat_keluar_bkd_sediaan(
+          surat_keluar_bkd_sediaan_id, surat_keluar_bkd_sediaan_parent_id, 
+          surat_keluar_bkd_id, jenis_id, satuan_kerja_asal_id, satuan_kerja_asal_nama)
+          values (
+          (select coalesce(max(surat_keluar_bkd_sediaan_id),0) + 1 from persuratan.surat_keluar_bkd_sediaan)
+          , new.surat_keluar_bkd_sediaan_id
+          , new.surat_keluar_bkd_id, null, vsatuan_kerja_asal_id, vsatuan_kerja_asal_nama
+          );
+        end if;
+      end if;
+    end if;
+  end if;
+  return new;
+  
+end;
+$body$
+language plpgsql volatile cost 100;
+alter function persuratan.surat_keluar_bkd_teruskan_sediaan() owner to postgres;
+
+drop trigger if exists surat_keluar_bkd_sediaan_t on persuratan.surat_keluar_bkd_sediaan;
+create trigger surat_keluar_bkd_sediaan_t
+after insert or update
+on persuratan.surat_keluar_bkd_sediaan
+for each row
+execute procedure persuratan.surat_keluar_bkd_teruskan_sediaan();
+
+create or replace function persuratan.ambil_sediaan_posisi_id_surat(suratkeluarbkdid numeric, jenisid numeric)
+  returns numeric as
+$body$
+declare 
+tmptahun numeric;
+begin
+  if jenisid is null then
+    select surat_keluar_bkd_sediaan_id into tmptahun
+    from
+    (
+      with recursive parents as (
+        select surat_keluar_bkd_sediaan_id, surat_keluar_bkd_sediaan_parent_id, ambil_satker_nama(satuan_kerja_asal_id) nama, 0 as depth
+        from persuratan.surat_keluar_bkd_sediaan
+        where surat_keluar_bkd_id = suratkeluarbkdid and jenis_id is null and surat_keluar_bkd_sediaan_parent_id = 0
+        union
+        select op.surat_keluar_bkd_sediaan_id, op.surat_keluar_bkd_sediaan_parent_id, ambil_satker_nama(satuan_kerja_asal_id) nama, depth - 1
+        from persuratan.surat_keluar_bkd_sediaan op
+        join parents p on op.surat_keluar_bkd_sediaan_parent_id = p.surat_keluar_bkd_sediaan_id
+      )
+      select *
+      from parents
+    ) a
+    where 1=1
+    order by depth
+    limit 1;
+  else
+    select surat_keluar_bkd_sediaan_id into tmptahun
+    from
+    (
+      with recursive parents as (
+        select surat_keluar_bkd_sediaan_id, surat_keluar_bkd_sediaan_parent_id, ambil_satker_nama(satuan_kerja_asal_id) nama, 0 as depth
+        from persuratan.surat_keluar_bkd_sediaan
+        where surat_keluar_bkd_id = suratkeluarbkdid and jenis_id = jenisid and surat_keluar_bkd_sediaan_parent_id = 0
+        union
+        select op.surat_keluar_bkd_sediaan_id, op.surat_keluar_bkd_sediaan_parent_id, ambil_satker_nama(satuan_kerja_asal_id) nama, depth - 1
+        from persuratan.surat_keluar_bkd_sediaan op
+        join parents p on op.surat_keluar_bkd_sediaan_parent_id = p.surat_keluar_bkd_sediaan_id
+      )
+      select *
+      from parents
+    ) a
+    where 1=1
+    order by depth
+    limit 1;
+  end if;
+  
+  return tmptahun;
+end;
+$body$
+language plpgsql volatile cost 100;
+alter function persuratan.ambil_sediaan_posisi_id_surat(numeric, numeric) owner to postgres;
+
+create or replace function persuratan.ambil_sediaan_posisi_surat(suratkeluarbkdid numeric, jenisid numeric)
+  returns character varying as
+$body$
+declare 
+tmptahun varchar(100);
+begin
+  if jenisid is null then
+    select nama into tmptahun
+    from
+    (
+      with recursive parents as (
+        select surat_keluar_bkd_sediaan_id, surat_keluar_bkd_sediaan_parent_id, ambil_satker_nama(satuan_kerja_asal_id) nama, 0 as depth
+        from persuratan.surat_keluar_bkd_sediaan
+        where surat_keluar_bkd_id = suratkeluarbkdid and jenis_id is null and surat_keluar_bkd_sediaan_parent_id = 0
+        union
+        select op.surat_keluar_bkd_sediaan_id, op.surat_keluar_bkd_sediaan_parent_id, ambil_satker_nama(satuan_kerja_asal_id) nama, depth - 1
+        from persuratan.surat_keluar_bkd_sediaan op
+        join parents p on op.surat_keluar_bkd_sediaan_parent_id = p.surat_keluar_bkd_sediaan_id
+      )
+      select *
+      from parents
+    ) a
+    where 1=1
+    order by depth
+    limit 1;
+  else
+    select nama into tmptahun
+    from
+    (
+      with recursive parents as (
+        select surat_keluar_bkd_sediaan_id, surat_keluar_bkd_sediaan_parent_id, ambil_satker_nama(satuan_kerja_asal_id) nama, 0 as depth
+        from persuratan.surat_keluar_bkd_sediaan
+        where surat_keluar_bkd_id = suratkeluarbkdid and jenis_id = jenisid and surat_keluar_bkd_sediaan_parent_id = 0
+        union
+        select op.surat_keluar_bkd_sediaan_id, op.surat_keluar_bkd_sediaan_parent_id, ambil_satker_nama(satuan_kerja_asal_id) nama, depth - 1
+        from persuratan.surat_keluar_bkd_sediaan op
+        join parents p on op.surat_keluar_bkd_sediaan_parent_id = p.surat_keluar_bkd_sediaan_id
+      )
+      select *
+      from parents
+    ) a
+    where 1=1
+    order by depth
+    limit 1;
+  end if;
+  
+  return tmptahun;
+end;
+$body$
+language plpgsql volatile cost 100;
+alter function persuratan.ambil_sediaan_posisi_surat(numeric, numeric) owner to postgres;
+
+create or replace function persuratan.ambil_sediaan_posisi_surat_baca(suratkeluarbkdid numeric, jenisid numeric)
+  returns character varying as
+$body$
+declare 
+tmptahun varchar(100);
+begin
+  if jenisid is null then
+    select nama into tmptahun
+    from
+    (
+      with recursive parents as (
+        select surat_keluar_bkd_sediaan_id, surat_keluar_bkd_sediaan_parent_id, ambil_satker_nama(satuan_kerja_asal_id) nama, 0 as depth
+        from persuratan.surat_keluar_bkd_sediaan
+        where terbaca = 1 and surat_keluar_bkd_id = suratkeluarbkdid and jenis_id is null and surat_keluar_bkd_sediaan_parent_id = 0
+        union
+        select op.surat_keluar_bkd_sediaan_id, op.surat_keluar_bkd_sediaan_parent_id, ambil_satker_nama(satuan_kerja_asal_id) nama, depth - 1
+        from persuratan.surat_keluar_bkd_sediaan op
+        join parents p on op.surat_keluar_bkd_sediaan_parent_id = p.surat_keluar_bkd_sediaan_id
+        where op.terbaca = 1
+      )
+      select *
+      from parents
+    ) a
+    where 1=1
+    order by depth
+    limit 1;
+  else
+    select nama into tmptahun
+    from
+    (
+      with recursive parents as (
+        select surat_keluar_bkd_sediaan_id, surat_keluar_bkd_sediaan_parent_id, ambil_satker_nama(satuan_kerja_asal_id) nama, 0 as depth
+        from persuratan.surat_keluar_bkd_sediaan
+        where terbaca = 1 and surat_keluar_bkd_id = suratkeluarbkdid and jenis_id = jenisid and surat_keluar_bkd_sediaan_parent_id = 0
+        union
+        select op.surat_keluar_bkd_sediaan_id, op.surat_keluar_bkd_sediaan_parent_id, ambil_satker_nama(satuan_kerja_asal_id) nama, depth - 1
+        from persuratan.surat_keluar_bkd_sediaan op
+        join parents p on op.surat_keluar_bkd_sediaan_parent_id = p.surat_keluar_bkd_sediaan_id
+        where op.terbaca = 1
+      )
+      select *
+      from parents
+    ) a
+    where 1=1
+    order by depth
+    limit 1;
+  end if;
+  
+  return tmptahun;
+end;
+$body$
+language plpgsql volatile cost 100;
+alter function persuratan.ambil_sediaan_posisi_surat_baca(numeric, numeric) owner to postgres;
+
+create or replace function persuratan.surat_keluar_bkd_sediaan_posisi_p()
+  returns trigger as
+$body$
+declare
+temprowid integer;
+tempperiode character varying(50);
+tempinfo text;
+tempquery text;
+begin
+  
+  execute 'create table if not exists persuratan.surat_keluar_bkd_sediaan_posisi(
+     surat_keluar_bkd_sediaan_id numeric not null, surat_keluar_bkd_id numeric
+     , id_posisi_surat character varying, id_posisi_surat_baca character varying
+    , constraint surat_keluar_bkd_sediaan_posisi_pkey primary key (surat_keluar_bkd_id))';
+  
+  select case when count(1) > 0 then 1 else 0 end into temprowid from persuratan.surat_keluar_bkd_sediaan_posisi a where 1=1 and a.surat_keluar_bkd_id = new.surat_keluar_bkd_id;
+  
+  if temprowid = 0 then
+    insert into persuratan.surat_keluar_bkd_sediaan_posisi(
+      surat_keluar_bkd_sediaan_id, surat_keluar_bkd_id, id_posisi_surat, id_posisi_surat_baca
+    )
+    select surat_keluar_bkd_sediaan_id, surat_keluar_bkd_id, id_posisi_surat, id_posisi_surat_baca
+    from
+    (
+      select 
+      a.surat_keluar_bkd_id
+      , persuratan.ambil_sediaan_posisi_id_surat(a.surat_keluar_bkd_id, a.jenis_id) id_pos
+      , persuratan.ambil_sediaan_posisi_surat(a.surat_keluar_bkd_id, a.jenis_id) id_posisi_surat
+      , persuratan.ambil_sediaan_posisi_surat_baca(a.surat_keluar_bkd_id, a.jenis_id) id_posisi_surat_baca
+      from persuratan.surat_keluar_bkd a
+      where a.surat_keluar_bkd_id = new.surat_keluar_bkd_id
+    ) a
+    inner join 
+    (
+      select surat_keluar_bkd_sediaan_id from persuratan.surat_keluar_bkd_sediaan
+    ) b on id_pos = surat_keluar_bkd_sediaan_id;
+    --raise notice 'sql %',temprowid;
+  else
+    update  persuratan.surat_keluar_bkd_sediaan_posisi as u
+    set     surat_keluar_bkd_sediaan_id = aggr.surat_keluar_bkd_sediaan_id,
+        id_posisi_surat = aggr.id_posisi_surat,
+        id_posisi_surat_baca = aggr.id_posisi_surat_baca
+    from    (
+          select surat_keluar_bkd_sediaan_id, surat_keluar_bkd_id, id_posisi_surat, id_posisi_surat_baca
+          from
+          (
+            select 
+            a.surat_keluar_bkd_id
+            , persuratan.ambil_sediaan_posisi_id_surat(a.surat_keluar_bkd_id, a.jenis_id) id_pos
+            , persuratan.ambil_sediaan_posisi_surat(a.surat_keluar_bkd_id, a.jenis_id) id_posisi_surat
+            , persuratan.ambil_sediaan_posisi_surat_baca(a.surat_keluar_bkd_id, a.jenis_id) id_posisi_surat_baca
+            from persuratan.surat_keluar_bkd a
+            where a.surat_keluar_bkd_id = new.surat_keluar_bkd_id
+          ) a
+          inner join 
+          (
+            select surat_keluar_bkd_sediaan_id from persuratan.surat_keluar_bkd_sediaan
+          ) b on id_pos = surat_keluar_bkd_sediaan_id
+        ) as aggr
+    where   u.surat_keluar_bkd_id = aggr.surat_keluar_bkd_id;
+    raise notice 'sql %',temprowid;
+  end if;
+  
+  return new;
+end;
+$body$
+language plpgsql volatile cost 100;
+alter function persuratan.surat_keluar_bkd_sediaan_posisi_p() owner to postgres;
+
+drop trigger if exists surat_keluar_bkd_sediaan_posisi on persuratan.surat_keluar_bkd_sediaan;
+create trigger surat_keluar_bkd_sediaan_posisi
+after insert or update
+on persuratan.surat_keluar_bkd_sediaan
+for each row
+execute procedure persuratan.surat_keluar_bkd_sediaan_posisi_p();
+
+CREATE OR REPLACE FUNCTION persuratan.surat_keluar_bkd_hapus()
+  RETURNS trigger AS
+$BODY$
+DECLARE
+    VAR_ID INTEGER;
+    VARCHECK INTEGER;
+    
+BEGIN
+  IF TG_OP = 'DELETE' THEN
+
+    DELETE FROM persuratan.surat_keluar_bkd_sediaan where surat_keluar_bkd_id = old.surat_keluar_bkd_id;
+    DELETE FROM persuratan.surat_keluar_bkd_sediaan_posisi where surat_keluar_bkd_id = old.surat_keluar_bkd_id;
+    RETURN old;
+  END IF;
+   
+END;
+$BODY$
+LANGUAGE plpgsql VOLATILE COST 100;
+ALTER FUNCTION persuratan.surat_keluar_bkd_hapus() OWNER TO postgres;
+
+DROP TRIGGER if exists surat_keluar_bkd_bhapus ON persuratan.surat_keluar_bkd;
+CREATE TRIGGER surat_keluar_bkd_bhapus
+BEFORE DELETE
+ON persuratan.surat_keluar_bkd
+FOR EACH ROW
+EXECUTE PROCEDURE persuratan.surat_keluar_bkd_hapus();
+
+insert into menu (menu_id, menu_parent_id, menu_group_id, nama, link_file, urut) values('1705', '17', 1, 'Surat Masuk Sediaan', 'surat_masuk_sediaan?1=1', 2);
+--============================================================belumupdate
+insert into menu(menu_id, menu_parent_id, menu_group_id, nama) values('1123', '11', 1, 'Nilai Rumpun');
+insert into menu(menu_id, menu_parent_id, menu_group_id, nama, link_file, status) values('112301', '1123', 1, 'Kualifikasi Pendidikan', 'nilai_rumpun_pendidikan', 1);
+insert into menu(menu_id, menu_parent_id, menu_group_id, nama, link_file, status) values('112302', '1123', 1, 'Kualifikasi Jurusan', 'nilai_rumpun_jurusan', 1);
+insert into menu(menu_id, menu_parent_id, menu_group_id, nama, link_file, status) values('112303', '1123', 1, 'Diklat/Kursus', 'nilai_rumpun_diklat_kursus', 1);
+
+--DROP TABLE if exists talent.rumpun;
+CREATE TABLE talent.rumpun
+(
+  rumpun_id integer not null,
+  permen_id integer not null,
+  kode character varying,
+  nama character varying,
+  keterangan character varying,
+  status character varying(1),
+  constraint rumpun_pkey primary key (rumpun_id)
+) WITH (OIDS=FALSE);
+ALTER TABLE talent.rumpun OWNER TO postgres;
+
+insert into talent.rumpun(rumpun_id, permen_id, kode, nama, keterangan) values(1, 1, 'A', 'ADM', 'Administrasi');
+insert into talent.rumpun(rumpun_id, permen_id, kode, nama, keterangan) values(2, 1, 'P', 'PEM', 'Pemerintahan');
+insert into talent.rumpun(rumpun_id, permen_id, kode, nama, keterangan) values(3, 1, 'M', 'MASY', 'Kemasyarakatan');
+insert into talent.rumpun(rumpun_id, permen_id, kode, nama, keterangan) values(4, 1, 'H', 'HUK', 'Hukum');
+insert into talent.rumpun(rumpun_id, permen_id, kode, nama, keterangan) values(5, 1, 'E', 'EKO', 'Ekonomi');
+insert into talent.rumpun(rumpun_id, permen_id, kode, nama, keterangan) values(6, 1, 'U', 'TEK', 'Teknik KE-PUAN');
+insert into talent.rumpun(rumpun_id, permen_id, kode, nama, keterangan) values(7, 1, 'T', 'TAN', 'Pertanian');
+
+--DROP TABLE if exists talent.rumpun_nilai;
+CREATE TABLE talent.rumpun_nilai
+(
+  rumpun_id integer not null,
+  permen_id integer not null,
+  infomode character varying not null,
+  infoid numeric not null,
+  nilai numeric,
+  keterangan_nilai character varying,
+  constraint rumpun_nilai_pkey primary key (rumpun_id, permen_id, infomode, infoid)
+) WITH (OIDS=FALSE);
+ALTER TABLE talent.rumpun_nilai OWNER TO postgres;
+
+insert into talent.rumpun_nilai(rumpun_id, permen_id, infomode, infoid, nilai, keterangan_nilai) values(-1, 1, 'perumpunan', 1, 30, 'NILAI REKAM JEJAK (30 %)');
+insert into talent.rumpun_nilai(rumpun_id, permen_id, infomode, infoid, nilai, keterangan_nilai) values(-1, 1, 'perumpunan', 2, 50, 'NILAI KUALIFIKASI (50 %)');
+insert into talent.rumpun_nilai(rumpun_id, permen_id, infomode, infoid, nilai, keterangan_nilai) values(-1, 1, 'perumpunan', 3, 20, 'NILAI PENG KOMPETENSI (20 %)');
+insert into talent.rumpun_nilai(rumpun_id, permen_id, infomode, infoid, nilai, keterangan_nilai) values(-1, 1, 'nilai_akhir', 1, 40, 'KOMPETENSI');
+insert into talent.rumpun_nilai(rumpun_id, permen_id, infomode, infoid, nilai, keterangan_nilai) values(-1, 1, 'nilai_akhir', 2, 30, 'KINERJA');
+insert into talent.rumpun_nilai(rumpun_id, permen_id, infomode, infoid, nilai, keterangan_nilai) values(-1, 1, 'nilai_akhir', 3, 25, 'NILAI RUMPUN');
+insert into talent.rumpun_nilai(rumpun_id, permen_id, infomode, infoid, nilai, keterangan_nilai) values(-1, 1, 'nilai_akhir', 4, 5, 'FAKTOR PENGOREKSI');
+
+--DROP TABLE if exists talent.pengembangan_kompetensi;
+CREATE TABLE talent.pengembangan_kompetensi
+(
+  pengembangan_kompetensi_id integer not null,
+  permen_id integer not null,
+  kode character varying,
+  nama character varying,
+  keterangan character varying,
+  nilai numeric,
+  status character varying(1),
+  constraint pengembangan_kompetensi_pkey primary key (pengembangan_kompetensi_id)
+) WITH (OIDS=FALSE);
+ALTER TABLE talent.pengembangan_kompetensi OWNER TO postgres;
+
+insert into talent.pengembangan_kompetensi(pengembangan_kompetensi_id, permen_id, nama, nilai) values(1, 1, 'KOMPETENSI', 40);
+insert into talent.pengembangan_kompetensi(pengembangan_kompetensi_id, permen_id, nama, nilai) values(2, 1, 'KINERJA', 30);
+insert into talent.pengembangan_kompetensi(pengembangan_kompetensi_id, permen_id, nama, nilai) values(3, 1, 'NILAI RUMPUN', 25);
+insert into talent.pengembangan_kompetensi(pengembangan_kompetensi_id, permen_id, nama, nilai) values(4, 1, 'FAKTOR PENGOREKSI', 5);
+
+DROP TABLE if exists app.user_login_personal;
+CREATE TABLE app.user_login_personal
+(
+  login_user character varying NOT NULL,
+  login_pass character varying NOT NULL,
+  pegawai_id numeric NOT NULL,
+  satuan_kerja_id numeric,
+  status character varying(1),
+  last_user character varying,
+  last_date timestamp without time zone,
+  CONSTRAINT pk_app_user_login_personal PRIMARY KEY (pegawai_id)
+)
+WITH (OIDS=FALSE);
+ALTER TABLE app.user_login_personal OWNER TO postgres;
+
+--drop table if exists tipe_kursus;
+create table tipe_kursus
+(
+  tipe_kursus_id integer not null,
+  kode character varying,
+  nama character varying,
+  keterangan character varying,
+  status character varying(1),
+  constraint tipe_kursus_pkey primary key (tipe_kursus_id)
+) with (oids=false);
+alter table tipe_kursus owner to postgres;
+
+insert into tipe_kursus(tipe_kursus_id, nama) values(1, 'Diklat Teknis');
+insert into tipe_kursus(tipe_kursus_id, nama) values(2, 'Diklat Fungsional');
+insert into tipe_kursus(tipe_kursus_id, nama) values(3, 'Seminar / Workshop / Kursus / Magang / Sejenisnya');
+
+--drop table if exists sk_dasar_jabatan;
+create table sk_dasar_jabatan
+(
+  sk_dasar_jabatan_id integer not null,
+  jenis_jabatan_id numeric not null,
+  kode character varying,
+  nama character varying,
+  keterangan character varying,
+  status character varying(1),
+  constraint sk_dasar_jabatan_pkey primary key (sk_dasar_jabatan_id)
+) with (oids=false);
+alter table sk_dasar_jabatan owner to postgres;
+
+insert into sk_dasar_jabatan(sk_dasar_jabatan_id, jenis_jabatan_id, nama) values(1, 1, 'SK Mutasi');
+insert into sk_dasar_jabatan(sk_dasar_jabatan_id, jenis_jabatan_id, nama) values(2, 1, 'SK Pelaksana');
+insert into sk_dasar_jabatan(sk_dasar_jabatan_id, jenis_jabatan_id, nama) values(3, 1, 'SK Kenaikan Pangkat');
+insert into sk_dasar_jabatan(sk_dasar_jabatan_id, jenis_jabatan_id, nama) values(4, 1, 'SK Pengangkatan Pertama Kali JFT');
+insert into sk_dasar_jabatan(sk_dasar_jabatan_id, jenis_jabatan_id, nama) values(5, 1, 'SK Kenaikan JFT');
+insert into sk_dasar_jabatan(sk_dasar_jabatan_id, jenis_jabatan_id, nama) values(6, 1, 'SK Inpassing JFT');
+insert into sk_dasar_jabatan(sk_dasar_jabatan_id, jenis_jabatan_id, nama) values(7, 1, 'SK Penyetaraan');
+insert into sk_dasar_jabatan(sk_dasar_jabatan_id, jenis_jabatan_id, nama) values(8, 2, 'SK Mutasi');
+insert into sk_dasar_jabatan(sk_dasar_jabatan_id, jenis_jabatan_id, nama) values(9, 2, 'SK Pelaksana');
+insert into sk_dasar_jabatan(sk_dasar_jabatan_id, jenis_jabatan_id, nama) values(10, 2, 'SK Kenaikan Pangkat');
+insert into sk_dasar_jabatan(sk_dasar_jabatan_id, jenis_jabatan_id, nama) values(11, 2, 'SK Pembebasan Dari Jabatan');
+insert into sk_dasar_jabatan(sk_dasar_jabatan_id, jenis_jabatan_id, nama) values(12, 3, 'SK Mutasi');
+insert into sk_dasar_jabatan(sk_dasar_jabatan_id, jenis_jabatan_id, nama) values(13, 3, 'SK Kenaikan Pangkat');
+insert into sk_dasar_jabatan(sk_dasar_jabatan_id, jenis_jabatan_id, nama) values(14, 3, 'SK Pengangkatan Pertama Kali JFT');
+insert into sk_dasar_jabatan(sk_dasar_jabatan_id, jenis_jabatan_id, nama) values(15, 3, 'SK Kenaikan JFT');
+insert into sk_dasar_jabatan(sk_dasar_jabatan_id, jenis_jabatan_id, nama) values(16, 3, 'SK Pengangkatan Kembali JFT');
+insert into sk_dasar_jabatan(sk_dasar_jabatan_id, jenis_jabatan_id, nama) values(17, 3, 'SK Inpassing JFT');
+insert into sk_dasar_jabatan(sk_dasar_jabatan_id, jenis_jabatan_id, nama) values(18, 3, 'SK Penyetaraan JFT');
+
+create table sk_dasar_pengakuan
+(
+  sk_dasar_pengakuan_id integer not null,
+  kode character varying,
+  nama character varying,
+  keterangan character varying,
+  status character varying(1),
+  constraint sk_dasar_pengakuan_pkey primary key (sk_dasar_pengakuan_id)
+) with (oids=false);
+alter table sk_dasar_pengakuan owner to postgres;
+
+insert into sk_dasar_pengakuan(sk_dasar_pengakuan_id, nama) values(1, 'SK CPNS/PNS');
+insert into sk_dasar_pengakuan(sk_dasar_pengakuan_id, nama) values(2, 'Kenaikan Pangkat');
+insert into sk_dasar_pengakuan(sk_dasar_pengakuan_id, nama) values(3, 'SK Pencantuman Gelar');
+
+alter table pendidikan_riwayat
+add column status_sk_dasar_pengakuan numeric
+, add column cantum_gelar_tanggal date
+, add column cantum_gelar_no_sk character varying
+, add column dasar_pangkat_riwayat_id numeric
+, add column nilai_rekam_jejak numeric
+, add column rumpun_id character varying;
+
+alter table jabatan_riwayat
+add column tmt_spmt timestamp without time zone
+, add column status_sk_dasar_jabatan numeric
+, add column tmt_selesai_jabatan timestamp without time zone
+, add column lama_jabatan numeric
+, add column nilai_rekam_jejak numeric
+, add column rumpun_id integer
+, add column sertifikasi_no_sk character varying
+, add column sertifikasi_tgl_sk timestamp without time zone
+, add column sertifikasi_tgl_berlaku timestamp without time zone
+, add column sertifikasi_tgl_expired timestamp without time zone
+, add column eoffice_jabatan_id numeric
+, add column eoffice_jabatan_nama character varying
+, add column eoffice_satuan_kerja_id numeric
+, add column eoffice_satuan_kerja_nama character varying
+, add column status_triger numeric
+;
+
+alter table diklat_struktural
+add column ds_jabatan_riwayat_id numeric
+, add column nilai_rekam_jejak numeric
+, add column rumpun_id integer;
+
+
+insert into satuan_kerja (satuan_kerja_id, satuan_kerja_parent_id, nama, nama_jabatan) values(-2, 0, 'Bupati', 'Bupati');
+alter table satuan_kerja
+add column status_sediaan character varying(1)
+, add column satuan_kerja_sediaan numeric
+, add column rumpun_id numeric;
+
+insert into menu(menu_id, menu_parent_id, menu_group_id, nama, link_file, status) values('010604', '0106', 1, 'Diklat/Kursus', 'pegawai_add_diklat_kursus_monitoring', 1);
+
+drop schema if exists sapk;
+create schema sapk authorization postgres;
+
+drop table if exists sapk.ref_jenis_kursus;
+create table sapk.ref_jenis_kursus
+(
+  ref_jenis_kursus_id integer not null,
+  ref_jenis_kursus_id_sapk character varying,
+  nama character varying,
+  rumpun_id integer,
+  constraint ref_jenis_kursus_pkey primary key (ref_jenis_kursus_id)
+) with (oids=false);
+alter table sapk.ref_jenis_kursus owner to postgres;
+
+drop table if exists sapk.ref_instansi;
+create table sapk.ref_instansi
+(
+  ref_instansi_id integer not null,
+  ref_instansi_id_sapk character varying,
+  nama character varying,
+  jenis character varying,
+  jenis2 character varying,
+  constraint ref_instansi_pkey primary key (ref_instansi_id)
+) with (oids=false);
+alter table sapk.ref_instansi owner to postgres;
+--==============================
+CREATE OR REPLACE FUNCTION jabatan_riwayat_triger_log()
+  RETURNS trigger AS
+$BODY$
+DECLARE
+tempstatus CHARACTER VARYING(1);
+tempinfo TEXT;
+tempquery TEXT;
+BEGIN
+  IF NEW.STATUS_TRIGER IS NULL THEN
+  
+    IF TG_OP = 'INSERT' THEN
+    tempstatus:= '1';
+    ELSIF TG_OP = 'UPDATE' AND NEW.STATUS IS NULL THEN
+    tempstatus:= '2';
+    ELSIF TG_OP = 'UPDATE' AND NEW.STATUS = '1' THEN
+    tempstatus:= '3';
+    ELSIF TG_OP = 'UPDATE' AND NEW.STATUS = '2' THEN
+    tempstatus:= '4';
+    END IF;
+    
+    IF TG_OP = 'INSERT' THEN
+    tempinfo:= 'Jenis Jabatan: ' || valtonulldb(NEW.JENIS_JABATAN_ID) || '<br/>';
+    tempinfo:= tempinfo || 'Tipe Pegawai: ' || valtonulldb(NEW.TIPE_PEGAWAI_ID) || '<br/>';
+    tempinfo:= tempinfo || 'No SK: ' || REPLACEQUOTE(NEW.NO_SK) || '<br/>';
+    tempinfo:= tempinfo || 'Tanggal SK: ' || getformatteddate(cast(NEW.TANGGAL_SK as text)) || '<br/>';
+    tempinfo:= tempinfo || 'Nama Jabatan: ' || valtonulldb(REPLACEQUOTE(NEW.NAMA)) || '<br/>';
+    tempinfo:= tempinfo || 'TMT Jabatan: ' || getformatteddate(cast(NEW.TMT_JABATAN as text)) || '<br/>';
+    tempinfo:= tempinfo || 'Angka Kredit: ' || valtonulldb(NEW.KREDIT)|| '<br/>';
+    tempinfo:= tempinfo || 'Satker luar jombang/sebelum 2012: ' || valtonulldb(NEW.IS_MANUAL) || '<br/>';
+    tempinfo:= tempinfo || 'Satuan Kerja: ' || valtonulldb(REPLACEQUOTE(NEW.SATKER_NAMA))|| '<br/>';  
+    tempinfo:= tempinfo || 'Eselon: ' || valtonulldb(NEW.ESELON_ID) || '<br/>';
+    tempinfo:= tempinfo || 'No Pelantikan: ' || valtonulldb(REPLACEQUOTE(NEW.NO_PELANTIKAN))|| '<br/>'; 
+    tempinfo:= tempinfo || 'Tanggal Pelantikan: ' || getformatteddate(cast(NEW.TANGGAL_PELANTIKAN as text)) || '<br/>';
+    tempinfo:= tempinfo || 'Tunjangan: ' || valtonulldb(NEW.TUNJANGAN) || '<br/>';
+    tempinfo:= tempinfo || 'Bulan Dibayar: ' || getformatteddate(cast(NEW.BULAN_DIBAYAR as text)) || '<br/>';
+    tempinfo:= tempinfo || 'Pejabat Penetap: ' || valtonulldb(REPLACEQUOTE(NEW.PEJABAT_PENETAP))|| '<br/>'; 
+    
+    ELSIF tempstatus = '3' THEN
+    tempinfo:= 'Data di hapus';
+    ELSIF tempstatus = '4' THEN
+    tempinfo:= 'Data di aktifkan';
+    ELSE
+      
+      tempinfo:= '';
+      IF OLD.JENIS_JABATAN_ID != NEW.JENIS_JABATAN_ID THEN
+      tempinfo:= tempinfo || 'Jenis Jabatan: ' || valtonulldb(OLD.JENIS_JABATAN_ID) || ' -> '|| valtonulldb(NEW.JENIS_JABATAN_ID) || '<br/>';
+      END IF;
+      IF OLD.TIPE_PEGAWAI_ID != NEW.TIPE_PEGAWAI_ID THEN
+      tempinfo:= tempinfo || 'Tipe Pegawai: ' || valtonulldb(OLD.TIPE_PEGAWAI_ID) || ' -> '|| valtonulldb(NEW.TIPE_PEGAWAI_ID) || '<br/>';
+      END IF;
+      IF OLD.NO_SK != NEW.NO_SK THEN
+      tempinfo:= tempinfo || 'No SK: ' || OLD.NO_SK || ' -> '|| REPLACEQUOTE(NEW.NO_SK) || '<br/>';
+      END IF;
+      IF OLD.TANGGAL_SK != NEW.TANGGAL_SK THEN
+      tempinfo:= tempinfo || 'Tanggal SK: ' || getformatteddate(cast(OLD.TANGGAL_SK as text)) || ' -> '|| getformatteddate(cast(NEW.TANGGAL_SK as text)) || '<br/>';
+      END IF;
+      IF OLD.NAMA != NEW.NAMA THEN
+      tempinfo:= tempinfo || 'Nama Jabatan: ' || valtonulldb(REPLACEQUOTE(OLD.NAMA)) || ' -> '|| valtonulldb(REPLACEQUOTE(NEW.NAMA)) || '<br/>';
+      END IF;
+      IF OLD.TMT_JABATAN != NEW.TMT_JABATAN THEN
+      tempinfo:= tempinfo || 'TMT Jabatan: ' || valtonulldb(OLD.TMT_JABATAN) || ' -> '|| valtonulldb(NEW.TMT_JABATAN)|| '<br/>';
+      END IF;
+      IF OLD.KREDIT != NEW.KREDIT THEN
+      tempinfo:= tempinfo || 'Angka Kredit: ' || valtonulldb(OLD.KREDIT) || ' -> '|| valtonulldb(NEW.KREDIT)|| '<br/>';
+      END IF;
+      IF OLD.IS_MANUAL != NEW.IS_MANUAL THEN
+      tempinfo:= tempinfo || 'Satker luar jombang/sebelum 2012: ' || valtonulldb(OLD.IS_MANUAL) || ' -> '|| valtonulldb(NEW.IS_MANUAL) || '<br/>';
+      END IF;
+      IF OLD.SATKER_NAMA != NEW.SATKER_NAMA THEN
+      tempinfo:= tempinfo || 'Satuan Kerja: ' || valtonulldb(REPLACEQUOTE(OLD.SATKER_NAMA)) || ' -> '|| valtonulldb(REPLACEQUOTE(NEW.SATKER_NAMA))|| '<br/>'; 
+      END IF;
+      IF OLD.ESELON_ID != NEW.ESELON_ID THEN
+      tempinfo:= tempinfo || 'Eselon: ' || valtonulldb(OLD.ESELON_ID) || ' -> '||  valtonulldb(NEW.ESELON_ID) || '<br/>';
+      END IF;
+      IF OLD.NO_PELANTIKAN != NEW.NO_PELANTIKAN THEN
+      tempinfo:= tempinfo || 'No Pelantikan: ' ||  valtonulldb(REPLACEQUOTE(OLD.NO_PELANTIKAN)) || ' -> '|| valtonulldb(REPLACEQUOTE(NEW.NO_PELANTIKAN))|| '<br/>';
+      END IF;
+      IF OLD.TANGGAL_PELANTIKAN != NEW.TANGGAL_PELANTIKAN THEN
+      tempinfo:= tempinfo || 'Tanggal Pelantikan: ' || getformatteddate(cast(OLD.TANGGAL_PELANTIKAN as text)) || ' -> '|| getformatteddate(cast(NEW.TANGGAL_PELANTIKAN as text)) || '<br/>';
+      END IF;
+      IF OLD.TUNJANGAN != NEW.TUNJANGAN THEN
+      tempinfo:= tempinfo || 'Tunjangan: ' || valtonulldb(OLD.TUNJANGAN) || ' -> '|| valtonulldb(NEW.TUNJANGAN) || '<br/>';
+      END IF;
+      IF OLD.BULAN_DIBAYAR != NEW.BULAN_DIBAYAR THEN
+      tempinfo:= tempinfo || 'Bulan Dibayar: ' || valtonulldb(OLD.BULAN_DIBAYAR) || ' -> '|| valtonulldb(NEW.BULAN_DIBAYAR) || '<br/>';
+      END IF;
+      IF OLD.PEJABAT_PENETAP != NEW.PEJABAT_PENETAP THEN
+      tempinfo:= tempinfo || 'Pejabat Penetap: ' || valtonulldb(REPLACEQUOTE(OLD.PEJABAT_PENETAP)) || ' -> '|| valtonulldb(REPLACEQUOTE(NEW.PEJABAT_PENETAP))|| '<br/>';
+      END IF;
+
+      IF tempinfo = '' OR tempinfo IS NULL THEN
+      tempinfo:= 'Tidak ada perubahan';
+      END IF;
+    END IF;
+    
+    tempquery:= '
+    INSERT INTO JABATAN_RIWAYAT_LOG(JABATAN_RIWAYAT_ID, PEGAWAI_ID, INFO_LOG, LAST_USER, LAST_DATE, STATUS)
+    VALUES(
+    '|| NEW.JABATAN_RIWAYAT_ID ||',
+    '|| NEW.PEGAWAI_ID ||',
+    '''|| tempinfo ||''',
+    '''|| NEW.LAST_USER ||''',
+    '''|| NOW() ||''',
+    '''|| tempstatus ||'''
+    )
+    ';
+    --raise notice 'sql %',tempquery;
+    IF tempquery IS NOT NULL THEN         
+    EXECUTE tempquery;
+    END IF;
+  END IF;
+  
+  RETURN null;
+   
+END;
+$BODY$
+  LANGUAGE plpgsql VOLATILE
+  COST 100;
+ALTER FUNCTION jabatan_riwayat_triger_log()
+  OWNER TO postgres;
+
+DROP type if exists p_jabatanrwyturut_type;
+create type p_jabatanrwyturut_type as (
+urut integer, jabatan_riwayat_id numeric, pegawai_id numeric, tipe_pegawai_id numeric
+, tmt_jabatan timestamp without time zone, tmt_jabatan_date date
+);
+
+DROP FUNCTION if exists p_jabatanrwyturut_pegawai(character varying, numeric);
+CREATE or replace FUNCTION p_jabatanrwyturut_pegawai(vurut character varying, pegawaiid numeric) RETURNS SETOF p_jabatanrwyturut_type AS $$
+DECLARE
+  cur refcursor;
+  query TEXT;
+  rec p_jabatanrwyturut_type%ROWTYPE;
+BEGIN
+  query := '
+  select a.*, to_date(to_char(a.tmt_jabatan, ''yyyy-mm-dd''), ''yyyy-mm-dd'') tmt_jabatan_date
+  from
+  (
+    select
+    row_number () over (partition by pegawai_id order by tmt_jabatan desc) urut
+    , a.jabatan_riwayat_id, a.pegawai_id, a.tipe_pegawai_id, a.tmt_jabatan
+    from jabatan_riwayat a
+    where pegawai_id = '||pegawaiid||'
+    and (coalesce(nullif(a.status, ''''), null) is null or a.status = ''2'')
+    order by tmt_jabatan desc
+  ) a
+  where 1=1';
+  
+  if coalesce(nullif(vurut, ''), null) is not null then
+    query := query || ' and urut::text = '''||vurut||''' ';
+  end if;
+
+  query := query || ' order by urut';
+  
+  --raise notice 'sql %', query;
+  --select * from p_jabatanrwyturut_pegawai('', 4857);
+  --select * from p_jabatanrwyturut_pegawai('2', 4857);
+  
+  OPEN cur FOR EXECUTE query;
+  
+  FETCH cur INTO rec;
+  WHILE FOUND LOOP
+    RETURN NEXT rec;
+    FETCH cur INTO rec;
+  END LOOP;
+  CLOSE cur;
+END;
+$$ LANGUAGE plpgsql STRICT;
+
+create or replace function jabatan_riwayat_beforelamajabatan()
+  returns trigger as
+$body$
+declare
+  var_id integer;
+  varcheck integer;
+begin
+
+  if new.status_triger = 1 then
+    new.status_triger = null;
+    return new;
+  else
+    new.status_triger:= 1;
+  end if;
+    return new;
+   
+end;
+$body$
+language plpgsql volatile cost 100;
+alter function jabatan_riwayat_beforelamajabatan() owner to postgres;
+
+drop trigger if exists jabatan_riwayat_tbeforelamajabatan on jabatan_riwayat;
+create trigger jabatan_riwayat_tbeforelamajabatan
+before insert or update
+on jabatan_riwayat
+for each row
+execute procedure jabatan_riwayat_beforelamajabatan();
+
+create or replace function jabatan_riwayat_hlamajabatan(vpegawaiid numeric)
+  returns void as
+$body$
+declare
+  sqlquery text;
+  vurut numeric;
+  recdata record;
+
+  vjabatanriwayatid numeric;
+  vtipepegawaiid numeric;
+  vtmtjabatan date;
+  ntmtjabatan date;
+  nlabajabatan numeric;
+begin
+
+  for recdata in (select * from p_jabatanrwyturut_pegawai('', vpegawaiid))
+  loop
+    vurut:= recdata.urut;
+    vjabatanriwayatid:= recdata.jabatan_riwayat_id;
+    vtmtjabatan:= recdata.tmt_jabatan_date;
+    vtipepegawaiid:= recdata.tipe_pegawai_id;
+
+    if ntmtjabatan is not null and vtmtjabatan is not null then
+    --if vtipepegawaiid = 11 then
+      if vurut > 1 then
+      
+        sqlquery:= '
+        select
+        case when
+        (datediff(''month'', to_date('''||vtmtjabatan||''', ''yyyy-mm-dd''), to_date('''||ntmtjabatan||''', ''yyyy-mm-dd'')) / 12) > 2
+        THEN 1 ELSE 0
+        END
+        +
+        datediff(''year'', to_date('''||vtmtjabatan||''', ''yyyy-mm-dd''), to_date('''||ntmtjabatan||''', ''yyyy-mm-dd''))
+        nlabajabatan
+        ';
+        --raise notice 'sql %',sqlquery;
+        execute sqlquery into nlabajabatan;
+        --raise notice 'sql %',nlabajabatan;
+
+        sqlquery:= ' update jabatan_riwayat set tmt_selesai_jabatan = to_date('''||ntmtjabatan||''', ''yyyy-mm-dd'')
+        , lama_jabatan = ' || nlabajabatan ||'
+        , status_triger = 1
+        where jabatan_riwayat_id = ' || vjabatanriwayatid;
+        raise notice 'sql %',sqlquery;
+        execute sqlquery;
+      else
+        sqlquery:= ' update jabatan_riwayat set tmt_selesai_jabatan = null
+        , lama_jabatan = null
+        , status_triger = 1
+        where jabatan_riwayat_id = ' || vjabatanriwayatid;
+        raise notice 'sql %',sqlquery;
+        execute sqlquery;
+        
+      end if;
+    end if;
+    
+    --ambil data sebelum
+    ntmtjabatan:= vtmtjabatan;
+  end loop;
+  
+  --update jabatan_riwayat set pegawai_id = 4857 where jabatan_riwayat_id = 33584;
+  --execute sqlquery;
+  --select jabatan_riwayat_hlamajabatan(4857);
+    
+exception
+when others
+then raise exception 'an error was encountered - ', sqlquery; 
+
+end;
+$body$
+language plpgsql volatile cost 100;
+alter function jabatan_riwayat_hlamajabatan(numeric) owner to postgres;
+
+create or replace function jabatan_riwayat_plamajabatan()
+  returns trigger as
+$body$
+declare
+    var_id integer;
+    varcheck integer;
+    
+begin
+  if new.status_triger = 1 then
+    perform jabatan_riwayat_hlamajabatan(new.pegawai_id);
+    --update jabatan_riwayat set pegawai_id = 4857 where jabatan_riwayat_id = 33584;
+  end if;
+    return new;
+   
+end;
+$body$
+language plpgsql volatile cost 100;
+alter function jabatan_riwayat_plamajabatan() owner to postgres;
+
+drop trigger if exists jabatan_riwayat_tlamajabatan on jabatan_riwayat;
+create trigger jabatan_riwayat_tlamajabatan
+after insert or update
+on jabatan_riwayat
+for each row
+execute procedure jabatan_riwayat_plamajabatan();
+
+update jabatan_riwayat as u
+set
+status_triger = null
+from
+(
+  select jabatan_riwayat_id
+  from pegawai a
+  where 1=1 --and pegawai_id = 11761
+) as x
+where u.jabatan_riwayat_id = x.jabatan_riwayat_id;
+
+create or replace function satuan_kerja_p_rumpun()
+  returns trigger as
+$body$
+declare
+    var_id integer;
+    varcheck integer;
+    
+begin
+  if new.tipe_jabatan_id = 1 then
+
+    update jabatan_riwayat as u
+    set
+    rumpun_id= new.rumpun_id
+    from
+    (
+      select
+      a.satker_id, a.jabatan_riwayat_id
+      from jabatan_riwayat a
+      where satker_id = new.satuan_kerja_id --and tipe_pegawai_id = 11
+      and (coalesce(nullif(a.status, ''), null) is null or a.status = '2')
+      order by pegawai_id, tmt_jabatan desc
+    ) as x
+    where u.jabatan_riwayat_id = x.jabatan_riwayat_id;
+    
+  end if;
+  return new;
+end;
+$body$
+language plpgsql volatile cost 100;
+alter function satuan_kerja_p_rumpun() owner to postgres;
+
+drop trigger if exists satuan_kerja_t_rumpun on satuan_kerja;
+create trigger satuan_kerja_t_rumpun
+after insert or update
+on satuan_kerja
+for each row
+execute procedure satuan_kerja_p_rumpun();
+
+insert into menu(menu_id, menu_parent_id, menu_group_id, nama, link_file, status, urut) values('010703', '0107', 1, 'Kompetensi', 'pegawai_add_kompetensi_monitoring', 1, null);
+insert into akses_app_simpeg_menu(akses_app_simpeg_id, menu_id, akses) values(1, '010703', 'A')
+
+CREATE OR REPLACE FUNCTION public.unique_penilaian_skp()
+  RETURNS trigger AS
+$BODY$
+DECLARE
+temprowid integer;
+tempstatus CHARACTER VARYING(1);
+tempinfo TEXT;
+tempquery TEXT;
+BEGIN
+  
+  IF TG_OP = 'INSERT' OR (TG_OP = 'UPDATE' AND (COALESCE(NULLIF(NEW.STATUS, ''), NULL) IS NULL OR NEW.STATUS = '2')) THEN
+    -- CHECK VALIDASI TMT DAN TANGGAL SK PEGAWAI TIDAK BOLEH SAMA DALAM STATUS AKTIF
+    IF TG_OP = 'INSERT' THEN
+      SELECT
+      CASE WHEN COUNT(1) > 0 THEN 1 ELSE 0 END INTO temprowid
+      FROM PENILAIAN_SKP A
+      WHERE 1=1 AND A.PEGAWAI_ID = NEW.PEGAWAI_ID
+      AND A.TAHUN = NEW.TAHUN
+      AND (COALESCE(NULLIF(A.STATUS, ''), NULL) IS NULL OR A.STATUS = '2')
+      ;
+    ELSE
+      SELECT
+      PENILAIAN_SKP_ID INTO temprowid
+      FROM PENILAIAN_SKP A
+      WHERE 1=1 AND A.PEGAWAI_ID = NEW.PEGAWAI_ID
+      AND A.TAHUN = NEW.TAHUN
+      AND (COALESCE(NULLIF(A.STATUS, ''), NULL) IS NULL OR A.STATUS = '2')
+      ;
+
+      IF NEW.PENILAIAN_SKP_ID = temprowid OR temprowid IS NULL THEN
+      temprowid:= 0;
+      ELSE
+      temprowid:= 1;
+      END IF;
+      
+    END IF;
+    --raise notice 'sql %',temprowid;
+    IF temprowid >= 1 AND temprowid IS NOT NULL THEN
+      RETURN FALSE; 
+    ELSE
+      RETURN NEW;
+    END IF;
+  ELSE
+  RETURN NEW;
+  END IF;
+  
+END;
+$BODY$
+LANGUAGE plpgsql VOLATILE COST 100;
+ALTER FUNCTION public.unique_penilaian_skp() OWNER TO postgres;
+
+DROP TRIGGER if exists uniquec_penilaian_skp ON public.penilaian_skp;
+CREATE TRIGGER uniquec_penilaian_skp
+BEFORE INSERT OR UPDATE
+ON public.penilaian_skp
+FOR EACH ROW
+EXECUTE PROCEDURE public.unique_penilaian_skp();
+
+ALTER TABLE public.pak DROP CONSTRAINT if exists ak_u1_pak_tanggal;
+--ALTER TABLE public.pak ADD CONSTRAINT ak_u1_pak_tanggal UNIQUE(pegawai_id, tanggal_sk);
+
+CREATE OR REPLACE FUNCTION public.unique_pak()
+  RETURNS trigger AS
+$BODY$
+DECLARE
+temprowid integer;
+tempstatus CHARACTER VARYING(1);
+tempinfo TEXT;
+tempquery TEXT;
+BEGIN
+  
+  IF TG_OP = 'INSERT' OR (TG_OP = 'UPDATE' AND (COALESCE(NULLIF(NEW.STATUS, ''), NULL) IS NULL OR NEW.STATUS = '2')) THEN
+    -- CHECK VALIDASI TMT DAN TANGGAL SK PEGAWAI TIDAK BOLEH SAMA DALAM STATUS AKTIF
+    IF TG_OP = 'INSERT' THEN
+      SELECT
+      CASE WHEN COUNT(1) > 0 THEN 1 ELSE 0 END INTO temprowid
+      FROM pak A
+      WHERE 1=1 AND A.PEGAWAI_ID = NEW.PEGAWAI_ID
+      AND A.TANGGAL_SK = NEW.TANGGAL_SK
+      AND (COALESCE(NULLIF(A.STATUS, ''), NULL) IS NULL OR A.STATUS = '2')
+      ;
+    ELSE
+      SELECT
+      pak_ID INTO temprowid
+      FROM pak A
+      WHERE 1=1 AND A.PEGAWAI_ID = NEW.PEGAWAI_ID
+      AND A.TANGGAL_SK = NEW.TANGGAL_SK
+      AND (COALESCE(NULLIF(A.STATUS, ''), NULL) IS NULL OR A.STATUS = '2')
+      ;
+
+      IF NEW.pak_ID = temprowid OR temprowid IS NULL THEN
+      temprowid:= 0;
+      ELSE
+      temprowid:= 1;
+      END IF;
+      
+    END IF;
+    --raise notice 'sql %',temprowid;
+    IF temprowid >= 1 AND temprowid IS NOT NULL THEN
+      RETURN FALSE; 
+    ELSE
+      RETURN NEW;
+    END IF;
+  ELSE
+  RETURN NEW;
+  END IF;
+  
+END;
+$BODY$
+LANGUAGE plpgsql VOLATILE COST 100;
+ALTER FUNCTION public.unique_pak() OWNER TO postgres;
+
+DROP TRIGGER if exists uniquec_pak ON public.pak;
+CREATE TRIGGER uniquec_pak
+BEFORE INSERT OR UPDATE
+ON public.pak
+FOR EACH ROW
+EXECUTE PROCEDURE public.unique_pak();
+
+drop table if exists penilaian_kompetensi;
+create table penilaian_kompetensi
+(
+  penilaian_kompetensi_id numeric not null,
+  pegawai_id numeric,
+  jabatan_riwayat_id numeric,
+  tanggal_kompetensi date,
+  tanggal_mulai date,
+  tanggal_selesai date,
+  tahun numeric,
+  asesor character varying,
+  integritas_nilai numeric,
+  kerjasama_nilai numeric,
+  komunikasi_nilai numeric,
+  orientasi_nilai numeric,
+  pelayanan_publik_nilai numeric,
+  pengembangan_diri_nilai numeric,
+  kelola_perubahan_nilai numeric,
+  ambil_keputusan_nilai numeric,
+  perekat_bangsa_nilai numeric,
+  skor_kompetensi numeric,
+  nilai_indeks_kompetensi character varying,
+  kesimpulan character varying,
+  penyelenggara character varying,
+  deskripsi character varying,
+  last_user character varying,
+  last_date timestamp without time zone,
+  last_level numeric,
+  status character varying(1),
+  user_login_id numeric,
+  user_login_pegawai_id numeric,
+  last_create_user character varying,
+  last_create_date timestamp without time zone,
+  constraint pk_penilaian_kompetensi primary key (penilaian_kompetensi_id),
+  constraint fk_penilaianskptopegawai foreign key (pegawai_id) references pegawai (pegawai_id) match simple on update restrict on delete restrict
+)
+with (oids=false);
+alter table penilaian_kompetensi owner to postgres;
+
+--=======================
+delete from menu where menu_id like '34%';
+insert into menu(menu_id, menu_parent_id, menu_group_id, nama, urut) values('34', '0', 1, 'Peta Talenta', 4);
+insert into menu(menu_id, menu_parent_id, menu_group_id, nama, link_file, status, urut) values('3401', '34', 1, 'Rekam Jejak', 'talenta_rekam_jejak', null, 1);
+insert into menu(menu_id, menu_parent_id, menu_group_id, nama, link_file, status, urut) values('3402', '34', 1, 'Kualifikasi', 'talenta_kualifikasi', null, 2);
+insert into menu(menu_id, menu_parent_id, menu_group_id, nama, link_file, status, urut) values('3403', '34', 1, 'Pengembangan Kompetensi', 'talenta_kompetensi', null, 3);
+insert into menu(menu_id, menu_parent_id, menu_group_id, nama, link_file, status, urut) values('3404', '34', 1, 'Perumpunan', 'talenta_perumpunan', null, 4);
+insert into menu(menu_id, menu_parent_id, menu_group_id, nama, link_file, status, urut) values('3405', '34', 1, 'Faktor Pengoreksi', 'talenta_nilai_akhir', null, 5);
+insert into akses_app_simpeg_menu(akses_app_simpeg_id, menu_id, akses) values(1, '3405', 'A')
+
+--select * from kategori_file order by urut desc
+--insert into kategori_file (kategori_file_id, nama, urut) values(22, 'Penghargaan', 10);
+--insert into kategori_file (kategori_file_id, nama, urut) values(23, 'Surat Kehilangan', 21);
+--insert into kategori_file (kategori_file_id, nama, urut) values(24, 'Usul Pensiun', 22);
+--insert into kategori_file (kategori_file_id, nama, urut) values(25, 'Diklat/Kursus', 12);
+--insert into kategori_file (kategori_file_id, nama, urut) values(26, 'Assessment', 10);
+--insert into kategori_file (kategori_file_id, nama, urut) values(27, 'Cuti', 10);
+--insert into kategori_file (kategori_file_id, nama, urut) values(28, 'Hukuman', 13);
+--insert into kategori_file (kategori_file_id, nama, urut) values(29, 'Pencantuman Gelar', 14);
+--insert into kategori_file (kategori_file_id, nama, urut) values(30, 'Usul Kenaikan Pangkat', 23);
+
+create or replace view riwayat_pegawai_kehilangan as 
+select 80 as riwayat_id,
+'Karis/Karsu Surat Kehilangan'::text as info_data,
+2 as tipe_file
+union all
+select 81 as riwayat_id,
+'Karpeg Surat Kehilangan'::text as info_data,
+2 as tipe_file;
+alter table riwayat_pegawai_kehilangan owner to postgres;
+grant all on table riwayat_pegawai_kehilangan to postgres;
+
+CREATE OR REPLACE VIEW riwayat_pegawai_file_lain AS 
+--SELECT 9 AS riwayat_id, 'DPCP'::text AS info_data, 2 AS tipe_file UNION ALL
+SELECT 10 AS riwayat_id, 'URAIAN_TUGAS'::text AS info_data, 2 AS tipe_file UNION ALL
+--SELECT 11 AS riwayat_id, 'HD'::text AS info_data, 2 AS tipe_file UNION ALL
+SELECT 12 AS riwayat_id, 'Daftar Riwayat Jabatan'::text AS info_data, 2 AS tipe_file UNION ALL
+SELECT 13 AS riwayat_id, 'KP_TDK'::text AS info_data, 2 AS tipe_file UNION ALL
+--SELECT 19 AS riwayat_id, 'DPCP'::text AS info_data, 2 AS tipe_file UNION ALL
+SELECT 24 AS riwayat_id, 'Usul Ijin-Tugas Belajar'::text AS info_data, 2 AS tipe_file UNION ALL
+SELECT 25 AS riwayat_id, 'Rekomendasi Usul Izin-Tugas Belajar'::text AS info_data, 2 AS tipe_file UNION ALL
+SELECT 26 AS riwayat_id, 'Uraian Tugas Usul Izin-Tugas Belajar'::text AS info_data, 2 AS tipe_file;
+ALTER TABLE riwayat_pegawai_file_lain
+OWNER TO postgres;
+
+drop table if exists pegawai_file_user;
+create table pegawai_file_user
+(
+  user_login_id numeric not null,
+  kategori_file_id numeric not null,
+  riwayat_table character varying,
+  riwayat_id character varying,
+  riwayat_field character varying,
+  status character varying(1),
+  last_user character varying,
+  last_date timestamp without time zone,
+  last_level numeric,
+  user_login_pegawai_id numeric,
+  constraint pk_pegawai_file_user primary key (user_login_id, kategori_file_id, riwayat_table, riwayat_id, riwayat_field)
+)
+with (oids=false);
+alter table pegawai_file_user owner to postgres;
+
+--select * from user_login where login_user = 'admin'
+--delete from pegawai_file_user;
+--insert into pegawai_file_user(user_login_id, kategori_file_id, riwayat_table, riwayat_id, riwayat_field, status) values(1, 5, 'GAJI_RIWAYAT', '', '', '1');
+--insert into pegawai_file_user(user_login_id, kategori_file_id, riwayat_table, riwayat_id, riwayat_field, status) values(1, 4, 'PANGKAT_RIWAYAT', '', '', '1');
+
+DROP type if exists p_jenisfiledata_type;
+create type p_jenisfiledata_type as (
+id_row text, kategori_file_id numeric, riwayat_table text, riwayat_id text, riwayat_field text, info_data text, nama text, urut integer
+);
+
+DROP FUNCTION if exists p_jenisfiledata_pegawai();
+CREATE or replace FUNCTION p_jenisfiledata_pegawai() RETURNS SETOF p_jenisfiledata_type AS $$
+DECLARE
+  cur refcursor;
+  query TEXT;
+  rec p_jenisfiledata_type%ROWTYPE;
+BEGIN
+  query := '
+  select
+  concat(cast(a.kategori_file_id as text),''-'',cast(a.riwayat_table as text),''-'',cast(a.riwayat_field as text),''-'',cast(a.riwayat_id as text)) id_row
+  , kategori_file_id, riwayat_table, riwayat_id, riwayat_field, info_data, nama, urut
+  from
+  (
+    select 1::numeric kategori_file_id, ''PANGKAT_RIWAYAT'' riwayat_table, null::text riwayat_id, riwayat_field, info_data, info_data nama, 1 urut
+    from riwayat_pegawai_cpns_file a
+    where 1 = 1
+    union all
+    select 2::numeric kategori_file_id, ''PANGKAT_RIWAYAT'' riwayat_table, null::text riwayat_id, riwayat_field, info_data, info_data nama, 2 urut
+    from riwayat_pegawai_pns_file a
+    where 1 = 1
+    union all
+    select 3::numeric kategori_file_id, ''JABATAN_RIWAYAT'' riwayat_table, null::text riwayat_id, null::text riwayat_field, ''Jabatan Riwayat''::text info_data, ''Jabatan Riwayat''::text nama, 3 urut
+    union all
+    select 5::numeric kategori_file_id, ''GAJI_RIWAYAT'' riwayat_table, null::text riwayat_id, null::text riwayat_field, ''Kenaikan Gaji Berkala''::text info_data, ''Kenaikan Gaji Berkala''::text nama, 3 urut
+    union all
+    select 4::numeric kategori_file_id, ''PANGKAT_RIWAYAT'' riwayat_table, null::text riwayat_id, null::text riwayat_field, ''Kenaikan Pangkat / KP''::text info_data, ''Kenaikan Pangkat / KP''::text nama, 4 urut
+    union all
+    select 20::numeric kategori_file_id, ''JABATAN_TAMBAHAN'' riwayat_table, null::text riwayat_id, null::text riwayat_field, ''SK Tugas''::text info_data, ''SK Tugas''::text nama, 5 urut
+    union all
+    select 6::numeric kategori_file_id, ''PENDIDIKAN_RIWAYAT'' riwayat_table, null::text riwayat_id, null::text riwayat_field, ''Pendidikan''::text info_data, ''Pendidikan''::text nama, 6 urut
+    union all
+    select 14::numeric kategori_file_id, ''PENDIDIKAN_RIWAYAT'' riwayat_table, null::text riwayat_id, null::text riwayat_field, ''Tubel/Ibel''::text info_data, ''Tubel/Ibel''::text nama, 6 urut
+    union all
+    select 11::numeric kategori_file_id, ''DIKLAT_STRUKTURAL'' riwayat_table, null::text riwayat_id, null::text riwayat_field, ''Diklatpim''::text info_data, ''Sertifikat Diklatpim''::text nama, 7 urut
+    union all
+    select 25::numeric kategori_file_id, ''DIKLAT_KURSUS'' riwayat_table, null::text riwayat_id, null::text riwayat_field, ''Diklat/Kursus''::text info_data, ''Sertifikat Diklat/kursus''::text nama, 8 urut
+    union all
+    select 7::numeric kategori_file_id, ''PENILAIAN_SKP'' riwayat_table, null::text riwayat_id, null::text riwayat_field, ''SKP/PPK''::text info_data, ''SKP/PPK''::text nama, 9 urut
+    union all
+    select 10::numeric kategori_file_id, ''PAK'' riwayat_table, null::text riwayat_id, null::text riwayat_field, ''PAK''::text info_data, ''PAK''::text nama, 10 urut
+    union all
+    select 26::numeric kategori_file_id, ''PENILAIAN_KOMPETENSI'' riwayat_table, null::text riwayat_id, null::text riwayat_field, ''Assessment''::text info_data, ''Hasil Kompetensi''::text nama, 11 urut
+    union all
+    select 27::numeric kategori_file_id, ''CUTI'' riwayat_table, null::text riwayat_id, null::text riwayat_field, ''Cuti''::text info_data, ''Surat Cuti''::text nama, 12 urut
+    union all
+    select 22::numeric kategori_file_id, ''PENGHARGAAN'' riwayat_table, null::text riwayat_id, null::text riwayat_field, ''Penghargaan''::text info_data, ''Sertifikat Penghargaan''::text nama, 13 urut
+    union all
+    select 15::numeric kategori_file_id, ''SUAMI_ISTRI'' riwayat_table, null::text riwayat_id, null::text riwayat_field, ''Suami/Istri''::text info_data, ''Suami/Istri''::text nama, 14 urut
+    union all
+    select 16::numeric kategori_file_id, ''ANAK'' riwayat_table, null::text riwayat_id, null::text riwayat_field, ''Anak''::text info_data, ''Anak''::text nama, 15 urut
+    union all
+    select 13::numeric kategori_file_id, ''TAMBAHAN_MASA_KERJA'' riwayat_table, null::text riwayat_id, null::text riwayat_field, ''P. Masa Kerja''::text info_data, ''P. Masa Kerja''::text nama, 17 urut
+    union all
+    select 28::numeric kategori_file_id, ''HUKUMAN'' riwayat_table, null::text riwayat_id, null::text riwayat_field, ''Hukuman''::text info_data, ''Hukuman''::text nama, 18 urut
+    union all
+    select 9::numeric kategori_file_id, ''SURAT_TANDA_LULUS'' riwayat_table, null::text riwayat_id, null::text riwayat_field, ''STLUD/PI''::text info_data, ''STLUD/PI''::text nama, 19 urut
+  ) a
+  where 1=1
+  order by urut
+  ';
+
+  --raise notice 'sql %', query;
+  --select * from p_jenisfiledata_pegawai();
+  
+  OPEN cur FOR EXECUTE query;
+  
+  FETCH cur INTO rec;
+  WHILE FOUND LOOP
+    RETURN NEXT rec;
+    FETCH cur INTO rec;
+  END LOOP;
+  CLOSE cur;
+END;
+$$ LANGUAGE plpgsql STRICT;
+
+CREATE OR REPLACE VIEW public.riwayat_pegawai_suami_istri_file AS 
+SELECT 'foto'::text AS riwayat_field,
+'Foto'::text AS info_data,
+1 AS tipe_file
+, ''::text AS formatbkn
+UNION ALL
+SELECT 'aktanikah'::text AS riwayat_field,
+'Akta Nikah'::text AS info_data,
+2 AS tipe_file
+, 'AKTA_NIKAH'::text AS formatbkn
+UNION ALL
+SELECT 'aktacerai'::text AS riwayat_field,
+'Akta Cerai'::text AS info_data,
+2 AS tipe_file
+, 'AKTA_CERAI'::text AS formatbkn
+UNION ALL
+SELECT 'kariskarsu'::text AS riwayat_field,
+'Karis Karsu'::text AS info_data,
+2 AS tipe_file
+, 'KARIS_KARSU'::text AS formatbkn
+UNION ALL
+SELECT 'aktakelahiran'::text AS riwayat_field,
+'Akta Kelahiran'::text AS info_data,
+2 AS tipe_file
+, 'AKTA_KELAHIRAN'::text AS formatbkn
+UNION ALL
+SELECT 'ktp'::text AS riwayat_field,
+'KTP'::text AS info_data,
+2 AS tipe_file
+, ''::text AS formatbkn
+UNION ALL
+SELECT 'pasport'::text AS riwayat_field,
+'Pasport'::text AS info_data,
+2 AS tipe_file
+, ''::text AS formatbkn
+UNION ALL
+SELECT 'sim'::text AS riwayat_field,
+'SIM'::text AS info_data,
+2 AS tipe_file
+, ''::text AS formatbkn
+UNION ALL
+SELECT 'suratkematian'::text AS riwayat_field,
+'Surat Kematian'::text AS info_data,
+2 AS tipe_file
+, 'SK_KEMATIAN'::text AS formatbkn
+UNION ALL
+SELECT 'skjandaduda'::text AS riwayat_field,
+'Surat Keterangan Janda Duda'::text AS info_data,
+2 AS tipe_file
+, 'SKET_DUDA'::text AS formatbkn
+UNION ALL
+SELECT 'laporanpernikahanpertama'::text AS riwayat_field,
+'Laporan Pernikahan Pertama'::text AS info_data,
+2 AS tipe_file
+, ''::text AS formatbkn
+;
+
+
+CREATE OR REPLACE VIEW public.riwayat_pegawai_anak_file AS 
+SELECT 'foto'::text AS riwayat_field,
+'Foto'::text AS info_data,
+1 AS tipe_file
+, ''::text AS formatbkn
+UNION ALL
+SELECT 'aktakelahiran'::text AS riwayat_field,
+'Akta Kelahiran'::text AS info_data,
+2 AS tipe_file
+, 'AKTA_ANAK'::text AS formatbkn
+UNION ALL
+SELECT 'ktp'::text AS riwayat_field,
+'KTP'::text AS info_data,
+2 AS tipe_file
+, ''::text AS formatbkn
+UNION ALL
+SELECT 'pasport'::text AS riwayat_field,
+'Pasport'::text AS info_data,
+2 AS tipe_file
+, ''::text AS formatbkn
+UNION ALL
+SELECT 'sim'::text AS riwayat_field,
+'SIM'::text AS info_data,
+2 AS tipe_file
+, ''::text AS formatbkn
+UNION ALL
+SELECT 'suratkematian'::text AS riwayat_field,
+'Surat Kematian'::text AS info_data,
+2 AS tipe_file
+, ''::text AS formatbkn
+UNION ALL
+SELECT 'suratnikah'::text AS riwayat_field,
+'Surat Menikah'::text AS info_data,
+2 AS tipe_file
+, ''::text AS formatbkn
+UNION ALL
+SELECT 'suratcerai'::text AS riwayat_field,
+'Surat Cerai'::text AS info_data,
+2 AS tipe_file
+, ''::text AS formatbkn
+UNION ALL
+SELECT 'suratketerangankuliah'::text AS riwayat_field,
+'Surat Keterangan Kuliah'::text AS info_data,
+2 AS tipe_file
+, 'SUKET'::text AS formatbkn
+UNION ALL
+SELECT 'suratketeranganbelumbekerja'::text AS riwayat_field,
+'Surat Keterangan Belum Bekerja'::text AS info_data,
+2 AS tipe_file
+, 'SUKET'::text AS formatbkn
+;
+
+CREATE OR REPLACE VIEW riwayat_pegawai_file AS 
+SELECT
+1 AS riwayat_id
+, 'Foto'::text AS info_data
+, 1 AS tipe_file
+, 'Foto'::text AS formatbkn
+UNION ALL
+SELECT
+2 AS riwayat_id
+, 'SK KONVERSI'::text AS info_data
+, 2 AS tipe_file
+, 'SK_KONVERSI'::text AS formatbkn
+UNION ALL
+SELECT
+3 AS riwayat_id
+, 'KARPEG'::text AS info_data
+, 2 AS tipe_file
+, 'KARPEG'::text AS formatbkn
+UNION ALL
+SELECT
+4 AS riwayat_id
+, 'TASPEN'::text AS info_data
+, 2 AS tipe_file
+, 'TASPEN'::text AS formatbkn
+UNION ALL
+SELECT
+5 AS riwayat_id
+, 'KTP'::text AS info_data
+, 2 AS tipe_file
+, 'KTP'::text AS formatbkn
+UNION ALL
+SELECT
+6 AS riwayat_id
+, 'Kartu Keluarga / KSK'::text AS info_data
+, 2 AS tipe_file
+, 'KK'::text AS formatbkn
+UNION ALL
+SELECT
+7 AS riwayat_id
+, 'NPWP'::text AS info_data
+, 2 AS tipe_file
+, 'NPWP'::text AS formatbkn
+UNION ALL
+SELECT
+8 AS riwayat_id
+, 'SURAT KEMATIAN'::text AS info_data
+, 2 AS tipe_file
+, 'SURAT_KEMATIAN'::text AS formatbkn
+UNION ALL
+SELECT
+9 AS riwayat_id
+, 'BPJS'::text AS info_data
+, 2 AS tipe_file
+, 'BPJS'::text AS formatbkn
+;
+
+CREATE OR REPLACE VIEW riwayat_pegawai_usulan_pensiun AS 
+SELECT 40 AS riwayat_id, 'DPCP'::text AS info_data, 2 AS tipe_file, 'DPCP'::text AS formatbkn UNION ALL
+SELECT 41 AS riwayat_id, 'Tidak Hukdis Sedang dan Berat'::text AS info_data, 2 AS tipe_file, 'HUKDIS'::text AS formatbkn UNION ALL
+SELECT 42 AS riwayat_id, 'Tidak Pidana dan Pernah Penjara'::text AS info_data, 2 AS tipe_file, 'SUCI'::text AS formatbkn UNION ALL
+SELECT 43 AS riwayat_id, 'Tidak Kekurangan Pegawai'::text AS info_data, 2 AS tipe_file, 'SUKET_TDK_KEKURANGAN'::text AS formatbkn UNION ALL
+SELECT 44 AS riwayat_id, 'Melaksanakan tugas tanggungjawab'::text AS info_data, 2 AS tipe_file, 'SUKET_TUGJAB'::text AS formatbkn UNION ALL
+SELECT 45 AS riwayat_id, 'Surat Keterangan Tim Penguji Kesehatan'::text AS info_data, 2 AS tipe_file, 'SUKET_DOKTER'::text AS formatbkn;
+ALTER TABLE riwayat_pegawai_usulan_pensiun OWNER TO postgres;
+
+CREATE OR REPLACE VIEW riwayat_pegawai_pendidikan_pencantuman_file AS 
+SELECT 'pencatumangelar'::text AS riwayat_field,
+'Surat Pencantuman Gelar'::text AS info_data,
+2 AS tipe_file;
+ALTER TABLE riwayat_pegawai_pendidikan_pencantuman_file OWNER TO postgres;
+
+CREATE OR REPLACE VIEW riwayat_pegawai_sertifikat_file AS 
+SELECT 1 AS riwayat_id, 'Sertifikat Pendidik'::text AS info_data, 2 AS tipe_file
+UNION ALL
+SELECT 2 AS riwayat_id, 'Sertifikat Keaslian PAK'::text AS info_data, 2 AS tipe_file;
+ALTER TABLE riwayat_pegawai_sertifikat_file OWNER TO postgres;
+
+insert into menu(menu_id, menu_parent_id, menu_group_id, nama, link_file, urut)
+values ('150108', '1501', 1, 'Usulan ke BKN Pusat', 'usulan_surat?reqJenis=13&reqKirim=1', 7);
+
+insert into persuratan.jenis_pelayanan(jenis_pelayanan_id, nama, satuan_kerja_tujuan_nama, kepada)
+values (13, 'Ke BKN Pusat', 'Badan Kepegawaian Negara Jakarta', 'Kepala Badan Kepegawaian Negara');
+
+CREATE OR REPLACE VIEW riwayat_pegawai_usulan_kenaikan_pangkat AS 
+SELECT 50 AS riwayat_id, 'Uraian Tugas'::text AS info_data, 2 AS tipe_file, 'URAIAN_TUGAS'::text AS formatbkn
+UNION ALL SELECT 51 AS riwayat_id, 'Rekom 3 Besar KASN'::text AS info_data, 2 AS tipe_file, 'KASN'::text AS formatbkn
+UNION ALL SELECT 52 AS riwayat_id, 'BA Jabatan Lama dan Baru'::text AS info_data, 2 AS tipe_file, 'BAP_JABATAN'::text AS formatbkn
+UNION ALL SELECT 53 AS riwayat_id, 'SK Pemberhentian JFT'::text AS info_data, 2 AS tipe_file, 'PEMBERHENTIAN_JFT'::text AS formatbkn
+UNION ALL SELECT 54 AS riwayat_id, 'SK Pelantikan/BA dan SPMT JFT'::text AS info_data, 2 AS tipe_file, 'BAP_SPMT_JFT'::text AS formatbkn
+UNION ALL SELECT 55 AS riwayat_id, 'SK Alih Jenjang dan SK Terampil'::text AS info_data, 2 AS tipe_file, 'SK_ALIH_JENJANG_JFT'::text AS formatbkn
+UNION ALL SELECT 56 AS riwayat_id, 'SK Pengangkatan Kembali JFT'::text AS info_data, 2 AS tipe_file, 'PENGANGKATAN_KEMBALI_JFT'::text AS formatbkn
+;ALTER TABLE riwayat_pegawai_usulan_kenaikan_pangkat OWNER TO postgres;
+
+CREATE OR REPLACE VIEW riwayat_file AS 
+ SELECT 1 AS no_urut,
+    a.pegawai_id,
+    'PANGKAT_RIWAYAT'::text AS riwayat_table,
+    a.riwayat_field,
+    a.pangkat_riwayat_id::text AS riwayat_id,
+        CASE a.riwayat_field
+            WHEN 'notausulcpns'::text THEN 'Nota Usul CPNS'::text
+            ELSE 'SK CPNS'::text
+        END AS info_data,
+    2 AS tipe_file,
+    concat(
+        CASE a.riwayat_field
+            WHEN 'notausulcpns'::text THEN 'NU_CPNS_'::text
+            ELSE 'SK_CPNS_'::text
+        END, a.nip_baru) AS format_bkn
+   FROM ( SELECT a_1.pangkat_riwayat_id,
+            a_1.pegawai_id,
+            a_1.pangkat_id,
+            a_1.no_sk,
+            getformatteddate(a_1.tanggal_sk::text::character varying) AS tanggal_sk,
+            getformatteddate(a_1.tmt_pangkat::text::character varying) AS tmt_pangkat,
+            a_1.masa_kerja_tahun,
+            a_1.masa_kerja_bulan,
+            b.kode AS pangkat_kode,
+            b.nama AS pangkat_nama,
+            f.riwayat_field,
+            p.nip_baru
+           FROM pangkat_riwayat a_1
+             JOIN ( SELECT pegawai.nip_baru,
+                    pegawai.pegawai_id
+                   FROM pegawai) p ON a_1.pegawai_id = p.pegawai_id
+             LEFT JOIN pangkat b ON a_1.pangkat_id = b.pangkat_id,
+            riwayat_pegawai_cpns_file f
+          WHERE 1 = 1 AND a_1.jenis_riwayat = 1::numeric) a
+UNION ALL
+ SELECT 2 AS no_urut,
+    a.pegawai_id,
+    'PANGKAT_RIWAYAT'::text AS riwayat_table,
+    a.riwayat_field,
+    a.pangkat_riwayat_id::text AS riwayat_id,
+        CASE a.riwayat_field
+            WHEN 'notausulpns'::text THEN 'Nota Usul PNS'::text
+            WHEN 'suratujikesehatan'::text THEN 'Surat Uji Kesehatan'::text
+            WHEN 'sttplprajabatan'::text THEN 'STTPL Prajabatan'::text
+            WHEN 'bapsumpah'::text THEN 'BAP Sumpah'::text
+            ELSE 'SK PNS'::text
+        END AS info_data,
+    2 AS tipe_file,
+    concat(
+        CASE a.riwayat_field
+            WHEN 'notausulpns'::text THEN 'NU_PNS_'::text
+            WHEN 'suratujikesehatan'::text THEN 'UJI_KES_'::text
+            WHEN 'sttplprajabatan'::text THEN 'STTPL_'::text
+            WHEN 'bapsumpah'::text THEN 'SUMPAH_PNS_'::text
+            ELSE 'SK_PNS_'::text
+        END, a.nip_baru) AS format_bkn
+   FROM ( SELECT a_1.pangkat_riwayat_id,
+            a_1.pegawai_id,
+            a_1.pangkat_id,
+            a_1.no_sk,
+            getformatteddate(a_1.tanggal_sk::text::character varying) AS tanggal_sk,
+            getformatteddate(a_1.tmt_pangkat::text::character varying) AS tmt_pangkat,
+            a_1.masa_kerja_tahun,
+            a_1.masa_kerja_bulan,
+            b.kode AS pangkat_kode,
+            b.nama AS pangkat_nama,
+            f.riwayat_field,
+            p.nip_baru
+           FROM pangkat_riwayat a_1
+             JOIN ( SELECT pegawai.nip_baru,
+                    pegawai.pegawai_id
+                   FROM pegawai) p ON a_1.pegawai_id = p.pegawai_id
+             LEFT JOIN pangkat b ON a_1.pangkat_id = b.pangkat_id,
+            riwayat_pegawai_pns_file f
+          WHERE 1 = 1 AND a_1.jenis_riwayat = 2::numeric) a
+UNION ALL
+ SELECT 3 AS no_urut,
+    a.pegawai_id,
+    'JABATAN_RIWAYAT'::text AS riwayat_table,
+    NULL::text AS riwayat_field,
+    a.jabatan_riwayat_id::text AS riwayat_id,
+    concat(a.nama, ' TMT ', a.tmt_jabatan) AS info_data,
+    2 AS tipe_file,
+    concat('SK_JABATAN_', a.nip_baru) AS format_bkn
+   FROM ( SELECT a_1.jabatan_riwayat_id,
+            a_1.pegawai_id,
+            a_1.no_sk,
+            getformatteddate(to_char(a_1.tanggal_sk, 'YYYY-MM-DD'::text)::character varying) AS tanggal_sk,
+            datetopagecheck(to_char(a_1.tmt_jabatan, 'YYYY-MM-DD'::text)::character varying) AS tmt_jabatan,
+            a_1.nama,
+            p.nip_baru
+           FROM jabatan_riwayat a_1
+             JOIN ( SELECT pegawai.nip_baru,
+                    pegawai.pegawai_id
+                   FROM pegawai) p ON a_1.pegawai_id = p.pegawai_id
+             LEFT JOIN eselon b ON a_1.eselon_id = b.eselon_id
+          WHERE 1 = 1
+          order by a_1.tmt_jabatan desc
+          ) a
+UNION ALL
+ SELECT 4 AS no_urut,
+    a.pegawai_id,
+    'PANGKAT_RIWAYAT'::text AS riwayat_table,
+    NULL::text AS riwayat_field,
+    a.pangkat_riwayat_id::text AS riwayat_id,
+    concat(a.pangkat_kode, ' TMT ', a.tmt_pangkat) AS info_data,
+    2 AS tipe_file,
+    concat('SK_KP_', a.pangkat_id::text, '_', a.nip_baru) AS format_bkn
+   FROM ( SELECT a_1.pangkat_riwayat_id,
+            a_1.pegawai_id,
+            a_1.pangkat_id,
+            a_1.no_sk,
+            datetopagecheck(a_1.tanggal_sk::text::character varying) AS tanggal_sk,
+            getformatteddate(a_1.tmt_pangkat::text::character varying) AS tmt_pangkat,
+            a_1.masa_kerja_tahun,
+            a_1.masa_kerja_bulan,
+            b.kode AS pangkat_kode,
+            b.nama AS pangkat_nama,
+            p.nip_baru
+           FROM pangkat_riwayat a_1
+             JOIN ( SELECT pegawai.nip_baru,
+                    pegawai.pegawai_id
+                   FROM pegawai) p ON a_1.pegawai_id = p.pegawai_id
+             LEFT JOIN pangkat b ON a_1.pangkat_id = b.pangkat_id
+          WHERE 1 = 1 AND (a_1.jenis_riwayat <> ALL (ARRAY[1::numeric, 2::numeric, 8::numeric, 9::numeric])) AND (COALESCE(NULLIF(a_1.status::text, ''::text), NULL::text) IS NULL OR a_1.status::text = '2'::text)
+          order by a_1.tmt_pangkat desc
+          ) a
+UNION ALL
+ SELECT 5 AS no_urut,
+    a.pegawai_id,
+    'GAJI_RIWAYAT'::text AS riwayat_table,
+    NULL::text AS riwayat_field,
+    a.gaji_riwayat_id::text AS riwayat_id,
+    concat(a.pangkat_kode, ' TMT ', a.tmt_sk) AS info_data,
+    2 AS tipe_file,
+    concat('KGB_', a.nip_baru) AS format_bkn
+   FROM 
+   ( 
+   SELECT a_1.gaji_riwayat_id,
+            a_1.pegawai_id,
+            a_1.pangkat_id,
+            a_1.no_sk,
+            datetopagecheck(a_1.tanggal_sk::text::character varying) AS tanggal_sk,
+            getformatteddate(a_1.tmt_sk::text::character varying) AS tmt_sk,
+            a_1.masa_kerja_tahun,
+            a_1.masa_kerja_bulan,
+            b.kode AS pangkat_kode,
+            b.nama AS pangkat_nama,
+            p.nip_baru
+           FROM gaji_riwayat a_1
+             JOIN ( SELECT pegawai.nip_baru,
+                    pegawai.pegawai_id
+                   FROM pegawai) p ON a_1.pegawai_id = p.pegawai_id
+             LEFT JOIN pangkat b ON a_1.pangkat_id = b.pangkat_id
+          WHERE 1 = 1 AND a_1.jenis_kenaikan = 3::numeric AND (COALESCE(NULLIF(a_1.status::text, ''::text), NULL::text) IS NULL OR a_1.status::text = '2'::text)
+          order by a_1.tmt_sk desc
+  ) a
+UNION ALL
+ SELECT 6 AS no_urut,
+    a.pegawai_id,
+    'PENDIDIKAN_RIWAYAT'::text AS riwayat_table,
+    a.riwayat_field,
+    a.pendidikan_riwayat_id::text AS riwayat_id,
+    a.pendidikan_nama_status AS info_data,
+    2 AS tipe_file,
+    concat(a.jenis_nama, '_', a.nip_baru) AS format_bkn
+   FROM ( SELECT a_1.pendidikan_riwayat_id,
+            a_1.pegawai_id,
+            concat(f.info_data, ' ', c.nama, ' Tgl STTB ', datetopagecheck(a_1.tanggal_sttb::text::character varying)) AS pendidikan_nama_status,
+            f.riwayat_field,
+                CASE f.riwayat_field
+                    WHEN 'transkrip'::text THEN concat('TRANSKRIP_', c.nama)
+                    WHEN 'ijazah'::text THEN concat('IJAZAH_', c.nama)
+                    ELSE NULL::text
+                END AS jenis_nama,
+            f.riwayat_field AS jenis_nama1,
+            p.nip_baru
+           FROM pendidikan_riwayat a_1
+             JOIN ( SELECT pegawai.nip_baru,
+                    pegawai.pegawai_id
+                   FROM pegawai) p ON a_1.pegawai_id = p.pegawai_id
+             LEFT JOIN pendidikan c ON a_1.pendidikan_id = c.pendidikan_id,
+            riwayat_pegawai_pendidikan_file f
+          WHERE 1 = 1 AND (a_1.status_pendidikan::text <> ALL (ARRAY['5'::character varying::text, '6'::character varying::text])) AND (COALESCE(NULLIF(a_1.status::text, ''::text), NULL::text) IS NULL OR a_1.status::text = '2'::text)
+          order by a_1.tanggal_sttb desc
+          ) a
+UNION ALL
+ SELECT 7 AS no_urut,
+    a.pegawai_id,
+    'PENILAIAN_SKP'::text AS riwayat_table,
+    a.riwayat_field,
+    a.penilaian_skp_id::text AS riwayat_id,
+    concat(a.info_data, 'Tahun', a.tahun) AS info_data,
+    2 AS tipe_file,
+    concat(a.info_data, '_', a.tahun, '_', a.nip_baru) AS format_bkn
+   FROM ( SELECT a_1.penilaian_skp_id,
+            a_1.pegawai_id,
+            a_1.tahun,
+            a_1.info_data,
+            a_1.riwayat_field,
+            p.nip_baru
+           FROM ( SELECT a_1_1.penilaian_skp_id,
+                    a_1_1.pegawai_id,
+                    a_1_1.tahun::text AS tahun,
+                    f.info_data,
+                    f.riwayat_field
+                   FROM penilaian_skp a_1_1,
+                    riwayat_pegawai_skp_ppk_file f
+                  WHERE 1 = 1 AND (COALESCE(NULLIF(a_1_1.status::text, ''::text), NULL::text) IS NULL OR a_1_1.status::text = '2'::text)) a_1
+             JOIN ( SELECT pegawai.nip_baru,
+                    pegawai.pegawai_id
+                   FROM pegawai) p ON a_1.pegawai_id = p.pegawai_id
+                   order by a_1.tahun desc
+                   ) a
+UNION ALL
+ SELECT 8 AS no_urut,
+    a.pegawai_id,
+    'PEGAWAI'::text AS riwayat_table,
+    NULL::text AS riwayat_field,
+    a.riwayat_id::text AS riwayat_id,
+    a.info_data,
+    a.tipe_file,
+    concat(a.formatbkn, '_', a.nip_baru) AS format_bkn
+   FROM ( SELECT a_1.pegawai_id,
+            a_1.nip_baru,
+            b.riwayat_id,
+            b.info_data,
+            b.formatbkn,
+            b.tipe_file
+           FROM pegawai a_1,
+            riwayat_pegawai_file b
+          WHERE 1 = 1
+          order by b.riwayat_id
+          ) a
+UNION ALL
+SELECT
+9 AS no_urut, a.pegawai_id
+, 'SURAT_TANDA_LULUS'::text AS riwayat_table
+, NULL::text AS riwayat_field, a.surat_tanda_lulus_id::text AS riwayat_id
+, a.jenis_nama || ' - ' || tanggal_info AS info_data, 2 AS tipe_file
+, concat(a.jenis_nama, '_', a.nip_baru) AS format_bkn
+FROM 
+(
+  SELECT a_1.surat_tanda_lulus_id
+  , a_1.pegawai_id, a_1.jenis_id
+  , datetopagecheck(to_char(a_1.tanggal_stlud, 'YYYY-MM-DD'::text)::character varying) AS tanggal_info
+  ,
+  CASE a_1.jenis_id
+  WHEN 1 THEN 'STILUD_I'::text
+  WHEN 2 THEN 'STILUD_II'::text
+  WHEN 3 THEN 'STLUKPPI_SMA'::text
+  WHEN 4 THEN 'STLUKPPI_D4_S-1'::text
+  WHEN 5 THEN 'STLUKPPI_S2'::text
+  ELSE NULL::text
+  END AS jenis_nama
+  , p.nip_baru
+  FROM surat_tanda_lulus a_1
+  JOIN 
+  (
+    SELECT pegawai.nip_baru,
+    pegawai.pegawai_id
+    FROM pegawai
+  ) p ON a_1.pegawai_id = p.pegawai_id
+  WHERE 1 = 1 AND (COALESCE(NULLIF(a_1.status::text, ''::text), NULL::text) IS NULL OR a_1.status::text = '2'::text)
+  --and a_1.pegawai_id = 4089
+) a
+UNION ALL
+ SELECT 10 AS no_urut,
+    a.pegawai_id,
+    'PAK'::text AS riwayat_table,
+    NULL::text AS riwayat_field,
+    a.pak_id::text AS riwayat_id,
+    concat('PAK TMT ', a.tanggal_sk) AS info_data,
+    2 AS tipe_file,
+    concat('PAK_', replace(a.tanggal_sk::text, '-'::text, ''::text), '_', a.nip_baru) AS format_bkn
+   FROM ( SELECT a_1.pak_id,
+            datetopagecheck(a_1.tanggal_sk::text::character varying) AS tanggal_sk,
+            p.nip_baru,
+            to_char(a_1.tanggal_sk::timestamp with time zone, 'MM'::text) AS bulan,
+            to_char(a_1.tanggal_sk::timestamp with time zone, 'YYYY'::text) AS tahun,
+            a_1.pegawai_id
+           FROM pak a_1
+             JOIN ( SELECT pegawai.nip_baru,
+                    pegawai.pegawai_id
+                   FROM pegawai) p ON a_1.pegawai_id = p.pegawai_id
+          WHERE 1 = 1 AND (COALESCE(NULLIF(a_1.status::text, ''::text), NULL::text) IS NULL OR a_1.status::text = '2'::text)
+          order by a_1.tanggal_sk desc
+          ) a
+UNION ALL
+ SELECT 11 AS no_urut,
+    a.pegawai_id,
+    'DIKLAT_STRUKTURAL'::text AS riwayat_table,
+    NULL::text AS riwayat_field,
+    a.diklat_struktural_id::text AS riwayat_id,
+    a.diklat_nama AS info_data,
+    2 AS tipe_file,
+    ''::text AS format_bkn
+   FROM ( SELECT a_1.diklat_struktural_id,
+            a_1.diklat_id,
+            a_1.pegawai_id,
+            a_1.tempat,
+            a_1.penyelenggara,
+            a_1.angkatan,
+            a_1.tahun,
+            a_1.tanggal_mulai,
+            a_1.tanggal_selesai,
+            a_1.no_sttpp,
+            a_1.tanggal_sttpp,
+            a_1.jumlah_jam,
+            b.nama,
+                CASE a_1.diklat_id
+                    WHEN 1 THEN 'Diklatpim IV'::text
+                    WHEN 2 THEN 'Diklatpim III'::text
+                    WHEN 3 THEN 'Diklatpim II'::text
+                    ELSE NULL::text
+                END AS diklat_nama
+           FROM diklat_struktural a_1
+             JOIN diklat b ON a_1.diklat_id = b.diklat_id
+          WHERE 1 = 1 AND (COALESCE(NULLIF(a_1.status::text, ''::text), NULL::text) IS NULL OR a_1.status::text = '2'::text)
+          order by a_1.tanggal_mulai desc
+          ) a
+UNION ALL
+ SELECT 12 AS no_urut,
+    a.pegawai_id,
+    NULL::text AS riwayat_table,
+    NULL::text AS riwayat_field,
+    a.riwayat_id::text AS riwayat_id,
+    a.info_data,
+    a.tipe_file,
+    ''::text AS format_bkn
+   FROM ( SELECT a_1.pegawai_id,
+            b.riwayat_id,
+            b.info_data,
+            b.tipe_file
+           FROM pegawai a_1,
+            riwayat_pegawai_sertifikat_file b
+          WHERE 1 = 1) a
+UNION ALL
+SELECT
+13 AS no_urut, a.pegawai_id
+, 'TAMBAHAN_MASA_KERJA'::text AS riwayat_table, NULL::text AS riwayat_field
+, a.tambahan_masa_kerja_id::text AS riwayat_id
+, a.info_data || ' - Tanggal ' || tanggal_info info_data
+, a.tipe_file, ''::text AS format_bkn
+FROM
+(
+  SELECT
+  a_1.pegawai_id, a_1.tambahan_masa_kerja_id
+  , datetopagecheck(to_char(a_1.tmt_sk, 'YYYY-MM-DD'::text)::character varying) AS tanggal_info
+  , b.riwayat_id, b.info_data, b.tipe_file
+  FROM tambahan_masa_kerja a_1,
+  riwayat_pegawai_tambahan_masa_kerja_file b
+  WHERE 1 = 1 AND (COALESCE(NULLIF(a_1.status::text, ''::text), NULL::text) IS NULL OR a_1.status::text = '2'::text)
+  --AND a_1.pegawai_id = 4089
+) a
+UNION ALL
+ SELECT 14 AS no_urut,
+    a.pegawai_id,
+    'PENDIDIKAN_RIWAYAT'::text AS riwayat_table,
+    a.riwayat_field,
+    a.pendidikan_riwayat_id::text AS riwayat_id,
+    a.pendidikan_nama_status AS info_data,
+    2 AS tipe_file,
+    concat(a.jenis_nama, '_', a.nip_baru) AS format_bkn
+   FROM ( SELECT a_1.pendidikan_riwayat_id,
+            a_1.pegawai_id,
+            concat(c.nama, ' - ',
+                CASE a_1.status_pendidikan
+                    WHEN '1'::text THEN 'Pendidikan CPNS'::text
+                    WHEN '2'::text THEN 'Diakui'::text
+                    WHEN '3'::text THEN 'Belum Diakui'::text
+                    WHEN '4'::text THEN 'Riwayat'::text
+                    WHEN '5'::text THEN 'Ijin belajar'::text
+                    WHEN '6'::text THEN 'Tugas Belajar'::text
+                    ELSE '-'::text
+                END) AS pendidikan_nama_status1,
+            concat(c.nama, ' - ', f.info_data) AS pendidikan_nama_status,
+            f.riwayat_field,
+                CASE f.riwayat_field
+                    WHEN 'ijinbelajar'::text THEN concat('IBEL_', c.nama)
+                    WHEN 'transkrip'::text THEN concat('TRANSKRIP_', c.nama)
+                    WHEN 'ijazah'::text THEN concat('IJAZAH_', c.nama)
+                    ELSE NULL::text
+                END AS jenis_nama,
+            f.riwayat_field AS jenis_nama1,
+            p.nip_baru
+           FROM pendidikan_riwayat a_1
+             JOIN ( SELECT pegawai.nip_baru,
+                    pegawai.pegawai_id
+                   FROM pegawai) p ON a_1.pegawai_id = p.pegawai_id
+             LEFT JOIN pendidikan c ON a_1.pendidikan_id = c.pendidikan_id,
+            riwayat_pegawai_pendidikan_tupel_file f
+          WHERE 1 = 1 AND COALESCE(NULLIF(a_1.no_surat_ijin::text, ''::text), NULL::text) IS NOT NULL AND a_1.tanggal_surat_ijin IS NOT NULL AND (COALESCE(NULLIF(a_1.status::text, ''::text), NULL::text) IS NULL OR a_1.status::text = '2'::text)
+          order by a_1.tanggal_sttb desc
+          ) a
+UNION ALL
+ SELECT 15 AS no_urut,
+    a.pegawai_id,
+    'SUAMI_ISTRI'::text AS riwayat_table,
+    a.riwayat_field,
+    a.suami_istri_id::text AS riwayat_id,
+    concat(a.info_data, ' - ', a.nama) AS info_data,
+    a.tipe_file,
+    concat(a.formatbkn, '_', a.nip_baru) AS format_bkn
+   FROM ( SELECT a_1.suami_istri_id,
+            a_1.pegawai_id,
+            p.nama AS nama_pegawai,
+            p.nip_baru,
+            a_1.nama,
+            f.info_data,
+            f.formatbkn,
+            f.riwayat_field,
+            f.tipe_file
+           FROM suami_istri a_1
+             JOIN pegawai p ON a_1.pegawai_id = p.pegawai_id,
+            riwayat_pegawai_suami_istri_file f
+          WHERE 1 = 1 AND (COALESCE(NULLIF(a_1.status::text, ''::text), NULL::text) IS NULL OR a_1.status::text = '2'::text)
+          order by a_1.tanggal_kawin desc
+          ) a
+UNION ALL
+ SELECT 16 AS no_urut,
+    a.pegawai_id,
+    'ANAK'::text AS riwayat_table,
+    a.riwayat_field,
+    a.anak_id::text AS riwayat_id,
+    concat(a.info_data, ' - ', a.nama) AS info_data,
+    a.tipe_file,
+    concat(a.formatbkn, '_', a.nip_baru) AS format_bkn
+   FROM ( SELECT a_1.anak_id,
+            a_1.pegawai_id,
+            a_1.suami_istri_id,
+            b.nama AS suami_istri_nama,
+            a_1.tanggal_lahir,
+            p.nama AS nama_pegawai,
+            p.nip_baru,
+            a_1.nama,
+            f.info_data,
+            f.formatbkn,
+            f.riwayat_field,
+            f.tipe_file
+           FROM anak a_1
+             LEFT JOIN suami_istri b ON a_1.suami_istri_id = b.suami_istri_id
+             JOIN pegawai p ON a_1.pegawai_id = p.pegawai_id,
+            riwayat_pegawai_anak_file f
+          WHERE 1 = 1 AND (COALESCE(NULLIF(a_1.status::text, ''::text), NULL::text) IS NULL OR a_1.status::text = '2'::text)
+          order by a_1.tanggal_lahir desc
+          ) a
+UNION ALL
+ SELECT 17 AS no_urut,
+    a.pegawai_id,
+    'SAUDARA'::text AS riwayat_table,
+    a.riwayat_field,
+    a.saudara_id::text AS riwayat_id,
+    concat(a.info_data, ' - ', a.nama) AS info_data,
+    a.tipe_file,
+    ''::text AS format_bkn
+   FROM ( SELECT a_1.saudara_id,
+            a_1.pegawai_id,
+            p.nama AS nama_pegawai,
+            p.nip_baru,
+            a_1.nama,
+            f.info_data,
+            f.riwayat_field,
+            f.tipe_file
+           FROM saudara a_1
+             JOIN pegawai p ON a_1.pegawai_id = p.pegawai_id,
+            riwayat_pegawai_saudara_file f
+          WHERE 1 = 1 AND (COALESCE(NULLIF(a_1.status::text, ''::text), NULL::text) IS NULL OR a_1.status::text = '2'::text)) a
+UNION ALL
+ SELECT 18 AS no_urut,
+    a.pegawai_id,
+    'ORANG_TUA'::text AS riwayat_table,
+    a.riwayat_field,
+    a.orang_tua_id::text AS riwayat_id,
+    concat(a.info_data, ' - ', a.nama) AS info_data,
+    a.tipe_file,
+    ''::text AS format_bkn
+   FROM ( SELECT a_1.orang_tua_id,
+            a_1.pegawai_id,
+            p.nama AS nama_pegawai,
+            p.nip_baru,
+            a_1.nama,
+            f.info_data,
+            f.riwayat_field,
+            f.tipe_file
+           FROM orang_tua a_1
+             JOIN pegawai p ON a_1.pegawai_id = p.pegawai_id,
+            ( SELECT riwayat_pegawai_orangtua_file.riwayat_field,
+                    riwayat_pegawai_orangtua_file.info_data,
+                    riwayat_pegawai_orangtua_file.tipe_file
+                   FROM riwayat_pegawai_orangtua_file
+                  WHERE riwayat_pegawai_orangtua_file.riwayat_field ~~ 'L%'::text) f
+          WHERE 1 = 1 AND a_1.jenis_kelamin::text = 'L'::text
+        UNION ALL
+         SELECT a_1.orang_tua_id,
+            a_1.pegawai_id,
+            p.nama AS nama_pegawai,
+            p.nip_baru,
+            a_1.nama,
+            f.info_data,
+            f.riwayat_field,
+            f.tipe_file
+           FROM orang_tua a_1
+             JOIN pegawai p ON a_1.pegawai_id = p.pegawai_id,
+            ( SELECT riwayat_pegawai_orangtua_file.riwayat_field,
+                    riwayat_pegawai_orangtua_file.info_data,
+                    riwayat_pegawai_orangtua_file.tipe_file
+                   FROM riwayat_pegawai_orangtua_file
+                  WHERE riwayat_pegawai_orangtua_file.riwayat_field ~~ 'P%'::text) f
+          WHERE 1 = 1 AND a_1.jenis_kelamin::text = 'P'::text) a
+UNION ALL
+ SELECT 19 AS no_urut,
+    a.pegawai_id,
+    'PEGAWAI'::text AS riwayat_table,
+    NULL::text AS riwayat_field,
+    a.riwayat_id::text AS riwayat_id,
+    a.info_data,
+    a.tipe_file,
+    concat(a.info_data, '_', a.nip_baru) AS format_bkn
+   FROM ( SELECT a_1.pegawai_id,
+            a_1.nip_baru,
+            b.riwayat_id,
+            b.info_data,
+            b.tipe_file
+           FROM pegawai a_1,
+            riwayat_pegawai_file_lain b
+          WHERE 1 = 1) a
+UNION ALL
+ SELECT 20 AS no_urut,
+    a.pegawai_id,
+    'JABATAN_TAMBAHAN'::text AS riwayat_table,
+    NULL::text AS riwayat_field,
+    a.jabatan_tambahan_id::text AS riwayat_id,
+    concat(a.nama, ', TMT ', a.tmt_jabatan) AS info_data,
+    2 AS tipe_file,
+    concat('TUGAS_', a.nip_baru) AS format_bkn
+   FROM ( SELECT a_1.jabatan_tambahan_id,
+            datetopagecheck(to_char(a_1.tmt_jabatan, 'YYYY-MM-DD'::text)::character varying) AS tmt_jabatan,
+            p.nip_baru,
+            a_1.nama,
+            a_1.pegawai_id
+           FROM jabatan_tambahan a_1
+             JOIN ( SELECT pegawai.nip_baru,
+                    pegawai.pegawai_id
+                   FROM pegawai) p ON a_1.pegawai_id = p.pegawai_id
+          WHERE 1 = 1 AND (COALESCE(NULLIF(a_1.status::text, ''::text), NULL::text) IS NULL OR a_1.status::text = '2'::text)
+          order by a_1.tmt_jabatan desc
+          ) a
+UNION ALL
+ SELECT 21 AS no_urut,
+    a.pegawai_id,
+    'SK_PPPK'::text AS riwayat_table,
+    a.riwayat_field,
+    a.sk_pppk_id::text AS riwayat_id,
+    concat(a.info_data, ' TMT ', a.tmt_pppk) AS info_data,
+    2 AS tipe_file,
+    concat(a.info_data, '_', a.tahun, '_', a.nip_baru) AS format_bkn
+   FROM ( SELECT a_1.sk_pppk_id,
+            datetopagecheck(to_char(a_1.tmt_pppk::timestamp with time zone, 'YYYY-MM-DD'::text)::character varying) AS tmt_pppk,
+            to_char(a_1.tanggal_sk::timestamp with time zone, 'MM'::text) AS bulan,
+            to_char(a_1.tanggal_sk::timestamp with time zone, 'YYYY'::text) AS tahun,
+            a_1.pegawai_id,
+            a_1.info_data,
+            a_1.riwayat_field,
+            p.nip_baru
+           FROM ( SELECT a_1_1.sk_pppk_id,
+                    a_1_1.pegawai_id,
+                    a_1_1.tmt_pppk,
+                    a_1_1.tanggal_sk,
+                    f.info_data,
+                    f.riwayat_field
+                   FROM sk_pppk a_1_1,
+                    riwayat_pegawai_pppk_file f
+                  WHERE 1 = 1 AND (COALESCE(NULLIF(a_1_1.status::text, ''::text), NULL::text) IS NULL OR a_1_1.status::text = '2'::text)) a_1
+             JOIN ( SELECT pegawai.nip_baru,
+                    pegawai.pegawai_id
+                   FROM pegawai) p ON a_1.pegawai_id = p.pegawai_id
+                  order by a_1.tanggal_sk desc
+        ) a
+union all
+select 
+22 AS no_urut,
+a.pegawai_id,
+'PENGHARGAAN'::text AS riwayat_table,
+NULL::text AS riwayat_field,
+a.infoid::text AS riwayat_id,
+concat(penghargaan_nama, ' ', a.info_tanggal_sk) AS info_data,
+2 AS tipe_file,
+concat('PENGHARGAAN_', replace(a.tanggal_sk::text, '-'::text, ''::text), '_', a.nip_baru) AS format_bkn
+FROM
+(
+  select 
+  a_1.penghargaan_id infoid, p.nip_baru
+  , rp.nama penghargaan_nama
+  , datetopagecheck(a_1.tanggal_sk::text::character varying) as tanggal_sk
+  , getformatteddate(a_1.tanggal_sk::text::character varying) as info_tanggal_sk
+  , a_1.pegawai_id
+  from penghargaan a_1
+  left join sapk.ref_penghargaan rp on a_1.ref_penghargaan_id = rp.ref_penghargaan_id
+  join ( select pegawai.nip_baru, pegawai.pegawai_id from pegawai) p on a_1.pegawai_id = p.pegawai_id
+  WHERE 1 = 1 AND (COALESCE(NULLIF(a_1.status::text, ''::text), NULL::text) IS NULL OR a_1.status::text = '2'::text)
+  order by a_1.tanggal_sk desc
+) a
+--where a.pegawai_id = 8300
+union all
+SELECT 23 AS no_urut
+, a.pegawai_id
+, 'PERSURATAN.SURAT_MASUK_PEGAWAI'::text AS riwayat_table
+, NULL::text AS riwayat_field
+, a.riwayat_id::text AS riwayat_id
+, a.info_data, a.tipe_file
+, concat(a.info_data, '_', a.nip_baru) AS format_bkn
+FROM 
+(
+  SELECT a_1.pegawai_id,
+  a_1.nip_baru,
+  b.riwayat_id,
+  b.info_data,
+  b.tipe_file
+  FROM pegawai a_1,
+  riwayat_pegawai_kehilangan b
+  WHERE 1 = 1
+) a
+--where pegawai_id = 6065
+union all
+SELECT 24 AS no_urut,
+a.pegawai_id,
+'PEGAWAI'::text AS riwayat_table,
+NULL::text AS riwayat_field,
+a.riwayat_id::text AS riwayat_id,
+a.info_data,
+a.tipe_file,
+concat(a.formatbkn, '_', a.nip_baru) AS format_bkn
+FROM
+(
+  SELECT a_1.pegawai_id, a_1.nip_baru, b.riwayat_id, b.info_data, b.formatbkn, b.tipe_file
+  FROM pegawai a_1, riwayat_pegawai_usulan_pensiun b
+  WHERE 1 = 1
+) a
+UNION ALL
+SELECT
+25 AS no_urut, a.pegawai_id
+, 'DIKLAT_KURSUS'::text AS riwayat_table
+, NULL::text AS riwayat_field
+, a.diklat_kursus_id::text AS riwayat_id
+, concat(a.nama, ' - ', a.tanggal_info) AS info_data
+, 2 AS tipe_file
+, concat('DIKLAT_KURSUS_', a.nip_baru) AS format_bkn
+FROM 
+(
+  SELECT
+  a_1.diklat_kursus_id, a_1.pegawai_id, B.NAMA
+  , getformatteddate(to_char(a_1.tanggal_sertifikat, 'YYYY-MM-DD'::text)::character varying) AS tanggal_format
+  , datetopagecheck(to_char(a_1.tanggal_sertifikat, 'YYYY-MM-DD'::text)::character varying) AS tanggal_info
+  , p.nip_baru
+  FROM diklat_kursus a_1
+  JOIN
+  (
+    SELECT pegawai.nip_baru,
+    pegawai.pegawai_id
+    FROM pegawai
+  ) p ON a_1.pegawai_id = p.pegawai_id
+  LEFT JOIN tipe_kursus b ON a_1.TIPE_KURSUS_ID = b.TIPE_KURSUS_ID
+  WHERE 1 = 1 --and a_1.pegawai_id = 4089
+  order by a_1.tanggal_sertifikat desc
+) a
+where 1=1 --and a.pegawai_id = 4089
+UNION ALL
+SELECT
+26 AS no_urut, a.pegawai_id
+, 'PENILAIAN_KOMPETENSI'::text AS riwayat_table
+, NULL::text AS riwayat_field
+, a.penilaian_kompetensi_id::text AS riwayat_id
+, a.tanggal_info AS info_data
+, 2 AS tipe_file
+, concat('PENILAIAN_KOMPETENSI_', a.nip_baru) AS format_bkn
+FROM 
+(
+  SELECT
+  a_1.penilaian_kompetensi_id, a_1.pegawai_id
+  , getformatteddate(to_char(a_1.tanggal_kompetensi, 'YYYY-MM-DD'::text)::character varying) AS tanggal_format
+  , datetopagecheck(to_char(a_1.tanggal_kompetensi, 'YYYY-MM-DD'::text)::character varying) AS tanggal_info
+  , p.nip_baru
+  FROM penilaian_kompetensi a_1
+  JOIN
+  (
+    SELECT pegawai.nip_baru,
+    pegawai.pegawai_id
+    FROM pegawai
+  ) p ON a_1.pegawai_id = p.pegawai_id
+  WHERE 1 = 1 --and a_1.pegawai_id = 4089
+  order by a_1.tanggal_kompetensi desc
+) a
+where 1=1 --and a.pegawai_id = 4089
+UNION ALL
+SELECT
+27 AS no_urut, a.pegawai_id
+, 'CUTI'::text AS riwayat_table
+, NULL::text AS riwayat_field
+, a.cuti_id::text AS riwayat_id
+, a.tanggal_info AS info_data
+, 2 AS tipe_file
+, concat('CUTI_', a.nip_baru) AS format_bkn
+FROM 
+(
+  SELECT
+  a_1.cuti_id, a_1.pegawai_id
+  , getformatteddate(to_char(a_1.tanggal_surat, 'YYYY-MM-DD'::text)::character varying) AS tanggal_format
+  , datetopagecheck(to_char(a_1.tanggal_surat, 'YYYY-MM-DD'::text)::character varying) AS tanggal_info
+  , p.nip_baru
+  FROM cuti a_1
+  JOIN
+  (
+    SELECT pegawai.nip_baru,
+    pegawai.pegawai_id
+    FROM pegawai
+  ) p ON a_1.pegawai_id = p.pegawai_id
+  WHERE 1 = 1 --and a_1.pegawai_id = 4089
+  order by a_1.tanggal_surat desc
+) a
+where 1=1 --and a.pegawai_id = 4089
+UNION ALL
+SELECT
+28 AS no_urut, a.pegawai_id
+, 'HUKUMAN'::text AS riwayat_table
+, NULL::text AS riwayat_field
+, a.hukuman_id::text AS riwayat_id
+, tingkat_hukuman_nama || ' - TMT ' || a.tanggal_info AS info_data
+, 2 AS tipe_file
+, concat('HUKUMAN_', a.nip_baru) AS format_bkn
+FROM 
+(
+  SELECT
+  a_1.hukuman_id, a_1.pegawai_id, c.nama tingkat_hukuman_nama
+  , getformatteddate(to_char(a_1.tmt_sk, 'YYYY-MM-DD'::text)::character varying) AS tanggal_format
+  , datetopagecheck(to_char(a_1.tmt_sk, 'YYYY-MM-DD'::text)::character varying) AS tanggal_info
+  , p.nip_baru
+  FROM hukuman a_1
+  JOIN
+  (
+    SELECT pegawai.nip_baru,
+    pegawai.pegawai_id
+    FROM pegawai
+  ) p ON a_1.pegawai_id = p.pegawai_id
+  LEFT JOIN tingkat_hukuman c on c.tingkat_hukuman_id = a_1.tingkat_hukuman_id
+  WHERE 1 = 1 --and a_1.pegawai_id = 4089
+  AND (COALESCE(NULLIF(a_1.status::text, ''::text), NULL::text) IS NULL OR a_1.status::text = '2'::text)
+  order by a_1.tmt_sk desc
+) a
+--where 1=1 and a.pegawai_id = 8300
+UNION ALL
+SELECT
+29 AS no_urut,
+a.pegawai_id,
+'PENDIDIKAN_RIWAYAT'::text AS riwayat_table,
+a.riwayat_field,
+a.pendidikan_riwayat_id::text AS riwayat_id,
+concat(a.pendidikan_nama_status, ' - ', replace(a.tanggal_info, '-', '/')) info_data,
+2 AS tipe_file,
+concat(a.jenis_nama, '_', a.nip_baru) AS format_bkn
+FROM 
+( 
+  SELECT a_1.pendidikan_riwayat_id,
+  a_1.pegawai_id,
+  --concat(c.nama, ' - ', f.info_data) AS pendidikan_nama_status,
+  c.nama pendidikan_nama_status,
+  f.riwayat_field,
+  CASE f.riwayat_field
+  WHEN 'ijinbelajar'::text THEN concat('IBEL_', c.nama)
+  WHEN 'transkrip'::text THEN concat('TRANSKRIP_', c.nama)
+  WHEN 'ijazah'::text THEN concat('IJAZAH_', c.nama)
+  ELSE NULL::text
+  END AS jenis_nama,
+  p.nip_baru
+  , getformatteddate(to_char(a_1.tanggal_sttb, 'YYYY-MM-DD'::text)::character varying) AS tanggal_format
+  , datetopagecheck(to_char(a_1.tanggal_sttb, 'YYYY-MM-DD'::text)::character varying) AS tanggal_info
+  FROM pendidikan_riwayat a_1
+  JOIN
+  (
+    SELECT pegawai.nip_baru,
+    pegawai.pegawai_id
+    FROM pegawai
+  ) p ON a_1.pegawai_id = p.pegawai_id
+  LEFT JOIN pendidikan c ON a_1.pendidikan_id = c.pendidikan_id,
+  riwayat_pegawai_pendidikan_pencantuman_file f
+  WHERE 1 = 1 AND COALESCE(NULLIF(a_1.no_surat_ijin::text, ''::text), NULL::text) IS NOT NULL
+  AND a_1.tanggal_surat_ijin IS NOT NULL
+  AND (COALESCE(NULLIF(a_1.status::text, ''::text), NULL::text) IS NULL OR a_1.status::text = '2'::text)
+  order by a_1.tanggal_sttb desc
+) a
+--where 1=1 and a.pegawai_id = 1729
+union all
+SELECT 30 AS no_urut,
+a.pegawai_id,
+'PEGAWAI'::text AS riwayat_table,
+NULL::text AS riwayat_field,
+a.riwayat_id::text AS riwayat_id,
+a.info_data,
+a.tipe_file,
+concat(a.formatbkn, '_', a.nip_baru) AS format_bkn
+FROM
+(
+  SELECT a_1.pegawai_id, a_1.nip_baru, b.riwayat_id, b.info_data, b.formatbkn, b.tipe_file
+  FROM pegawai a_1, riwayat_pegawai_usulan_kenaikan_pangkat b
+  WHERE 1 = 1
+) a
+--where 1=1 and a.pegawai_id = 1729
+;
+ALTER TABLE riwayat_file OWNER TO postgres;

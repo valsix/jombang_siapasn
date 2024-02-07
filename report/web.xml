@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+ | $Header: setup/struts4php.xml
+ | $Revision: 1.0
+ | $Date: 2004.06.19
+ |
+ | ====================================================================
+ -->
+<configuration>
+	<path name="datasource">
+		<configValue name="default">jombang</configValue>
+		<path name="valsix">
+			<configValue name="driver">postgres</configValue>
+			<configValue name="server">localhost</configValue>
+			<!-- <configValue name="database">db_siappro1</configValue> -->
+			<configValue name="database">simpeg_jombang</configValue>
+			<configValue name="username">postgres</configValue> 
+			<!-- <configValue name="password">b3rkarakt3rBerdayaS41ng</configValue> -->
+			<configValue name="password">root</configValue>
+			<configValue name="pathreport">C:\\AppServ\\www\\simpeg_jombang\\</configValue>
+			<configValue name="serverreport">PostgreSQL35W</configValue>
+		</path>
+	</path>
+</configuration>

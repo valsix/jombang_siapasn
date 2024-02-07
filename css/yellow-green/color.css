@@ -1,0 +1,42 @@
+body {
+	/*background-image:url(../../images/back.png);*/
+	/*background-image:url(../../images/bg.jpg);*/
+	background-repeat:repeat;
+}
+.content{
+	background: #ffffff; /* Old browsers */
+	background: #ffffff; /* Old browsers */
+	background: -moz-linear-gradient(top,  #ffffff 0%, #e5e5e5 100%); /* FF3.6+ */
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#ffffff), color-stop(100%,#e5e5e5)); /* Chrome,Safari4+ */
+	background: -webkit-linear-gradient(top,  #ffffff 0%,#e5e5e5 100%); /* Chrome10+,Safari5.1+ */
+	background: -o-linear-gradient(top,  #ffffff 0%,#e5e5e5 100%); /* Opera 11.10+ */
+	background: -ms-linear-gradient(top,  #ffffff 0%,#e5e5e5 100%); /* IE10+ */
+	background: linear-gradient(to bottom,  #ffffff 0%,#e5e5e5 100%); /* W3C */
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffffff', endColorstr='#e5e5e5',GradientType=0 ); /* IE6-9 */
+}
+.label a{
+	/*background: #9ACD32;*/
+	background:#26bfff;                  /*Color 1*/ 
+	color:#FFFFFF;      
+}
+.container:hover .label a,
+.container:target .label a{
+	background: #1b4b72;
+	color:#333333;         
+}
+.content p,
+.content h6{                       
+	color:#333333;	
+}
+.content h4,
+.content h6 i{
+	/*color: #9ACD32;*/                        /*Color 1*/ 
+	color:#26bfff;
+}
+/*Close Icon*/
+.content h4 a i{
+	color:#CCCCCC;
+}
+.content h4 a:hover i{
+	color:#333333;
+}

@@ -1,0 +1,13 @@
+insert into peraturan(peraturan_id, nama, keterangan) values (2, 'PP 94 Tahun 2021', 'DISIPLIN PNS');
+insert into tingkat_hukuman(tingkat_hukuman_id, nama, peraturan_id) values (4, 'Ringan', 2);
+insert into tingkat_hukuman(tingkat_hukuman_id, nama, peraturan_id) values (5, 'Sedang', 2);
+insert into tingkat_hukuman(tingkat_hukuman_id, nama, peraturan_id) values (6, 'Berat', 2);
+insert into jenis_hukuman(jenis_hukuman_id, nama, tingkat_hukuman_id) values (12, 'Teguran Lisan', 4);
+insert into jenis_hukuman(jenis_hukuman_id, nama, tingkat_hukuman_id) values (13, 'Teguran Tertulis', 4);
+insert into jenis_hukuman(jenis_hukuman_id, nama, tingkat_hukuman_id) values (14, 'Pernyataan Tidak Puas Secara Tertulis', 4);
+insert into jenis_hukuman(jenis_hukuman_id, nama, tingkat_hukuman_id) values (15, 'Pemotongan tunjangan kinerja sebesar 25% (dua puluh lima persen) selama 6 (enam) bulan', 5);
+insert into jenis_hukuman(jenis_hukuman_id, nama, tingkat_hukuman_id) values (16, 'Pemotongan tunjangan kinerja sebesar 25% (dua puluh lima persen) selama 9 (sembilan) bulan', 5);
+insert into jenis_hukuman(jenis_hukuman_id, nama, tingkat_hukuman_id) values (17, 'Pemotongan tunjangan kinerja sebesar 25% (dua puluh lima persen) selama 12 (dua belas) bulan', 5);
+insert into jenis_hukuman(jenis_hukuman_id, nama, tingkat_hukuman_id) values (18, 'Penurunan jabatan setingkat lebih rendah selama 12 (dua belas) bulan', 6);
+insert into jenis_hukuman(jenis_hukuman_id, nama, tingkat_hukuman_id) values (19, 'Pembebasan dari jabatannya menjadi Jabatan Pelaksana selama 12 (dua belas) bulan', 6);
+insert into jenis_hukuman(jenis_hukuman_id, nama, tingkat_hukuman_id) values (20, 'Pemberhentian dengan hormat tidak atas permintaan sendiri sebagai PNS', 6);

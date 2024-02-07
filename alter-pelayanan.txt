@@ -1,0 +1,1055 @@
+/*
+untuk reset disposisi
+
+select * from persuratan.surat_masuk_bkd where surat_masuk_bkd_id = 23601;
+select * from persuratan.surat_masuk_pegawai where surat_masuk_bkd_id = 23601;
+select * from persuratan.surat_masuk_bkd_disposisi where surat_masuk_bkd_id = 23601;
+select * from persuratan.surat_masuk_bkd_disposisi_posisi where surat_masuk_bkd_id = 23601;
+select * from persuratan.surat_masuk_bkd_disposisi_keterangan where surat_masuk_bkd_id = 23601;
+
+select distinct no_agenda::numeric FROM persuratan.surat_masuk_bkd A where coalesce(nullif(no_agenda, ''), null) is not null order by no_agenda::numeric desc
+
+update persuratan.surat_masuk_bkd set no_agenda = 5863 where surat_masuk_bkd_id = 23601;
+--update persuratan.surat_masuk_bkd set no_agenda = null where surat_masuk_bkd_id = 23601;
+--update persuratan.surat_masuk_bkd_disposisi set terbaca= null, terdisposisi= null where surat_masuk_bkd_id = 23601 and surat_masuk_bkd_disposisi_parent_id = '0';
+delete from persuratan.surat_masuk_bkd_disposisi where surat_masuk_bkd_id = 23601;
+delete from persuratan.surat_masuk_bkd_disposisi_posisi where surat_masuk_bkd_id = 23601;
+
+
+
+*/
+
+alter table persuratan.us_jabatan_tambahan
+add column alasan_tolak character varying;
+
+alter table persuratan.us_jabatan_riwayat
+add column alasan_tolak character varying;
+
+alter table persuratan.surat_masuk_pegawai
+add column status_e_file_bkd integer
+, add column status_e_file_upt integer
+, add column tmt_pensiun date;
+
+alter table persuratan.surat_masuk_pegawai_turun_status
+add column jenis character varying;
+
+alter table persuratan.surat_masuk_upt
+add column jkm_nomor character varying
+, add column jkm_tanggal date;
+
+alter table persuratan.surat_masuk_bkd
+add column jkm_nomor character varying
+, add column jkm_tanggal date;
+
+--select * from kategori_file order by kategori_file_id
+
+--select * from persuratan.jenis_pelayanan_check where jenis_pelayanan_id = 4 order by nomor
+--select * from persuratan.jenis_pelayanan_check a where 1=1 and a.jenis_pelayanan_id = 4 order by nomor
+update persuratan.jenis_pelayanan_check set tipe = 'skcpns' where jenis_pelayanan_id = 4 and nomor = 1;
+update persuratan.jenis_pelayanan_check set tipe = 'skpns' where jenis_pelayanan_id = 4 and nomor = 2;
+update persuratan.jenis_pelayanan_check set info_checked = '1', link_file = 'SURAT_MASUK_PEGAWAI_ID', informasi_table = 'PERSURATAN.SURAT_MASUK_PEGAWAI', kategori_file_id = 23 where jenis_pelayanan_id = 4 and nomor = 5;
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (7, 4, '3', 'KARPEG', '1', 'PEGAWAI_ID', 'PEGAWAI', 8, '');
+
+--select * from persuratan.jenis_pelayanan_check a where 1=1 and a.jenis_pelayanan_id = 3 order by nomor
+update persuratan.jenis_pelayanan_check set tipe = 'skcpns' where jenis_pelayanan_id = 3 and nomor = 1;
+update persuratan.jenis_pelayanan_check set tipe = 'skpns' where jenis_pelayanan_id = 3 and nomor = 2;
+update persuratan.jenis_pelayanan_check set tipe = '6' where jenis_pelayanan_id = 3 and nomor = 9;
+
+--================================================================================================
+
+--select * from persuratan.jenis_pelayanan_check where jenis_pelayanan_id = 3 order by nomor
+--sebelum null
+update persuratan.jenis_pelayanan_check set kategori_file_id = 15 where jenis_pelayanan_id = 3 and nomor = 4;
+--sebelum null
+update persuratan.jenis_pelayanan_check set kategori_file_id = 15 where jenis_pelayanan_id = 3 and nomor = 5;
+--sebelum null
+update persuratan.jenis_pelayanan_check set kategori_file_id = 15 where jenis_pelayanan_id = 3 and nomor = 6;
+
+--kategori sebelum 6, nomor = 9
+update persuratan.jenis_pelayanan_check set kategori_file_id = 8, nomor = 11 where jenis_pelayanan_id = 3 and nomor = 9;
+--kategori sebelum null, nomor = 10
+update persuratan.jenis_pelayanan_check set kategori_file_id = 15, nomor = 12 where jenis_pelayanan_id = 3 and nomor = 10;
+
+--link file: "1", informasi_field: "INFO_PERTAMA_PNS"
+update persuratan.jenis_pelayanan_check set link_file = null, informasi_field = null where jenis_pelayanan_id = 3 and nomor = 7;
+--link file: "1", info check: null informasi_table:"SUAMI_ISTRI_PISAH_TERAKHIR", informasi_field: "INFO_PERTAMA_PNS"
+update persuratan.jenis_pelayanan_check set link_file = null, info_checked = null, informasi_table = null, informasi_field = null where jenis_pelayanan_id = 3 and nomor = 8;
+
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (9, 3, 'aktacerai', 'Akta Cerai Pasangan Sebelum', '1', 'SUAMI_ISTRI_ID', 'SUAMI_ISTRI', 15, '');
+
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (10, 3, 'aktacerai', 'Akta Cerai Pasangan Saat Ini', '1', 'SUAMI_ISTRI_ID', 'SUAMI_ISTRI', 15, '');
+
+--tambahan khusus surat kehilangan
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (13, 3, '', 'Karis/Karsu Surat Kehilangan', '1', 'SURAT_MASUK_PEGAWAI_ID', 'PERSURATAN.SURAT_MASUK_PEGAWAI', 23, '');
+
+--revisi data
+update persuratan.jenis_pelayanan_check set nomor = 15 where jenis_pelayanan_id = 3 and nomor = 13;
+update persuratan.jenis_pelayanan_check set nomor = 14 where jenis_pelayanan_id = 3 and nomor = 12;
+update persuratan.jenis_pelayanan_check set nomor = 13 where jenis_pelayanan_id = 3 and nomor = 11;
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (11, 3, 'suratkematian', 'Surat Kematian Pasangan Sebelum', '1', 'SUAMI_ISTRI_ID', 'SUAMI_ISTRI', 15, '');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (12, 3, 'suratkematian', 'Surat Kematian Pasangan Saat Ini', '1', 'SUAMI_ISTRI_ID', 'SUAMI_ISTRI', 15, '');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (16, 3, 'kariskarsu', 'Karis/Karsu', '1', 'SUAMI_ISTRI_ID', 'SUAMI_ISTRI', 15, '');
+
+--================================================================================================
+
+--select * from persuratan.jenis_pelayanan_check where jenis_pelayanan_id = 7 and kategori = 'bup' order by nomor
+delete from persuratan.jenis_pelayanan_check where jenis_pelayanan_id = 7 and kategori = 'bup';
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (1, 7, 'skcpns', 'SK CPNS', '1', 'PANGKAT_RIWAYAT_ID', 'PANGKAT_RIWAYAT', 1, 'bup');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (2, 7, 'skpns', 'SK PNS', '1', 'PANGKAT_RIWAYAT_ID', 'PANGKAT_RIWAYAT', 2, 'bup');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (3, 7, '0', 'SK Pangkat Terakhir', '1', 'PANGKAT_RIWAYAT_ID', 'PANGKAT_RIWAYAT', 4, 'bup');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (4, 7, '0', 'Surat Keterangan kenaikan gaji berkala', '1', 'GAJI_RIWAYAT_ID', 'GAJI_RIWAYAT', 5, 'bup');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (5.1, 7, 'ppk', 'Penilaian Prestasi Kerja Tahun', '1', 'PENILAIAN_SKP_ID', 'PENILAIAN_SKP', 7, 'bup');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (5.2, 7, 'ppk', 'Penilaian Prestasi Kerja Tahun', '1', 'PENILAIAN_SKP_ID', 'PENILAIAN_SKP', 7, 'bup');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (6, 7, '6', 'Kartu Keluarga', '1', 'PEGAWAI_ID', 'PEGAWAI', 8, 'bup');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (7, 7, '40', 'DPCP', '1', 'PEGAWAI_ID', 'PEGAWAI', 24, 'bup');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (8, 7, '41', 'Surat Pernyataan Tidak Pernah Dijatuhi Hukdis Sedang dan Berat', '1', 'PEGAWAI_ID', 'PEGAWAI', 24, 'bup');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (9, 7, '42', 'Surat Pernyataan Tidak Sedang Menjalani Proses Pidana atau Pernah Dipidana Penjara', '1', 'PEGAWAI_ID', 'PEGAWAI', 24, 'bup');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (10.01, 7, 'suratkematian', 'Surat Kematian', '', 'SUAMI_ISTRI_ID', 'SUAMI_ISTRI', 15, 'bup');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (10.02, 7, 'aktanikah', 'Akta Nikah', '', 'SUAMI_ISTRI_ID', 'SUAMI_ISTRI', 15, 'bup');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (10.03, 7, 'aktacerai', 'Akta Cerai', '', 'SUAMI_ISTRI_ID', 'SUAMI_ISTRI', 15, 'bup');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (10.04, 7, 'suratkematian', 'Surat Kematian', '', 'SUAMI_ISTRI_ID', 'SUAMI_ISTRI', 15, 'bup');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (10.05, 7, 'aktanikah', 'Akta Nikah', '', 'SUAMI_ISTRI_ID', 'SUAMI_ISTRI', 15, 'bup');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (10.06, 7, 'aktacerai', 'Akta Cerai', '', 'SUAMI_ISTRI_ID', 'SUAMI_ISTRI', 15, 'bup');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (10.07, 7, 'suratkematian', 'Surat Kematian', '', 'SUAMI_ISTRI_ID', 'SUAMI_ISTRI', 15, 'bup');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (10.08, 7, 'aktanikah', 'Akta Nikah', '', 'SUAMI_ISTRI_ID', 'SUAMI_ISTRI', 15, 'bup');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (10.09, 7, 'aktacerai', 'Akta Cerai', '', 'SUAMI_ISTRI_ID', 'SUAMI_ISTRI', 15, 'bup');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (10.10, 7, 'suratkematian', 'Surat Kematian', '', 'SUAMI_ISTRI_ID', 'SUAMI_ISTRI', 15, 'bup');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (10.11, 7, 'aktanikah', 'Akta Nikah', '', 'SUAMI_ISTRI_ID', 'SUAMI_ISTRI', 15, 'bup');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (10.12, 7, 'aktacerai', 'Akta Cerai', '', 'SUAMI_ISTRI_ID', 'SUAMI_ISTRI', 15, 'bup');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (10.13, 7, 'suratkematian', 'Surat Kematian', '', 'SUAMI_ISTRI_ID', 'SUAMI_ISTRI', 15, 'bup');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (10.14, 7, 'aktanikah', 'Akta Nikah', '', 'SUAMI_ISTRI_ID', 'SUAMI_ISTRI', 15, 'bup');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (10.15, 7, 'aktacerai', 'Akta Cerai', '', 'SUAMI_ISTRI_ID', 'SUAMI_ISTRI', 15, 'bup');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (10.16, 7, 'suratkematian', 'Surat Kematian', '', 'SUAMI_ISTRI_ID', 'SUAMI_ISTRI', 15, 'bup');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (10.17, 7, 'aktanikah', 'Akta Nikah', '', 'SUAMI_ISTRI_ID', 'SUAMI_ISTRI', 15, 'bup');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (10.18, 7, 'aktacerai', 'Akta Cerai', '', 'SUAMI_ISTRI_ID', 'SUAMI_ISTRI', 15, 'bup');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (10.19, 7, 'suratkematian', 'Surat Kematian', '', 'SUAMI_ISTRI_ID', 'SUAMI_ISTRI', 15, 'bup');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (10.20, 7, 'aktanikah', 'Akta Nikah', '', 'SUAMI_ISTRI_ID', 'SUAMI_ISTRI', 15, 'bup');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (10.21, 7, 'aktacerai', 'Akta Cerai', '', 'SUAMI_ISTRI_ID', 'SUAMI_ISTRI', 15, 'bup');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (11.01, 7, 'aktakelahiran', 'Akta Kelahiran anak', '', 'ANAK_ID', 'ANAK', 16, 'bup');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (11.02, 7, 'suratketerangankuliah', 'Surat Keterangan Kuliah', '', 'ANAK_ID', 'ANAK', 16, 'bup');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (11.03, 7, 'suratketeranganbelumbekerja', 'Surat Keterangan Belum Bekerja', '', 'ANAK_ID', 'ANAK', 16, 'bup');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (11.04, 7, 'aktakelahiran', 'Akta Kelahiran anak', '', 'ANAK_ID', 'ANAK', 16, 'bup');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (11.05, 7, 'suratketerangankuliah', 'Surat Keterangan Kuliah', '', 'ANAK_ID', 'ANAK', 16, 'bup');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (11.06, 7, 'suratketeranganbelumbekerja', 'Surat Keterangan Belum Bekerja', '', 'ANAK_ID', 'ANAK', 16, 'bup');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (11.07, 7, 'aktakelahiran', 'Akta Kelahiran anak', '', 'ANAK_ID', 'ANAK', 16, 'bup');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (11.08, 7, 'suratketerangankuliah', 'Surat Keterangan Kuliah', '', 'ANAK_ID', 'ANAK', 16, 'bup');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (11.09, 7, 'suratketeranganbelumbekerja', 'Surat Keterangan Belum Bekerja', '', 'ANAK_ID', 'ANAK', 16, 'bup');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (11.10, 7, 'aktakelahiran', 'Akta Kelahiran anak', '', 'ANAK_ID', 'ANAK', 16, 'bup');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (11.11, 7, 'suratketerangankuliah', 'Surat Keterangan Kuliah', '', 'ANAK_ID', 'ANAK', 16, 'bup');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (11.12, 7, 'suratketeranganbelumbekerja', 'Surat Keterangan Belum Bekerja', '', 'ANAK_ID', 'ANAK', 16, 'bup');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (11.13, 7, 'aktakelahiran', 'Akta Kelahiran anak', '', 'ANAK_ID', 'ANAK', 16, 'bup');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (11.14, 7, 'suratketerangankuliah', 'Surat Keterangan Kuliah', '', 'ANAK_ID', 'ANAK', 16, 'bup');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (11.15, 7, 'suratketeranganbelumbekerja', 'Surat Keterangan Belum Bekerja', '', 'ANAK_ID', 'ANAK', 16, 'bup');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (11.16, 7, 'aktakelahiran', 'Akta Kelahiran anak', '', 'ANAK_ID', 'ANAK', 16, 'bup');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (11.17, 7, 'suratketerangankuliah', 'Surat Keterangan Kuliah', '', 'ANAK_ID', 'ANAK', 16, 'bup');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (11.18, 7, 'suratketeranganbelumbekerja', 'Surat Keterangan Belum Bekerja', '', 'ANAK_ID', 'ANAK', 16, 'bup');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (11.19, 7, 'aktakelahiran', 'Akta Kelahiran anak', '', 'ANAK_ID', 'ANAK', 16, 'bup');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (11.20, 7, 'suratketerangankuliah', 'Surat Keterangan Kuliah', '', 'ANAK_ID', 'ANAK', 16, 'bup');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (11.21, 7, 'suratketeranganbelumbekerja', 'Surat Keterangan Belum Bekerja', '', 'ANAK_ID', 'ANAK', 16, 'bup');
+
+--select * from persuratan.jenis_pelayanan_check where jenis_pelayanan_id = 7 and kategori = 'meninggal' order by nomor
+delete from persuratan.jenis_pelayanan_check where jenis_pelayanan_id = 7 and kategori = 'meninggal';
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (1, 7, 'skcpns', 'SK CPNS', '1', 'PANGKAT_RIWAYAT_ID', 'PANGKAT_RIWAYAT', 1, 'meninggal');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (2, 7, 'skpns', 'SK PNS', '1', 'PANGKAT_RIWAYAT_ID', 'PANGKAT_RIWAYAT', 2, 'meninggal');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (3, 7, '0', 'SK Pangkat Terakhir', '1', 'PANGKAT_RIWAYAT_ID', 'PANGKAT_RIWAYAT', 4, 'meninggal');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (4, 7, '0', 'Surat Keterangan kenaikan gaji berkala', '1', 'GAJI_RIWAYAT_ID', 'GAJI_RIWAYAT', 5, 'meninggal');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (5.1, 7, 'ppk', 'Penilaian Prestasi Kerja Tahun', '1', 'PENILAIAN_SKP_ID', 'PENILAIAN_SKP', 7, 'meninggal');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (5.2, 7, 'ppk', 'Penilaian Prestasi Kerja Tahun', '1', 'PENILAIAN_SKP_ID', 'PENILAIAN_SKP', 7, 'meninggal');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (6, 7, '6', 'Kartu Keluarga', '1', 'PEGAWAI_ID', 'PEGAWAI', 8, 'meninggal');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (7, 7, '40', 'DPCP', '1', 'PEGAWAI_ID', 'PEGAWAI', 24, 'meninggal');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (8, 7, '41', 'Surat Pernyataan Tidak Pernah Dijatuhi Hukdis Sedang dan Berat', '1', 'PEGAWAI_ID', 'PEGAWAI', 24, 'meninggal');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (9, 7, '42', 'Surat Pernyataan Tidak Sedang Menjalani Proses Pidana atau Pernah Dipidana Penjara', '1', 'PEGAWAI_ID', 'PEGAWAI', 24, 'meninggal');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (10.01, 7, 'suratkematian', 'Surat Kematian', '', 'SUAMI_ISTRI_ID', 'SUAMI_ISTRI', 15, 'meninggal');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (10.02, 7, 'aktanikah', 'Akta Nikah', '', 'SUAMI_ISTRI_ID', 'SUAMI_ISTRI', 15, 'meninggal');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (10.03, 7, 'aktacerai', 'Akta Cerai', '', 'SUAMI_ISTRI_ID', 'SUAMI_ISTRI', 15, 'meninggal');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (10.04, 7, 'suratkematian', 'Surat Kematian', '', 'SUAMI_ISTRI_ID', 'SUAMI_ISTRI', 15, 'meninggal');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (10.05, 7, 'aktanikah', 'Akta Nikah', '', 'SUAMI_ISTRI_ID', 'SUAMI_ISTRI', 15, 'meninggal');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (10.06, 7, 'aktacerai', 'Akta Cerai', '', 'SUAMI_ISTRI_ID', 'SUAMI_ISTRI', 15, 'meninggal');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (10.07, 7, 'suratkematian', 'Surat Kematian', '', 'SUAMI_ISTRI_ID', 'SUAMI_ISTRI', 15, 'meninggal');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (10.08, 7, 'aktanikah', 'Akta Nikah', '', 'SUAMI_ISTRI_ID', 'SUAMI_ISTRI', 15, 'meninggal');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (10.09, 7, 'aktacerai', 'Akta Cerai', '', 'SUAMI_ISTRI_ID', 'SUAMI_ISTRI', 15, 'meninggal');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (10.10, 7, 'suratkematian', 'Surat Kematian', '', 'SUAMI_ISTRI_ID', 'SUAMI_ISTRI', 15, 'meninggal');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (10.11, 7, 'aktanikah', 'Akta Nikah', '', 'SUAMI_ISTRI_ID', 'SUAMI_ISTRI', 15, 'meninggal');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (10.12, 7, 'aktacerai', 'Akta Cerai', '', 'SUAMI_ISTRI_ID', 'SUAMI_ISTRI', 15, 'meninggal');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (10.13, 7, 'suratkematian', 'Surat Kematian', '', 'SUAMI_ISTRI_ID', 'SUAMI_ISTRI', 15, 'meninggal');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (10.14, 7, 'aktanikah', 'Akta Nikah', '', 'SUAMI_ISTRI_ID', 'SUAMI_ISTRI', 15, 'meninggal');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (10.15, 7, 'aktacerai', 'Akta Cerai', '', 'SUAMI_ISTRI_ID', 'SUAMI_ISTRI', 15, 'meninggal');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (10.16, 7, 'suratkematian', 'Surat Kematian', '', 'SUAMI_ISTRI_ID', 'SUAMI_ISTRI', 15, 'meninggal');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (10.17, 7, 'aktanikah', 'Akta Nikah', '', 'SUAMI_ISTRI_ID', 'SUAMI_ISTRI', 15, 'meninggal');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (10.18, 7, 'aktacerai', 'Akta Cerai', '', 'SUAMI_ISTRI_ID', 'SUAMI_ISTRI', 15, 'meninggal');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (10.19, 7, 'suratkematian', 'Surat Kematian', '', 'SUAMI_ISTRI_ID', 'SUAMI_ISTRI', 15, 'meninggal');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (10.20, 7, 'aktanikah', 'Akta Nikah', '', 'SUAMI_ISTRI_ID', 'SUAMI_ISTRI', 15, 'meninggal');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (10.21, 7, 'aktacerai', 'Akta Cerai', '', 'SUAMI_ISTRI_ID', 'SUAMI_ISTRI', 15, 'meninggal');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (11.01, 7, 'aktakelahiran', 'Akta Kelahiran anak', '', 'ANAK_ID', 'ANAK', 16, 'meninggal');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (11.02, 7, 'suratketerangankuliah', 'Surat Keterangan Kuliah', '', 'ANAK_ID', 'ANAK', 16, 'meninggal');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (11.03, 7, 'suratketeranganbelumbekerja', 'Surat Keterangan Belum Bekerja', '', 'ANAK_ID', 'ANAK', 16, 'meninggal');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (11.04, 7, 'aktakelahiran', 'Akta Kelahiran anak', '', 'ANAK_ID', 'ANAK', 16, 'meninggal');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (11.05, 7, 'suratketerangankuliah', 'Surat Keterangan Kuliah', '', 'ANAK_ID', 'ANAK', 16, 'meninggal');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (11.06, 7, 'suratketeranganbelumbekerja', 'Surat Keterangan Belum Bekerja', '', 'ANAK_ID', 'ANAK', 16, 'meninggal');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (11.07, 7, 'aktakelahiran', 'Akta Kelahiran anak', '', 'ANAK_ID', 'ANAK', 16, 'meninggal');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (11.08, 7, 'suratketerangankuliah', 'Surat Keterangan Kuliah', '', 'ANAK_ID', 'ANAK', 16, 'meninggal');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (11.09, 7, 'suratketeranganbelumbekerja', 'Surat Keterangan Belum Bekerja', '', 'ANAK_ID', 'ANAK', 16, 'meninggal');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (11.10, 7, 'aktakelahiran', 'Akta Kelahiran anak', '', 'ANAK_ID', 'ANAK', 16, 'meninggal');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (11.11, 7, 'suratketerangankuliah', 'Surat Keterangan Kuliah', '', 'ANAK_ID', 'ANAK', 16, 'meninggal');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (11.12, 7, 'suratketeranganbelumbekerja', 'Surat Keterangan Belum Bekerja', '', 'ANAK_ID', 'ANAK', 16, 'meninggal');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (11.13, 7, 'aktakelahiran', 'Akta Kelahiran anak', '', 'ANAK_ID', 'ANAK', 16, 'meninggal');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (11.14, 7, 'suratketerangankuliah', 'Surat Keterangan Kuliah', '', 'ANAK_ID', 'ANAK', 16, 'meninggal');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (11.15, 7, 'suratketeranganbelumbekerja', 'Surat Keterangan Belum Bekerja', '', 'ANAK_ID', 'ANAK', 16, 'meninggal');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (11.16, 7, 'aktakelahiran', 'Akta Kelahiran anak', '', 'ANAK_ID', 'ANAK', 16, 'meninggal');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (11.17, 7, 'suratketerangankuliah', 'Surat Keterangan Kuliah', '', 'ANAK_ID', 'ANAK', 16, 'meninggal');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (11.18, 7, 'suratketeranganbelumbekerja', 'Surat Keterangan Belum Bekerja', '', 'ANAK_ID', 'ANAK', 16, 'meninggal');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (11.19, 7, 'aktakelahiran', 'Akta Kelahiran anak', '', 'ANAK_ID', 'ANAK', 16, 'meninggal');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (11.20, 7, 'suratketerangankuliah', 'Surat Keterangan Kuliah', '', 'ANAK_ID', 'ANAK', 16, 'meninggal');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (11.21, 7, 'suratketeranganbelumbekerja', 'Surat Keterangan Belum Bekerja', '', 'ANAK_ID', 'ANAK', 16, 'meninggal');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (12, 7, '8', 'Surat keterangan kematian PNS', '1', 'PEGAWAI_ID', 'PEGAWAI', 8, 'meninggal');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (13, 7, 'skjandaduda', 'Surat keterangan Janda/Duda', '1', 'SUAMI_ISTRI_ID', 'SUAMI_ISTRI', 15, 'meninggal');
+
+delete from persuratan.jenis_pelayanan_check where jenis_pelayanan_id = 7 and kategori = 'dini';
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (1, 7, 'skcpns', 'SK CPNS', '1', 'PANGKAT_RIWAYAT_ID', 'PANGKAT_RIWAYAT', 1, 'dini');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (2, 7, 'skpns', 'SK PNS', '1', 'PANGKAT_RIWAYAT_ID', 'PANGKAT_RIWAYAT', 2, 'dini');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (3, 7, '0', 'SK Pangkat Terakhir', '1', 'PANGKAT_RIWAYAT_ID', 'PANGKAT_RIWAYAT', 4, 'dini');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (4, 7, '0', 'Surat Keterangan kenaikan gaji berkala', '1', 'GAJI_RIWAYAT_ID', 'GAJI_RIWAYAT', 5, 'dini');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (5.1, 7, 'ppk', 'Penilaian Prestasi Kerja Tahun', '1', 'PENILAIAN_SKP_ID', 'PENILAIAN_SKP', 7, 'dini');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (5.2, 7, 'ppk', 'Penilaian Prestasi Kerja Tahun', '1', 'PENILAIAN_SKP_ID', 'PENILAIAN_SKP', 7, 'dini');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (6, 7, '6', 'Kartu Keluarga', '1', 'PEGAWAI_ID', 'PEGAWAI', 8, 'dini');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (7, 7, '40', 'DPCP', '1', 'PEGAWAI_ID', 'PEGAWAI', 24, 'dini');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (8, 7, '41', 'Surat Pernyataan Tidak Pernah Dijatuhi Hukdis Sedang dan Berat', '1', 'PEGAWAI_ID', 'PEGAWAI', 24, 'dini');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (9, 7, '42', 'Surat Pernyataan Tidak Sedang Menjalani Proses Pidana atau Pernah Dipidana Penjara', '1', 'PEGAWAI_ID', 'PEGAWAI', 24, 'dini');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (10.01, 7, 'suratkematian', 'Surat Kematian', '', 'SUAMI_ISTRI_ID', 'SUAMI_ISTRI', 15, 'dini');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (10.02, 7, 'aktanikah', 'Akta Nikah', '', 'SUAMI_ISTRI_ID', 'SUAMI_ISTRI', 15, 'dini');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (10.03, 7, 'aktacerai', 'Akta Cerai', '', 'SUAMI_ISTRI_ID', 'SUAMI_ISTRI', 15, 'dini');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (10.04, 7, 'suratkematian', 'Surat Kematian', '', 'SUAMI_ISTRI_ID', 'SUAMI_ISTRI', 15, 'dini');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (10.05, 7, 'aktanikah', 'Akta Nikah', '', 'SUAMI_ISTRI_ID', 'SUAMI_ISTRI', 15, 'dini');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (10.06, 7, 'aktacerai', 'Akta Cerai', '', 'SUAMI_ISTRI_ID', 'SUAMI_ISTRI', 15, 'dini');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (10.07, 7, 'suratkematian', 'Surat Kematian', '', 'SUAMI_ISTRI_ID', 'SUAMI_ISTRI', 15, 'dini');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (10.08, 7, 'aktanikah', 'Akta Nikah', '', 'SUAMI_ISTRI_ID', 'SUAMI_ISTRI', 15, 'dini');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (10.09, 7, 'aktacerai', 'Akta Cerai', '', 'SUAMI_ISTRI_ID', 'SUAMI_ISTRI', 15, 'dini');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (10.10, 7, 'suratkematian', 'Surat Kematian', '', 'SUAMI_ISTRI_ID', 'SUAMI_ISTRI', 15, 'dini');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (10.11, 7, 'aktanikah', 'Akta Nikah', '', 'SUAMI_ISTRI_ID', 'SUAMI_ISTRI', 15, 'dini');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (10.12, 7, 'aktacerai', 'Akta Cerai', '', 'SUAMI_ISTRI_ID', 'SUAMI_ISTRI', 15, 'dini');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (10.13, 7, 'suratkematian', 'Surat Kematian', '', 'SUAMI_ISTRI_ID', 'SUAMI_ISTRI', 15, 'dini');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (10.14, 7, 'aktanikah', 'Akta Nikah', '', 'SUAMI_ISTRI_ID', 'SUAMI_ISTRI', 15, 'dini');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (10.15, 7, 'aktacerai', 'Akta Cerai', '', 'SUAMI_ISTRI_ID', 'SUAMI_ISTRI', 15, 'dini');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (10.16, 7, 'suratkematian', 'Surat Kematian', '', 'SUAMI_ISTRI_ID', 'SUAMI_ISTRI', 15, 'dini');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (10.17, 7, 'aktanikah', 'Akta Nikah', '', 'SUAMI_ISTRI_ID', 'SUAMI_ISTRI', 15, 'dini');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (10.18, 7, 'aktacerai', 'Akta Cerai', '', 'SUAMI_ISTRI_ID', 'SUAMI_ISTRI', 15, 'dini');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (10.19, 7, 'suratkematian', 'Surat Kematian', '', 'SUAMI_ISTRI_ID', 'SUAMI_ISTRI', 15, 'dini');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (10.20, 7, 'aktanikah', 'Akta Nikah', '', 'SUAMI_ISTRI_ID', 'SUAMI_ISTRI', 15, 'dini');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (10.21, 7, 'aktacerai', 'Akta Cerai', '', 'SUAMI_ISTRI_ID', 'SUAMI_ISTRI', 15, 'dini');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (11.01, 7, 'aktakelahiran', 'Akta Kelahiran anak', '', 'ANAK_ID', 'ANAK', 16, 'dini');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (11.02, 7, 'suratketerangankuliah', 'Surat Keterangan Kuliah', '', 'ANAK_ID', 'ANAK', 16, 'dini');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (11.03, 7, 'suratketeranganbelumbekerja', 'Surat Keterangan Belum Bekerja', '', 'ANAK_ID', 'ANAK', 16, 'dini');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (11.04, 7, 'aktakelahiran', 'Akta Kelahiran anak', '', 'ANAK_ID', 'ANAK', 16, 'dini');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (11.05, 7, 'suratketerangankuliah', 'Surat Keterangan Kuliah', '', 'ANAK_ID', 'ANAK', 16, 'dini');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (11.06, 7, 'suratketeranganbelumbekerja', 'Surat Keterangan Belum Bekerja', '', 'ANAK_ID', 'ANAK', 16, 'dini');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (11.07, 7, 'aktakelahiran', 'Akta Kelahiran anak', '', 'ANAK_ID', 'ANAK', 16, 'dini');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (11.08, 7, 'suratketerangankuliah', 'Surat Keterangan Kuliah', '', 'ANAK_ID', 'ANAK', 16, 'dini');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (11.09, 7, 'suratketeranganbelumbekerja', 'Surat Keterangan Belum Bekerja', '', 'ANAK_ID', 'ANAK', 16, 'dini');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (11.10, 7, 'aktakelahiran', 'Akta Kelahiran anak', '', 'ANAK_ID', 'ANAK', 16, 'dini');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (11.11, 7, 'suratketerangankuliah', 'Surat Keterangan Kuliah', '', 'ANAK_ID', 'ANAK', 16, 'dini');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (11.12, 7, 'suratketeranganbelumbekerja', 'Surat Keterangan Belum Bekerja', '', 'ANAK_ID', 'ANAK', 16, 'dini');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (11.13, 7, 'aktakelahiran', 'Akta Kelahiran anak', '', 'ANAK_ID', 'ANAK', 16, 'dini');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (11.14, 7, 'suratketerangankuliah', 'Surat Keterangan Kuliah', '', 'ANAK_ID', 'ANAK', 16, 'dini');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (11.15, 7, 'suratketeranganbelumbekerja', 'Surat Keterangan Belum Bekerja', '', 'ANAK_ID', 'ANAK', 16, 'dini');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (11.16, 7, 'aktakelahiran', 'Akta Kelahiran anak', '', 'ANAK_ID', 'ANAK', 16, 'dini');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (11.17, 7, 'suratketerangankuliah', 'Surat Keterangan Kuliah', '', 'ANAK_ID', 'ANAK', 16, 'dini');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (11.18, 7, 'suratketeranganbelumbekerja', 'Surat Keterangan Belum Bekerja', '', 'ANAK_ID', 'ANAK', 16, 'dini');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (11.19, 7, 'aktakelahiran', 'Akta Kelahiran anak', '', 'ANAK_ID', 'ANAK', 16, 'dini');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (11.20, 7, 'suratketerangankuliah', 'Surat Keterangan Kuliah', '', 'ANAK_ID', 'ANAK', 16, 'dini');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (11.21, 7, 'suratketeranganbelumbekerja', 'Surat Keterangan Belum Bekerja', '', 'ANAK_ID', 'ANAK', 16, 'dini');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (12.01, 7, '43', 'Suket Kepala OPD PNS yang menyatakan tidak kekurangan peqawai', '1', 'PEGAWAI_ID', 'PEGAWAI', 24, 'dini');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (12.02, 7, '44', 'Suket Kepala OPD PNS yang menyatakan telah melaksanakan tugas dan tanggungjawab dinas', '1', 'PEGAWAI_ID', 'PEGAWAI', 24, 'dini');
+
+delete from persuratan.jenis_pelayanan_check where jenis_pelayanan_id = 7 and kategori = 'udzur';
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (1, 7, 'skcpns', 'SK CPNS', '1', 'PANGKAT_RIWAYAT_ID', 'PANGKAT_RIWAYAT', 1, 'udzur');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (2, 7, 'skpns', 'SK PNS', '1', 'PANGKAT_RIWAYAT_ID', 'PANGKAT_RIWAYAT', 2, 'udzur');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (3, 7, '0', 'SK Pangkat Terakhir', '1', 'PANGKAT_RIWAYAT_ID', 'PANGKAT_RIWAYAT', 4, 'udzur');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (4, 7, '0', 'Surat Keterangan kenaikan gaji berkala', '1', 'GAJI_RIWAYAT_ID', 'GAJI_RIWAYAT', 5, 'udzur');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (5.1, 7, 'ppk', 'Penilaian Prestasi Kerja Tahun', '1', 'PENILAIAN_SKP_ID', 'PENILAIAN_SKP', 7, 'udzur');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (5.2, 7, 'ppk', 'Penilaian Prestasi Kerja Tahun', '1', 'PENILAIAN_SKP_ID', 'PENILAIAN_SKP', 7, 'udzur');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (6, 7, '6', 'Kartu Keluarga', '1', 'PEGAWAI_ID', 'PEGAWAI', 8, 'udzur');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (7, 7, '40', 'DPCP', '1', 'PEGAWAI_ID', 'PEGAWAI', 24, 'udzur');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (8, 7, '41', 'Surat Pernyataan Tidak Pernah Dijatuhi Hukdis Sedang dan Berat', '1', 'PEGAWAI_ID', 'PEGAWAI', 24, 'udzur');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (9, 7, '42', 'Surat Pernyataan Tidak Sedang Menjalani Proses Pidana atau Pernah Dipidana Penjara', '1', 'PEGAWAI_ID', 'PEGAWAI', 24, 'udzur');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (10.01, 7, 'suratkematian', 'Surat Kematian', '', 'SUAMI_ISTRI_ID', 'SUAMI_ISTRI', 15, 'udzur');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (10.02, 7, 'aktanikah', 'Akta Nikah', '', 'SUAMI_ISTRI_ID', 'SUAMI_ISTRI', 15, 'udzur');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (10.03, 7, 'aktacerai', 'Akta Cerai', '', 'SUAMI_ISTRI_ID', 'SUAMI_ISTRI', 15, 'udzur');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (10.04, 7, 'suratkematian', 'Surat Kematian', '', 'SUAMI_ISTRI_ID', 'SUAMI_ISTRI', 15, 'udzur');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (10.05, 7, 'aktanikah', 'Akta Nikah', '', 'SUAMI_ISTRI_ID', 'SUAMI_ISTRI', 15, 'udzur');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (10.06, 7, 'aktacerai', 'Akta Cerai', '', 'SUAMI_ISTRI_ID', 'SUAMI_ISTRI', 15, 'udzur');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (10.07, 7, 'suratkematian', 'Surat Kematian', '', 'SUAMI_ISTRI_ID', 'SUAMI_ISTRI', 15, 'udzur');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (10.08, 7, 'aktanikah', 'Akta Nikah', '', 'SUAMI_ISTRI_ID', 'SUAMI_ISTRI', 15, 'udzur');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (10.09, 7, 'aktacerai', 'Akta Cerai', '', 'SUAMI_ISTRI_ID', 'SUAMI_ISTRI', 15, 'udzur');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (10.10, 7, 'suratkematian', 'Surat Kematian', '', 'SUAMI_ISTRI_ID', 'SUAMI_ISTRI', 15, 'udzur');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (10.11, 7, 'aktanikah', 'Akta Nikah', '', 'SUAMI_ISTRI_ID', 'SUAMI_ISTRI', 15, 'udzur');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (10.12, 7, 'aktacerai', 'Akta Cerai', '', 'SUAMI_ISTRI_ID', 'SUAMI_ISTRI', 15, 'udzur');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (10.13, 7, 'suratkematian', 'Surat Kematian', '', 'SUAMI_ISTRI_ID', 'SUAMI_ISTRI', 15, 'udzur');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (10.14, 7, 'aktanikah', 'Akta Nikah', '', 'SUAMI_ISTRI_ID', 'SUAMI_ISTRI', 15, 'udzur');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (10.15, 7, 'aktacerai', 'Akta Cerai', '', 'SUAMI_ISTRI_ID', 'SUAMI_ISTRI', 15, 'udzur');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (10.16, 7, 'suratkematian', 'Surat Kematian', '', 'SUAMI_ISTRI_ID', 'SUAMI_ISTRI', 15, 'udzur');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (10.17, 7, 'aktanikah', 'Akta Nikah', '', 'SUAMI_ISTRI_ID', 'SUAMI_ISTRI', 15, 'udzur');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (10.18, 7, 'aktacerai', 'Akta Cerai', '', 'SUAMI_ISTRI_ID', 'SUAMI_ISTRI', 15, 'udzur');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (10.19, 7, 'suratkematian', 'Surat Kematian', '', 'SUAMI_ISTRI_ID', 'SUAMI_ISTRI', 15, 'udzur');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (10.20, 7, 'aktanikah', 'Akta Nikah', '', 'SUAMI_ISTRI_ID', 'SUAMI_ISTRI', 15, 'udzur');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (10.21, 7, 'aktacerai', 'Akta Cerai', '', 'SUAMI_ISTRI_ID', 'SUAMI_ISTRI', 15, 'udzur');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (11.01, 7, 'aktakelahiran', 'Akta Kelahiran anak', '', 'ANAK_ID', 'ANAK', 16, 'udzur');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (11.02, 7, 'suratketerangankuliah', 'Surat Keterangan Kuliah', '', 'ANAK_ID', 'ANAK', 16, 'udzur');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (11.03, 7, 'suratketeranganbelumbekerja', 'Surat Keterangan Belum Bekerja', '', 'ANAK_ID', 'ANAK', 16, 'udzur');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (11.04, 7, 'aktakelahiran', 'Akta Kelahiran anak', '', 'ANAK_ID', 'ANAK', 16, 'udzur');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (11.05, 7, 'suratketerangankuliah', 'Surat Keterangan Kuliah', '', 'ANAK_ID', 'ANAK', 16, 'udzur');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (11.06, 7, 'suratketeranganbelumbekerja', 'Surat Keterangan Belum Bekerja', '', 'ANAK_ID', 'ANAK', 16, 'udzur');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (11.07, 7, 'aktakelahiran', 'Akta Kelahiran anak', '', 'ANAK_ID', 'ANAK', 16, 'udzur');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (11.08, 7, 'suratketerangankuliah', 'Surat Keterangan Kuliah', '', 'ANAK_ID', 'ANAK', 16, 'udzur');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (11.09, 7, 'suratketeranganbelumbekerja', 'Surat Keterangan Belum Bekerja', '', 'ANAK_ID', 'ANAK', 16, 'udzur');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (11.10, 7, 'aktakelahiran', 'Akta Kelahiran anak', '', 'ANAK_ID', 'ANAK', 16, 'udzur');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (11.11, 7, 'suratketerangankuliah', 'Surat Keterangan Kuliah', '', 'ANAK_ID', 'ANAK', 16, 'udzur');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (11.12, 7, 'suratketeranganbelumbekerja', 'Surat Keterangan Belum Bekerja', '', 'ANAK_ID', 'ANAK', 16, 'udzur');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (11.13, 7, 'aktakelahiran', 'Akta Kelahiran anak', '', 'ANAK_ID', 'ANAK', 16, 'udzur');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (11.14, 7, 'suratketerangankuliah', 'Surat Keterangan Kuliah', '', 'ANAK_ID', 'ANAK', 16, 'udzur');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (11.15, 7, 'suratketeranganbelumbekerja', 'Surat Keterangan Belum Bekerja', '', 'ANAK_ID', 'ANAK', 16, 'udzur');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (11.16, 7, 'aktakelahiran', 'Akta Kelahiran anak', '', 'ANAK_ID', 'ANAK', 16, 'udzur');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (11.17, 7, 'suratketerangankuliah', 'Surat Keterangan Kuliah', '', 'ANAK_ID', 'ANAK', 16, 'udzur');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (11.18, 7, 'suratketeranganbelumbekerja', 'Surat Keterangan Belum Bekerja', '', 'ANAK_ID', 'ANAK', 16, 'udzur');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (11.19, 7, 'aktakelahiran', 'Akta Kelahiran anak', '', 'ANAK_ID', 'ANAK', 16, 'udzur');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (11.20, 7, 'suratketerangankuliah', 'Surat Keterangan Kuliah', '', 'ANAK_ID', 'ANAK', 16, 'udzur');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (11.21, 7, 'suratketeranganbelumbekerja', 'Surat Keterangan Belum Bekerja', '', 'ANAK_ID', 'ANAK', 16, 'udzur');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (12, 7, '45', 'Surat Keterangan Tim Penguji Kesehatan', '1', 'PEGAWAI_ID', 'PEGAWAI', 24, 'udzur');
+
+--================================================================================================
+delete from persuratan.jenis_pelayanan_check where jenis_pelayanan_id = 10 and kategori = 'kpreguler';
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (1, 10, '0', 'SK Pangkat Terakhir', '1', 'PANGKAT_RIWAYAT_ID', 'PANGKAT_RIWAYAT', 4, 'kpreguler');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (2, 10, '0', 'SK Jabatan Pelaksana Terakhir', '1', 'JABATAN_RIWAYAT_ID', 'JABATAN_RIWAYAT', 3, 'kpreguler');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (3.1, 10, 'ppk', 'Penilaian Prestasi Kerja Tahun', '1', 'PENILAIAN_SKP_ID', 'PENILAIAN_SKP', 7, 'kpreguler');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (3.2, 10, 'ppk', 'Penilaian Prestasi Kerja Tahun', '1', 'PENILAIAN_SKP_ID', 'PENILAIAN_SKP', 7, 'kpreguler');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (4, 10, 'ijazah', 'Ijazah Pendidikan', '1', 'PENDIDIKAN_RIWAYAT_ID', 'PENDIDIKAN_RIWAYAT', 6, 'kpreguler');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (5, 10, 'transkrip', 'Transkip', '1', 'PENDIDIKAN_RIWAYAT_ID', 'PENDIDIKAN_RIWAYAT', 6, 'kpreguler');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (6, 10, 'akreditasiprodi', 'Akreditasi Prodi', '1', 'PENDIDIKAN_RIWAYAT_ID', 'PENDIDIKAN_RIWAYAT', 6, 'kpreguler');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (7.1, 10, 'ijinbelajar', 'Surat Ijin Belajar/ Tugas Belajar', '1', 'PENDIDIKAN_RIWAYAT_ID', 'PENDIDIKAN_RIWAYAT', 14, 'kpreguler');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (7.2, 10, 'tugasbelajar', 'Surat Ijin Belajar/ Tugas Belajar', '1', 'PENDIDIKAN_RIWAYAT_ID', 'PENDIDIKAN_RIWAYAT', 14, 'kpreguler');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (8, 10, '0', 'STLUD', '1', 'SURAT_TANDA_LULUS_ID', 'SURAT_TANDA_LULUS', 9, 'kpreguler');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (9, 10, '50', 'Uraian Tugas', '1', 'PEGAWAI_ID', 'PEGAWAI', 30, 'kpreguler');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (10, 10, 'pencatumangelar', 'Surat pencantuman gelar', '', 'PENDIDIKAN_RIWAYAT_ID', 'PENDIDIKAN_RIWAYAT', 29, 'kpreguler');
+
+delete from persuratan.jenis_pelayanan_check where jenis_pelayanan_id = 10 and kategori = 'kppi';
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (1, 10, '0', 'SK Pangkat Terakhir', '1', 'PANGKAT_RIWAYAT_ID', 'PANGKAT_RIWAYAT', 4, 'kppi');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (2, 10, '0', 'SK Jabatan Fungsional Umum/Pelaksana Terakhir', '1', 'JABATAN_RIWAYAT_ID', 'JABATAN_RIWAYAT', 3, 'kppi');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (3.1, 10, 'ppk', 'Penilaian Prestasi Kerja Tahun', '1', 'PENILAIAN_SKP_ID', 'PENILAIAN_SKP', 7, 'kppi');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (3.2, 10, 'ppk', 'Penilaian Prestasi Kerja Tahun', '1', 'PENILAIAN_SKP_ID', 'PENILAIAN_SKP', 7, 'kppi');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (4, 10, 'ijazah', 'Ijazah Pendidikan', '1', 'PENDIDIKAN_RIWAYAT_ID', 'PENDIDIKAN_RIWAYAT', 6, 'kppi');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (5, 10, 'transkrip', 'Transkip', '1', 'PENDIDIKAN_RIWAYAT_ID', 'PENDIDIKAN_RIWAYAT', 6, 'kppi');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (6, 10, 'akreditasiprodi', 'Akreditasi Prodi', '1', 'PENDIDIKAN_RIWAYAT_ID', 'PENDIDIKAN_RIWAYAT', 6, 'kppi');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (7.1, 10, 'ijinbelajar', 'Surat Ijin Belajar/ Tugas Belajar', '1', 'PENDIDIKAN_RIWAYAT_ID', 'PENDIDIKAN_RIWAYAT', 14, 'kppi');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (7.2, 10, 'tugasbelajar', 'Surat Ijin Belajar/ Tugas Belajar', '1', 'PENDIDIKAN_RIWAYAT_ID', 'PENDIDIKAN_RIWAYAT', 14, 'kppi');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (8, 10, '0', 'STL-PI', '1', 'SURAT_TANDA_LULUS_ID', 'SURAT_TANDA_LULUS', 9, 'kppi');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (9, 10, '50', 'Uraian Tugas', '1', 'PEGAWAI_ID', 'PEGAWAI', 30, 'kppi');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (10, 10, 'pencatumangelar', 'Surat pencantuman gelar', '', 'PENDIDIKAN_RIWAYAT_ID', 'PENDIDIKAN_RIWAYAT', 29, 'kppi');
+
+delete from persuratan.jenis_pelayanan_check where jenis_pelayanan_id = 10 and kategori = 'kpstugas';
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (1, 10, '0', 'SK Pangkat Terakhir', '1', 'PANGKAT_RIWAYAT_ID', 'PANGKAT_RIWAYAT', 4, 'kpstugas');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (2, 10, '0', 'SK Jabatan Fungsional Umum/Pelaksana Terakhir', '1', 'JABATAN_RIWAYAT_ID', 'JABATAN_RIWAYAT', 3, 'kpstugas');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (3.1, 10, 'ppk', 'Penilaian Prestasi Kerja Tahun', '1', 'PENILAIAN_SKP_ID', 'PENILAIAN_SKP', 7, 'kpstugas');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (3.2, 10, 'ppk', 'Penilaian Prestasi Kerja Tahun', '1', 'PENILAIAN_SKP_ID', 'PENILAIAN_SKP', 7, 'kpstugas');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (4, 10, 'ijazah', 'Ijazah Pendidikan', '1', 'PENDIDIKAN_RIWAYAT_ID', 'PENDIDIKAN_RIWAYAT', 6, 'kpstugas');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (5, 10, 'transkrip', 'Transkip', '1', 'PENDIDIKAN_RIWAYAT_ID', 'PENDIDIKAN_RIWAYAT', 6, 'kpstugas');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (6, 10, 'akreditasiprodi', 'Akreditasi Prodi', '1', 'PENDIDIKAN_RIWAYAT_ID', 'PENDIDIKAN_RIWAYAT', 6, 'kpstugas');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (7.1, 10, 'ijinbelajar', 'Surat Ijin Belajar/ Tugas Belajar', '1', 'PENDIDIKAN_RIWAYAT_ID', 'PENDIDIKAN_RIWAYAT', 14, 'kpstugas');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (7.2, 10, 'tugasbelajar', 'Surat Ijin Belajar/ Tugas Belajar', '1', 'PENDIDIKAN_RIWAYAT_ID', 'PENDIDIKAN_RIWAYAT', 14, 'kpstugas');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (8, 10, '0', 'STL-PI', '1', 'SURAT_TANDA_LULUS_ID', 'SURAT_TANDA_LULUS', 9, 'kpstugas');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (9, 10, '50', 'Uraian Tugas', '1', 'PEGAWAI_ID', 'PEGAWAI', 30, 'kpstugas');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (10, 10, 'pencatumangelar', 'Surat pencantuman gelar', '', 'PENDIDIKAN_RIWAYAT_ID', 'PENDIDIKAN_RIWAYAT', 29, 'kpstugas');
+
+delete from persuratan.jenis_pelayanan_check where jenis_pelayanan_id = 10 and kategori = 'kpbtugas';
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (1, 10, '0', 'SK Pangkat Terakhir', '1', 'PANGKAT_RIWAYAT_ID', 'PANGKAT_RIWAYAT', 4, 'kpbtugas');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (2, 10, '0', 'SK Jabatan Fungsional Umum/Pelaksana Terakhir', '1', 'JABATAN_RIWAYAT_ID', 'JABATAN_RIWAYAT', 3, 'kpbtugas');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (3.1, 10, 'ppk', 'Penilaian Prestasi Kerja Tahun', '1', 'PENILAIAN_SKP_ID', 'PENILAIAN_SKP', 7, 'kpbtugas');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (3.2, 10, 'ppk', 'Penilaian Prestasi Kerja Tahun', '1', 'PENILAIAN_SKP_ID', 'PENILAIAN_SKP', 7, 'kpbtugas');
+
+delete from persuratan.jenis_pelayanan_check where jenis_pelayanan_id = 10 and kategori = 'kpjft';
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (1, 10, '0', 'SK Pangkat Terakhir', '1', 'PANGKAT_RIWAYAT_ID', 'PANGKAT_RIWAYAT', 4, 'kpjft');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (2, 10, '0', 'SK Jabatan Fungsional TertentuTerakhir', '1', 'JABATAN_RIWAYAT_ID', 'JABATAN_RIWAYAT', 3, 'kpjft');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (3.1, 10, 'ppk', 'Penilaian Prestasi Kerja Tahun', '1', 'PENILAIAN_SKP_ID', 'PENILAIAN_SKP', 7, 'kpjft');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (3.2, 10, 'ppk', 'Penilaian Prestasi Kerja Tahun', '1', 'PENILAIAN_SKP_ID', 'PENILAIAN_SKP', 7, 'kpjft');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (4.1, 10, '2', 'Sertifikat Keaslian PAK', '1', 'SERTIFIKAT_FILE_ID', 'SERTIFIKAT_FILE', 12, 'kpjft');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (4.2, 10, '1', 'Sertifikat Pendidik', '1', 'SERTIFIKAT_FILE_ID', 'SERTIFIKAT_FILE', 12, 'kpjft');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (5.1, 10, '0', 'PAK 1', '', 'PAK_ID', 'PAK', 10, 'kpjft');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (5.2, 10, '0', 'PAK 2', '', 'PAK_ID', 'PAK', 10, 'kpjft');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (6, 10, 'ijazah', 'Ijazah Pendidikan', '1', 'PENDIDIKAN_RIWAYAT_ID', 'PENDIDIKAN_RIWAYAT', 6, 'kpjft');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (7, 10, 'transkrip', 'Transkip', '1', 'PENDIDIKAN_RIWAYAT_ID', 'PENDIDIKAN_RIWAYAT', 6, 'kpjft');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (8, 10, 'akreditasiprodi', 'Akreditasi Prodi', '1', 'PENDIDIKAN_RIWAYAT_ID', 'PENDIDIKAN_RIWAYAT', 6, 'kpjft');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (9.1, 10, 'ijinbelajar', 'Surat Ijin Belajar/ Tugas Belajar', '1', 'PENDIDIKAN_RIWAYAT_ID', 'PENDIDIKAN_RIWAYAT', 14, 'kpjft');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (9.2, 10, 'tugasbelajar', 'Surat Ijin Belajar/ Tugas Belajar', '1', 'PENDIDIKAN_RIWAYAT_ID', 'PENDIDIKAN_RIWAYAT', 14, 'kpjft');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (10, 10, 'pencatumangelar', 'Surat pencantuman gelar', '', 'PENDIDIKAN_RIWAYAT_ID', 'PENDIDIKAN_RIWAYAT', 29, 'kpjft');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (15.1, 10, '54', 'SK Pelantikan Jabatan / BA pengambilan sumpah dan SPMT (pengangkatan Pertama)', '', 'PEGAWAI_ID', 'PEGAWAI', 30, 'kpjft');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (15.2, 10, '55', 'SK Alih Jenjang Terampil ke Ahli dan SK Fungsional Terampil Sebelumnya', '', 'PEGAWAI_ID', 'PEGAWAI', 30, 'kpjft');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (15.3, 10, '56', 'SK Pengangkatan Kembali (Jika pernah dibebaskan sementara)', '', 'PEGAWAI_ID', 'PEGAWAI', 30, 'kpjft');
+
+delete from persuratan.jenis_pelayanan_check where jenis_pelayanan_id = 10 and kategori = 'kpstruktural';
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (1, 10, '0', 'SK Pangkat Terakhir', '1', 'PANGKAT_RIWAYAT_ID', 'PANGKAT_RIWAYAT', 4, 'kpstruktural');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (2, 10, '0', 'SK Jabatan Pelaksana Terakhir', '1', 'JABATAN_RIWAYAT_ID', 'JABATAN_RIWAYAT', 3, 'kpstruktural');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (3.1, 10, 'ppk', 'Penilaian Prestasi Kerja Tahun', '1', 'PENILAIAN_SKP_ID', 'PENILAIAN_SKP', 7, 'kpstruktural');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (3.2, 10, 'ppk', 'Penilaian Prestasi Kerja Tahun', '1', 'PENILAIAN_SKP_ID', 'PENILAIAN_SKP', 7, 'kpstruktural');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (4, 10, 'ijazah', 'Ijazah Pendidikan', '1', 'PENDIDIKAN_RIWAYAT_ID', 'PENDIDIKAN_RIWAYAT', 6, 'kpstruktural');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (5, 10, 'transkrip', 'Transkip', '1', 'PENDIDIKAN_RIWAYAT_ID', 'PENDIDIKAN_RIWAYAT', 6, 'kpstruktural');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (6, 10, 'akreditasiprodi', 'Akreditasi Prodi', '1', 'PENDIDIKAN_RIWAYAT_ID', 'PENDIDIKAN_RIWAYAT', 6, 'kpstruktural');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (7.1, 10, 'ijinbelajar', 'Surat Ijin Belajar/ Tugas Belajar', '1', 'PENDIDIKAN_RIWAYAT_ID', 'PENDIDIKAN_RIWAYAT', 14, 'kpstruktural');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (7.2, 10, 'tugasbelajar', 'Surat Ijin Belajar/ Tugas Belajar', '1', 'PENDIDIKAN_RIWAYAT_ID', 'PENDIDIKAN_RIWAYAT', 14, 'kpstruktural');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (8.1, 10, '0', 'STLUD', '1', 'SURAT_TANDA_LULUS_ID', 'SURAT_TANDA_LULUS', 9, 'kpstruktural');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (8.2, 10, '0', 'Diklatpim', '1', 'DIKLAT_STRUKTURAL_ID', 'DIKLAT_STRUKTURAL', 11, 'kpstruktural');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (9, 10, '50', 'Uraian Tugas', '1', 'PEGAWAI_ID', 'PEGAWAI', 30, 'kpstruktural');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (10, 10, 'pencatumangelar', 'Surat pencantuman gelar', '', 'PENDIDIKAN_RIWAYAT_ID', 'PENDIDIKAN_RIWAYAT', 29, 'kpstruktural');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (15.1, 10, '51', 'Rekom 3 Besar KASN', '', 'PEGAWAI_ID', 'PEGAWAI', 30, 'kpstruktural');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (15.2, 10, '52', 'Berita Acara Pengambilan Sumpah Jabatan Lama dan Baru', '1', 'PEGAWAI_ID', 'PEGAWAI', 30, 'kpstruktural');
+insert into persuratan.jenis_pelayanan_check(nomor, jenis_pelayanan_id, tipe, nama, info_checked, link_file, informasi_table, kategori_file_id, kategori)
+values (15.3, 10, '53', 'SK Pemberhentian dari JFT (Jika sebelumnya menduduki JFT)', '', 'PEGAWAI_ID', 'PEGAWAI', 30, 'kpstruktural');
+--================================================================================================
+
+update persuratan.jenis_pelayanan_check set nama = 'SK Jabatan Terakhir' where nomor = 2 and jenis_pelayanan_id = 10 and kategori = 'kpreguler';
+update persuratan.jenis_pelayanan_check set nama = 'SK Jabatan Terakhir' where nomor = 2 and jenis_pelayanan_id = 10 and kategori = 'kppi';
+update persuratan.jenis_pelayanan_check set nama = 'SK Jabatan Terakhir' where nomor = 2 and jenis_pelayanan_id = 10 and kategori = 'kpjft';
+update persuratan.jenis_pelayanan_check set nama = 'SK Jabatan Terakhir' where nomor = 2 and jenis_pelayanan_id = 10 and kategori = 'kpstugas';
+update persuratan.jenis_pelayanan_check set nama = 'SK Jabatan Terakhir' where nomor = 2 and jenis_pelayanan_id = 10 and kategori = 'kpbtugas';
+update persuratan.jenis_pelayanan_check set nama = 'SK Jabatan Terakhir' where nomor = 2 and jenis_pelayanan_id = 10 and kategori = 'kpstruktural';
+
+drop table if exists persuratan.jenis_pelayanan_tujuan;
+create table persuratan.jenis_pelayanan_tujuan
+(
+  jenis_pelayanan_id numeric not null,
+  urut numeric,
+  satuan_kerja_id numeric,
+  constraint pk_jenis_pelayanan_tujuan primary key (jenis_pelayanan_id, satuan_kerja_id)
+)
+with (oids=false);
+alter table persuratan.jenis_pelayanan_tujuan owner to postgres;
+
+insert into persuratan.jenis_pelayanan_tujuan(jenis_pelayanan_id, urut, satuan_kerja_id) values(3, 1, 601);
+insert into persuratan.jenis_pelayanan_tujuan(jenis_pelayanan_id, urut, satuan_kerja_id) values(4, 1, 601);
+insert into persuratan.jenis_pelayanan_tujuan(jenis_pelayanan_id, urut, satuan_kerja_id) values(7, 1, 601);
+insert into persuratan.jenis_pelayanan_tujuan(jenis_pelayanan_id, urut, satuan_kerja_id) values(10, 1, 600);
+
+CREATE OR REPLACE FUNCTION unique_surat_masuk_bkd()
+  RETURNS trigger AS
+$BODY$
+DECLARE
+temprowid integer;
+tempstatus CHARACTER VARYING(1);
+tempinfo TEXT;
+tempquery TEXT;
+BEGIN
+	
+	--IF TG_OP = 'INSERT' OR (TG_OP = 'UPDATE' AND (COALESCE(NULLIF(NEW.STATUS, ''), NULL) IS NULL OR NEW.STATUS = '2')) THEN
+	IF TG_OP = 'INSERT' OR TG_OP = 'UPDATE' THEN
+		IF TG_OP = 'INSERT' THEN
+			IF COALESCE(NULLIF(NEW.NO_AGENDA, ''), NULL) IS NULL THEN
+			temprowid:= 0;
+			ELSE
+				SELECT
+				CASE WHEN COUNT(1) > 0 THEN 1 ELSE 0 END INTO temprowid
+				FROM persuratan.surat_masuk_bkd A
+				WHERE 1=1
+				AND EXISTS
+				(
+					SELECT 1
+					FROM
+					(
+						SELECT A.NO_AGENDA
+						FROM PERSURATAN.SURAT_MASUK_BKD A
+						INNER JOIN PERSURATAN.SURAT_MASUK_BKD_DISPOSISI B ON A.SURAT_MASUK_BKD_ID = B.SURAT_MASUK_BKD_ID
+						WHERE SURAT_AWAL = 1 
+						AND TO_CHAR(NOW(), 'YYYY') = TO_CHAR(A.TANGGAL, 'YYYY')
+					) X
+					WHERE A.NO_AGENDA = X.NO_AGENDA
+				)
+				AND A.NO_AGENDA = NEW.NO_AGENDA
+				;
+			END IF;
+
+			raise notice 'sql %',NEW.SURAT_MASUK_BKD_ID || '-' || temprowid || '-' || NEW.NO_AGENDA || '-' || TO_CHAR(NEW.TANGGAL, 'YYYY');
+			--RETURN FALSE; 
+		ELSE
+		
+			IF COALESCE(NULLIF(NEW.NO_AGENDA, ''), NULL) IS NULL THEN
+				temprowid:= NULL;
+			ELSE
+				SELECT
+				SURAT_MASUK_BKD_ID INTO temprowid
+				FROM persuratan.surat_masuk_bkd A
+				WHERE 1=1
+				AND EXISTS
+				(
+					SELECT 1
+					FROM
+					(
+						SELECT A.NO_AGENDA, A.SURAT_MASUK_BKD_ID
+						FROM PERSURATAN.SURAT_MASUK_BKD A
+						INNER JOIN PERSURATAN.SURAT_MASUK_BKD_DISPOSISI B ON A.SURAT_MASUK_BKD_ID = B.SURAT_MASUK_BKD_ID
+						WHERE SURAT_AWAL = 1 
+						AND TO_CHAR(NOW(), 'YYYY') = TO_CHAR(A.TANGGAL, 'YYYY')
+					) X
+					WHERE A.NO_AGENDA = X.NO_AGENDA
+					AND A.SURAT_MASUK_BKD_ID = X.SURAT_MASUK_BKD_ID
+				)
+				AND A.NO_AGENDA = NEW.NO_AGENDA
+				;
+			END IF;
+
+			raise notice 'sql %',NEW.SURAT_MASUK_BKD_ID || '-' || temprowid || '-' || NEW.NO_AGENDA || '-' || TO_CHAR(NEW.TANGGAL, 'YYYY');
+
+			IF NEW.SURAT_MASUK_BKD_ID = temprowid OR temprowid IS NULL THEN
+			temprowid:= 0;
+			ELSE
+			temprowid:= 1;
+			END IF;
+			
+		END IF;
+		--raise notice 'sql %',NEW.surat_masuk_bkd_ID;
+		IF temprowid >= 1 AND temprowid IS NOT NULL THEN
+			RETURN FALSE; 
+		ELSE
+			RETURN NEW;
+		END IF;
+	ELSE
+	RETURN NEW;
+	END IF;
+	
+END;
+$BODY$
+LANGUAGE plpgsql VOLATILE COST 100;
+ALTER FUNCTION unique_surat_masuk_bkd() OWNER TO postgres;
+
+CREATE OR REPLACE FUNCTION persuratan.surat_masuk_pegawai_triger_log()
+  RETURNS trigger AS
+$BODY$
+DECLARE
+tempstatus CHARACTER VARYING(1);
+tempinfo TEXT;
+tempsatuankerjaid numeric;
+tempquery TEXT;
+vjenisid numeric;
+vjenis CHARACTER VARYING;
+BEGIN
+
+	vjenis:= '';
+	if NEW.USULAN_SURAT_ID is not null then
+		select b.nama into vjenis
+		from persuratan.usulan_surat a
+		inner join persuratan.jenis_pelayanan b on b.jenis_pelayanan_id = a.jenis_id
+		where a.usulan_surat_id = NEW.USULAN_SURAT_ID;
+	end if;
+	
+	--IF TG_OP = 'INSERT' THEN
+		IF NEW.STATUS_BERKAS = '1' THEN
+			SELECT SATUAN_KERJA_ASAL_ID INTO tempsatuankerjaid FROM PERSURATAN.SURAT_MASUK_UPT WHERE SURAT_MASUK_UPT_ID = NEW.SURAT_MASUK_UPT_ID;
+			tempinfo:= 'Di usulkan oleh ';
+		ELSIF NEW.STATUS_BERKAS = '2' THEN
+			SELECT SATUAN_KERJA_TUJUAN_ID INTO tempsatuankerjaid FROM PERSURATAN.SURAT_MASUK_UPT WHERE SURAT_MASUK_UPT_ID = NEW.SURAT_MASUK_UPT_ID;
+			tempinfo:= 'Di kirim ke ';
+		ELSIF NEW.STATUS_BERKAS = '3' THEN
+			SELECT SATUAN_KERJA_TUJUAN_ID INTO tempsatuankerjaid FROM PERSURATAN.SURAT_MASUK_UPT WHERE SURAT_MASUK_UPT_ID = NEW.SURAT_MASUK_UPT_ID;
+			tempinfo:= 'Di terima oleh ';
+		ELSIF NEW.STATUS_BERKAS = '4' THEN
+			SELECT SATUAN_KERJA_ASAL_ID INTO tempsatuankerjaid FROM PERSURATAN.SURAT_MASUK_BKD WHERE SURAT_MASUK_BKD_ID = NEW.SURAT_MASUK_BKD_ID;
+			tempinfo:= 'Di usulkan oleh ';
+		ELSIF NEW.STATUS_BERKAS = '5' THEN
+			SELECT SATUAN_KERJA_TUJUAN_ID INTO tempsatuankerjaid FROM PERSURATAN.SURAT_MASUK_BKD WHERE SURAT_MASUK_BKD_ID = NEW.SURAT_MASUK_BKD_ID;
+			tempinfo:= 'Di kirim ke ';
+		
+		--RESET VALUE USULAN SURAT
+		ELSIF NEW.STATUS_BERKAS = '10' AND OLD.STATUS_VERIFIKASI = 1 AND NEW.STATUS_VERIFIKASI IS NULL AND (NEW.JENIS_ID = 3 OR NEW.JENIS_ID = 4 OR NEW.JENIS_ID = 7 OR NEW.JENIS_ID = 10)
+		THEN
+		    raise notice 'sql %',NEW.STATUS_BERKAS || '-' || OLD.STATUS_VERIFIKASI || '-' || NEW.STATUS_VERIFIKASI || '-' || NEW.JENIS_ID;
+		    
+		    tempquery:= ' UPDATE PERSURATAN.SURAT_MASUK_PEGAWAI SET USULAN_SURAT_ID= NULL, USULAN_SURAT_URUT = NULL WHERE SURAT_MASUK_PEGAWAI_ID = '|| NEW.SURAT_MASUK_PEGAWAI_ID ||'';
+		    raise notice 'sql %',tempquery;
+		    IF tempquery IS NOT NULL THEN
+		    EXECUTE tempquery;
+		    END IF;
+		    
+		--batal usulan ke kanreg
+		
+		--persetujuan usulan ke bkdpp
+		ELSIF NEW.STATUS_BERKAS = '10' AND NEW.STATUS_VERIFIKASI = 1 AND (NEW.JENIS_ID = 3 OR NEW.JENIS_ID = 4 OR NEW.JENIS_ID = 7) AND NEW.USULAN_SURAT_ID IS NOT NULL AND NEW.STATUS_SURAT_KELUAR = 1
+		--ELSIF NEW.STATUS_BERKAS = '10' AND NEW.STATUS_VERIFIKASI = 1 AND (NEW.JENIS_ID = 3 OR NEW.JENIS_ID = 4 OR NEW.JENIS_ID = 10) AND NEW.USULAN_SURAT_ID IS NOT NULL AND NEW.STATUS_SURAT_KELUAR = 1
+		THEN
+			SELECT SATUAN_KERJA_ASAL_ID INTO tempsatuankerjaid FROM PERSURATAN.SURAT_MASUK_BKD_DISPOSISI WHERE SURAT_MASUK_BKD_ID = NEW.SURAT_MASUK_BKD_ID AND STATUS_POSISI_SURAT = 1;
+			tempinfo:= 'Proses usul nomor surat keluar ke BKDPP oleh ';
+		ELSIF NEW.STATUS_BERKAS = '10' AND NEW.STATUS_VERIFIKASI = 1 AND (NEW.JENIS_ID = 3 OR NEW.JENIS_ID = 4 OR NEW.JENIS_ID = 7) AND NEW.USULAN_SURAT_ID IS NOT NULL AND NEW.STATUS_SURAT_KELUAR = 2
+		--ELSIF NEW.STATUS_BERKAS = '10' AND NEW.STATUS_VERIFIKASI = 1 AND (NEW.JENIS_ID = 3 OR NEW.JENIS_ID = 4 OR NEW.JENIS_ID = 10) AND NEW.USULAN_SURAT_ID IS NOT NULL AND NEW.STATUS_SURAT_KELUAR = 2
+		THEN
+			SELECT SATUAN_KERJA_ASAL_ID INTO tempsatuankerjaid FROM PERSURATAN.SURAT_MASUK_BKD_DISPOSISI WHERE SURAT_MASUK_BKD_ID = NEW.SURAT_MASUK_BKD_ID AND STATUS_POSISI_SURAT = 1;
+			--tempinfo:= 'Proses kirim ke Kanreg II BKN oleh ';
+			tempinfo:= 'Proses kirim '|| vjenis ||' oleh ';
+			
+		ELSIF NEW.STATUS_BERKAS = '10' AND NEW.STATUS_VERIFIKASI = 1 AND (NEW.JENIS_ID = 3 OR NEW.JENIS_ID = 4 OR NEW.JENIS_ID = 7) AND NEW.USULAN_SURAT_ID IS NOT NULL AND NEW.STATUS_SURAT_KELUAR = 3
+		--ELSIF NEW.STATUS_BERKAS = '10' AND NEW.STATUS_VERIFIKASI = 1 AND (NEW.JENIS_ID = 3 OR NEW.JENIS_ID = 4 OR NEW.JENIS_ID = 10) AND NEW.USULAN_SURAT_ID IS NOT NULL AND NEW.STATUS_SURAT_KELUAR = 3
+		THEN
+			SELECT SATUAN_KERJA_ASAL_ID INTO tempsatuankerjaid FROM PERSURATAN.SURAT_MASUK_BKD_DISPOSISI WHERE SURAT_MASUK_BKD_ID = NEW.SURAT_MASUK_BKD_ID AND STATUS_POSISI_SURAT = 1;
+			--tempinfo:= 'Di kirim ke Kanreg II BKN oleh ';
+			tempinfo:= 'Di kirim '|| vjenis ||' oleh ';
+		ELSIF NEW.STATUS_BERKAS = '10' AND NEW.STATUS_VERIFIKASI = 1 AND (NEW.JENIS_ID = 3 OR NEW.JENIS_ID = 4 OR NEW.JENIS_ID = 7) AND NEW.USULAN_SURAT_ID IS NOT NULL AND NEW.STATUS_SURAT_KELUAR = 4
+		--ELSIF NEW.STATUS_BERKAS = '10' AND NEW.STATUS_VERIFIKASI = 1 AND (NEW.JENIS_ID = 3 OR NEW.JENIS_ID = 4 OR NEW.JENIS_ID = 10) AND NEW.USULAN_SURAT_ID IS NOT NULL AND NEW.STATUS_SURAT_KELUAR = 4
+		THEN
+			SELECT SATUAN_KERJA_ASAL_ID INTO tempsatuankerjaid FROM PERSURATAN.SURAT_MASUK_BKD_DISPOSISI WHERE SURAT_MASUK_BKD_ID = NEW.SURAT_MASUK_BKD_ID AND STATUS_POSISI_SURAT = 1;
+			--tempinfo:= 'Sudah di kirim ke Kanreg II BKN oleh ';
+			tempinfo:= 'Sudah di kirim '|| vjenis ||' oleh ';
+		-- Bisa di ambil
+		ELSIF NEW.STATUS_BERKAS = '10' AND NEW.STATUS_VERIFIKASI = 1 AND (NEW.JENIS_ID = 3 OR NEW.JENIS_ID = 4 OR NEW.JENIS_ID = 10) AND NEW.USULAN_SURAT_ID IS NOT NULL AND NEW.STATUS_SURAT_KELUAR = 88
+		THEN
+			SELECT SATUAN_KERJA_ASAL_ID INTO tempsatuankerjaid FROM PERSURATAN.SURAT_MASUK_BKD_DISPOSISI WHERE SURAT_MASUK_BKD_ID = NEW.SURAT_MASUK_BKD_ID AND STATUS_POSISI_SURAT = 1;
+			tempinfo:= 'Bisa diambil di ';
+			
+		--usulan ke kanreg
+		ELSIF NEW.STATUS_BERKAS = '10' AND NEW.STATUS_VERIFIKASI = 1 AND (NEW.JENIS_ID = 3 OR NEW.JENIS_ID = 4 OR NEW.JENIS_ID = 7) AND NEW.USULAN_SURAT_ID IS NOT NULL 
+		--ELSIF NEW.STATUS_BERKAS = '10' AND NEW.STATUS_VERIFIKASI = 1 AND (NEW.JENIS_ID = 3 OR NEW.JENIS_ID = 4 OR NEW.JENIS_ID = 10) AND NEW.USULAN_SURAT_ID IS NOT NULL 
+		--AND OLD.USULAN_SURAT_ID IS NULL 
+		AND NEW.STATUS_SURAT_KELUAR IS NULL
+		THEN
+			SELECT SATUAN_KERJA_ASAL_ID INTO tempsatuankerjaid FROM PERSURATAN.SURAT_MASUK_BKD_DISPOSISI WHERE SURAT_MASUK_BKD_ID = NEW.SURAT_MASUK_BKD_ID AND STATUS_POSISI_SURAT = 1;
+			--tempinfo:= 'Proses Usul ke Kanreg II BKN oleh ';
+			tempinfo:= 'Proses Usul '|| vjenis ||' oleh ';
+		--khusus untuk batal kanreg atau pusat
+		ELSIF NEW.STATUS_BERKAS = '10' AND NEW.STATUS_VERIFIKASI = 1 AND (NEW.JENIS_ID = 3 OR NEW.JENIS_ID = 4 OR NEW.JENIS_ID = 10) AND NEW.USULAN_SURAT_ID IS NULL 
+		AND OLD.USULAN_SURAT_ID IS NOT NULL 
+		AND NEW.STATUS_SURAT_KELUAR IS NULL
+		THEN
+			SELECT SATUAN_KERJA_ASAL_ID INTO tempsatuankerjaid FROM PERSURATAN.SURAT_MASUK_BKD_DISPOSISI WHERE SURAT_MASUK_BKD_ID = NEW.SURAT_MASUK_BKD_ID AND STATUS_POSISI_SURAT = 1;
+			tempinfo:= 'Terverifikasi oleh ';
+		ELSIF NEW.STATUS_BERKAS = '10' AND NEW.STATUS_SURAT_KELUAR = 3 AND NEW.STATUS_VERIFIKASI = 1 THEN
+			SELECT SATUAN_KERJA_ASAL_ID INTO tempsatuankerjaid FROM PERSURATAN.SURAT_MASUK_BKD_DISPOSISI WHERE SURAT_MASUK_BKD_ID = NEW.SURAT_MASUK_BKD_ID AND STATUS_POSISI_SURAT = 1;
+			tempinfo:= 'Dapat di ambil di ';
+		
+		--usul nomor ke surat keluar : STATUS_SURAT_KELUAR in 1, 2
+		ELSIF NEW.STATUS_BERKAS = '10' AND NEW.STATUS_VERIFIKASI = 1 AND (NEW.JENIS_ID = 3 OR NEW.JENIS_ID = 4 OR NEW.JENIS_ID = 7 OR NEW.JENIS_ID = 10) AND NEW.STATUS_SURAT_KELUAR IN (1,2) --AND NEW.USULAN_SURAT_ID = 1 
+		THEN
+			--raise notice 'sql %','A';
+			RETURN NEW;
+			
+		ELSIF NEW.STATUS_SURAT_KELUAR IS NOT NULL OR (OLD.STATUS_VERIFIKASI = 1 AND NEW.STATUS_VERIFIKASI = 1) OR NEW.STATUS_SURAT_KELUAR = 2 
+		THEN
+			--raise notice 'sql %',NEW.JENIS_ID || '-B-' || NEW.USULAN_SURAT_ID;
+			RETURN NEW;
+		ELSIF NEW.STATUS_BERKAS = '10' AND OLD.STATUS_VERIFIKASI IS NULL AND NEW.STATUS_VERIFIKASI = 1 AND (NEW.JENIS_ID = 3 OR NEW.JENIS_ID = 4 OR NEW.JENIS_ID = 7 OR NEW.JENIS_ID = 10) THEN
+			SELECT SATUAN_KERJA_ASAL_ID INTO tempsatuankerjaid FROM PERSURATAN.SURAT_MASUK_BKD_DISPOSISI WHERE SURAT_MASUK_BKD_ID = NEW.SURAT_MASUK_BKD_ID AND STATUS_POSISI_SURAT = 1;
+			tempinfo:= 'Terverifikasi oleh ';
+		ELSIF NEW.STATUS_BERKAS = '10' AND OLD.STATUS_VERIFIKASI IS NULL AND NEW.STATUS_VERIFIKASI = 1 THEN
+			SELECT SATUAN_KERJA_ASAL_ID INTO tempsatuankerjaid FROM PERSURATAN.SURAT_MASUK_BKD_DISPOSISI WHERE SURAT_MASUK_BKD_ID = NEW.SURAT_MASUK_BKD_ID AND STATUS_POSISI_SURAT = 1;
+			tempinfo:= 'Terverifikasi dan proses pengesahan oleh ';
+		-- kalau turun status kembali 1 return
+		ELSIF NEW.STATUS_BERKAS = '10' AND OLD.STATUS_KEMBALI = 1 AND NEW.STATUS_KEMBALI = 1 THEN
+		RETURN NEW;
+		ELSIF NEW.STATUS_BERKAS = '10' AND OLD.STATUS_KEMBALI IS NULL AND NEW.STATUS_KEMBALI = 1 THEN
+			SELECT SATUAN_KERJA_ASAL_ID INTO tempsatuankerjaid FROM PERSURATAN.SURAT_MASUK_BKD_DISPOSISI WHERE SURAT_MASUK_BKD_ID = NEW.SURAT_MASUK_BKD_ID AND STATUS_POSISI_SURAT = 1;
+			tempinfo:= 'Turun Status oleh ';
+		ELSIF NEW.STATUS_BERKAS = '10' AND OLD.STATUS_TMS IS NULL AND NEW.STATUS_TMS = 1 THEN
+			SELECT SATUAN_KERJA_ASAL_ID INTO tempsatuankerjaid FROM PERSURATAN.SURAT_MASUK_BKD_DISPOSISI WHERE SURAT_MASUK_BKD_ID = NEW.SURAT_MASUK_BKD_ID AND STATUS_POSISI_SURAT = 1;
+			tempinfo:= 'TMS oleh ';
+		ELSIF NEW.STATUS_BERKAS = '10' AND OLD.STATUS_TMS IS NOT NULL AND NEW.STATUS_TMS IS NULL THEN
+			SELECT SATUAN_KERJA_ASAL_ID INTO tempsatuankerjaid FROM PERSURATAN.SURAT_MASUK_BKD_DISPOSISI WHERE SURAT_MASUK_BKD_ID = NEW.SURAT_MASUK_BKD_ID AND STATUS_POSISI_SURAT = 1;
+			tempinfo:= 'Batal TMS oleh ';
+		ELSIF NEW.STATUS_BERKAS = '6' OR NEW.STATUS_BERKAS = '8' OR NEW.STATUS_BERKAS = '10' THEN
+			SELECT SATUAN_KERJA_ASAL_ID INTO tempsatuankerjaid FROM PERSURATAN.SURAT_MASUK_BKD_DISPOSISI WHERE SURAT_MASUK_BKD_ID = NEW.SURAT_MASUK_BKD_ID AND STATUS_POSISI_SURAT = 1;
+			tempinfo:= 'Di terima oleh ';
+		ELSIF NEW.STATUS_BERKAS = '7' OR NEW.STATUS_BERKAS = '9' THEN
+			SELECT SATUAN_KERJA_TUJUAN_ID INTO tempsatuankerjaid FROM PERSURATAN.SURAT_MASUK_BKD_DISPOSISI WHERE SURAT_MASUK_BKD_ID = NEW.SURAT_MASUK_BKD_ID AND STATUS_POSISI_SURAT = 1;
+			tempinfo:= 'Disposisi ke ';
+		END IF;
+	--tempinfo:= tempinfo || 'Tempat: ' || REPLACEQUOTE(NEW.TEMPAT) || '<br/>';
+	--END IF;
+	raise notice 'sql %',tempinfo;
+
+	IF NEW.STATUS_BERKAS = '1' OR NEW.STATUS_BERKAS = '2' OR NEW.STATUS_BERKAS = '3' THEN
+		IF NEW.USER_LOGIN_PEGAWAI_ID IS NULL THEN
+			tempquery:= '
+			INSERT INTO persuratan.SURAT_MASUK_PEGAWAI_LOG(SURAT_MASUK_PEGAWAI_ID, JENIS_ID, SURAT_MASUK_UPT_ID, PEGAWAI_ID, SATUAN_KERJA_ID, INFO_LOG, LAST_USER, LAST_DATE, USER_LOGIN_ID, USER_LOGIN_PEGAWAI_ID)
+			VALUES(
+			'|| NEW.SURAT_MASUK_PEGAWAI_ID ||',
+			'|| NEW.JENIS_ID ||',
+			'|| NEW.SURAT_MASUK_UPT_ID ||',
+			'|| NEW.PEGAWAI_ID ||',
+			'|| tempsatuankerjaid ||',
+			'''|| tempinfo ||''',
+			'''|| NEW.LAST_USER ||''',
+			'''|| NOW() ||'''
+			, '|| NEW.USER_LOGIN_ID ||'
+			, NULL
+			)
+			';
+		ELSE
+			tempquery:= '
+			INSERT INTO persuratan.SURAT_MASUK_PEGAWAI_LOG(SURAT_MASUK_PEGAWAI_ID, JENIS_ID, SURAT_MASUK_UPT_ID, PEGAWAI_ID, SATUAN_KERJA_ID, INFO_LOG, LAST_USER, LAST_DATE, USER_LOGIN_ID, USER_LOGIN_PEGAWAI_ID)
+			VALUES(
+			'|| NEW.SURAT_MASUK_PEGAWAI_ID ||',
+			'|| NEW.JENIS_ID ||',
+			'|| NEW.SURAT_MASUK_UPT_ID ||',
+			'|| NEW.PEGAWAI_ID ||',
+			'|| tempsatuankerjaid ||',
+			'''|| tempinfo ||''',
+			'''|| NEW.LAST_USER ||''',
+			'''|| NOW() ||'''
+			, '|| NEW.USER_LOGIN_ID ||'
+			, '|| NEW.USER_LOGIN_PEGAWAI_ID ||'
+			)
+			';
+		END IF;
+	ELSIF NEW.STATUS_BERKAS = '4' OR NEW.STATUS_BERKAS = '5' OR NEW.STATUS_BERKAS = '6' OR NEW.STATUS_BERKAS = '7' OR NEW.STATUS_BERKAS = '8' OR NEW.STATUS_BERKAS = '9' OR NEW.STATUS_BERKAS = '10' THEN
+		IF NEW.USER_LOGIN_PEGAWAI_ID IS NULL THEN
+			tempquery:= '
+			INSERT INTO persuratan.SURAT_MASUK_PEGAWAI_LOG(SURAT_MASUK_PEGAWAI_ID, JENIS_ID, SURAT_MASUK_BKD_ID, PEGAWAI_ID, SATUAN_KERJA_ID, INFO_LOG, LAST_USER, LAST_DATE, USER_LOGIN_ID, USER_LOGIN_PEGAWAI_ID)
+			VALUES(
+			'|| NEW.SURAT_MASUK_PEGAWAI_ID ||',
+			'|| NEW.JENIS_ID ||',
+			'|| NEW.SURAT_MASUK_BKD_ID ||',
+			'|| NEW.PEGAWAI_ID ||',
+			'|| tempsatuankerjaid ||',
+			'''|| tempinfo ||''',
+			'''|| NEW.LAST_USER ||''',
+			'''|| NOW() ||'''
+			, '|| NEW.USER_LOGIN_ID ||'
+			, NULL
+			)
+			';
+		ELSE
+			tempquery:= '
+			INSERT INTO persuratan.SURAT_MASUK_PEGAWAI_LOG(SURAT_MASUK_PEGAWAI_ID, JENIS_ID, SURAT_MASUK_BKD_ID, PEGAWAI_ID, SATUAN_KERJA_ID, INFO_LOG, LAST_USER, LAST_DATE, USER_LOGIN_ID, USER_LOGIN_PEGAWAI_ID)
+			VALUES(
+			'|| NEW.SURAT_MASUK_PEGAWAI_ID ||',
+			'|| NEW.JENIS_ID ||',
+			'|| NEW.SURAT_MASUK_BKD_ID ||',
+			'|| NEW.PEGAWAI_ID ||',
+			'|| tempsatuankerjaid ||',
+			'''|| tempinfo ||''',
+			'''|| NEW.LAST_USER ||''',
+			'''|| NOW() ||'''
+			, '|| NEW.USER_LOGIN_ID ||'
+			, '|| NEW.USER_LOGIN_PEGAWAI_ID ||'
+			)
+			';
+		END IF;
+	END IF;
+	
+	raise notice 'sql %',tempquery;
+	IF tempquery IS NOT NULL THEN         
+	EXECUTE tempquery;
+	END IF;
+
+	--khusus pembatalan
+	IF NEW.STATUS_BERKAS = '99' THEN
+		tempinfo:= 'Pembatalan oleh ';
+		INSERT INTO persuratan.SURAT_MASUK_PEGAWAI_LOG
+		(
+			SURAT_MASUK_PEGAWAI_ID, JENIS_ID
+			, SURAT_MASUK_UPT_ID, SURAT_MASUK_BKD_ID, PEGAWAI_ID, INFO_LOG
+			, LAST_USER, LAST_DATE, USER_LOGIN_ID, USER_LOGIN_PEGAWAI_ID
+		)
+		VALUES
+		(
+			NEW.SURAT_MASUK_PEGAWAI_ID
+			, NEW.JENIS_ID
+			, NEW.SURAT_MASUK_UPT_ID
+			, NEW.SURAT_MASUK_BKD_ID
+			, NEW.PEGAWAI_ID
+			, tempinfo
+			, NEW.LAST_USER
+			, NOW()
+			, NEW.USER_LOGIN_ID
+			, NEW.USER_LOGIN_PEGAWAI_ID
+		);
+	END IF;
+	
+	RETURN NEW;
+   
+END;
+$BODY$
+LANGUAGE plpgsql VOLATILE COST 100;
+ALTER FUNCTION persuratan.surat_masuk_pegawai_triger_log() OWNER TO postgres;

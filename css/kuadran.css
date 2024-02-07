@@ -1,0 +1,180 @@
+/****/
+.area-main-menu{
+	*border: 2px solid red;
+	padding: 40px;
+	width: 70%;
+	height: auto !important;
+}
+.area-main-menu .item{
+	*width: calc(33.3% - 40px);
+	width: calc(50% - 40px);
+	float: left;
+	margin: 0 20px;
+}
+@media screen and (max-width:767px) {
+	.area-main-menu{
+		padding: 0px;
+		width: calc(100% - 40px);
+	}
+	.area-main-menu .item{
+		width: calc(100% - 0px);
+		margin: 10px 0px;
+	}
+}
+.area-main-menu .item a{
+	background: rgba(255,255,255,1);
+	border: 2px solid #fff;
+	display: block;
+	padding: 20px;
+
+	-webkit-border-radius: 7px;
+	-moz-border-radius: 7px;
+	border-radius: 7px;
+
+	text-transform: uppercase;
+	text-align: center;
+	letter-spacing: 2px;
+}
+.area-main-menu .item a:hover{
+	*background: rgba(255,255,255,1);
+	border: 2px solid #034489;
+}
+.area-main-menu .item span {
+	display: inline-block;
+	width: 100%;
+}
+.area-main-menu .item span img{
+	*width: 200px;
+	height: 150px;
+}
+
+/****/
+.area-kuadran-wrapper{
+	*border: 1px solid red;
+}
+.area-kuadran-wrapper .area-kuadran{
+	*border: 1px solid cyan;
+	float: left;
+	width: 50%;
+}
+.area-kuadran-wrapper .area-kuadran .inner {
+	background: url(../images/bg-kuadran.png);
+	background-size: 100% 100%;
+	padding: 5px;
+}
+.area-kuadran-wrapper .area-kuadran .inner .item{
+	float: left;
+	width: calc(33.3% - 10px);
+	margin: 5px 5px;
+	*border: 1px solid red;
+}
+.area-kuadran-wrapper .area-kuadran .inner .item a{
+	text-align: center;
+	border: 2px solid #FFFFFF;
+	display: block;
+
+	padding: 40px 0;
+
+	-webkit-border-radius: 7px;
+	-moz-border-radius: 7px;
+	border-radius: 7px;
+
+	position: relative;
+}
+.area-kuadran-wrapper .area-kuadran .inner .item a:hover{
+	background: rgba(255,255,255,0.4);
+}
+.area-kuadran-wrapper .area-kuadran .inner .item a .nomor{
+	font-size: 22px;
+	*color: #FFFFFF;
+	color: #333333;
+	*background: rgba(0,0,0,0.2);
+	background: rgba(255,255,255,0.8);
+	display: inline-block;
+	padding: 10px 10px;
+
+	/*-webkit-border-radius: 4px;
+	-moz-border-radius: 4px;
+	border-radius: 4px; */
+
+	position: absolute;
+	left: 0;
+	top: 0;
+
+	-webkit-border-radius: 4px;
+	-webkit-border-top-right-radius: 0px;
+	-webkit-border-bottom-left-radius: 0px;
+	-moz-border-radius: 4px;
+	-moz-border-radius-topright: 0px;
+	-moz-border-radius-bottomleft: 0px;
+	border-radius: 4px;
+	border-top-right-radius: 0px;
+	border-bottom-left-radius: 0px;
+}
+.area-kuadran-wrapper .area-kuadran .inner .item a:hover .nomor{
+	background: rgba(0,0,0,0.5);
+	color: #FFFFFF;
+}
+.area-kuadran-wrapper .area-kuadran .inner .item a .pns{
+	*border: 1px solid red;
+	color: #333333;
+	padding-top: 5px;
+	display: inline-block;
+	font-size: 20px;
+	text-transform: uppercase;
+
+}
+.area-kuadran-wrapper .area-kuadran .inner .item a .pns:before {
+    font-family: FontAwesome;
+    content: "\f0c0";
+    display: inline-block;
+    padding-right: 3px;
+	margin-right: 10px;
+    vertical-align: middle;
+
+	background: #FFFFFF;
+	width: 40px;
+	height: 40px;
+	line-height: 40px;
+	text-align: center;
+
+	-webkit-border-radius: 50%;
+	-moz-border-radius: 50%;
+	border-radius: 50%;
+}
+
+.area-kuadran-wrapper .area-kuadran-legend{
+	*border: 1px solid red;
+	float: left;
+	width: 50%;
+	padding-left: 20px;
+}
+.area-kuadran-wrapper .area-kuadran-legend table td,
+.area-kuadran-wrapper .area-kuadran-legend table th {
+    padding: 10px 5px;
+	*display: inline-block;
+    /*display: table-cell;
+    text-align: left;
+    vertical-align: middle;
+    border-radius: 2px;*/
+}
+.area-kuadran-wrapper .area-kuadran-legend table thead {
+	background-color: #605ca8;
+	color: #FFFFFF;
+}
+.area-kuadran-wrapper .area-kuadran-legend table tbody tr{
+	border-bottom: 1px solid rgba(0,0,0,0.1);
+}
+.area-kuadran-wrapper .area-kuadran-legend table tbody tr td{
+
+}
+.area-kuadran-wrapper .area-kuadran-legend table th:nth-child(1),
+.area-kuadran-wrapper .area-kuadran-legend table td:nth-child(1){
+	width: 100px !important;
+	padding-left: 10px;
+}
+.area-kuadran-wrapper .area-kuadran-legend table th:nth-child(2),
+.area-kuadran-wrapper .area-kuadran-legend table td:nth-child(2){
+	width: 140px !important;
+	*border: 1px solid red;
+}

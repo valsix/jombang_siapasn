@@ -1,0 +1,33 @@
+.track3 {
+    width: 10px;
+    background: rgba(0, 0, 0, 0);
+	*background:rgba(27,75,114,0.4);
+    margin-right: -9px;
+    border-radius: 10px;
+    -webkit-transition: background 250ms linear;
+    transition: background 250ms linear;
+	
+	*border:1px solid red;
+}
+
+.track3:hover,
+.track3.dragging {
+    background: #d9d9d9; 
+    background: rgba(0, 0, 0, 0.15);
+}
+
+.handle3 {
+    width: 7px;
+    right: 0;
+    background: #999;
+    *background: rgba(0, 0, 0, 0.4);
+	background:rgba(46,125,196,0.7);
+    border-radius: 7px;
+    -webkit-transition: width 250ms;
+    transition: width 250ms;
+}
+
+.track3:hover .handle3,
+.track3.dragging .handle3 {
+    width: 10px;
+}

@@ -1,0 +1,201 @@
+drop table if exists sapk.jenis_id_dokumen;
+create table sapk.jenis_id_dokumen
+(
+  id integer not null,
+  kode character varying,
+  nama character varying,
+  constraint jenis_id_dokumen_pkey primary key (id)
+) with (oids=false);
+alter table sapk.jenis_id_dokumen owner to postgres;
+
+drop table if exists sapk.jenis_kawin;
+create table sapk.jenis_kawin
+(
+  id integer not null,
+  nama character varying,
+  constraint jenis_kawin_pkey primary key (id)
+) with (oids=false);
+alter table sapk.jenis_kawin owner to postgres;
+
+drop table if exists sapk.jenis_kelamin;
+create table sapk.jenis_kelamin
+(
+  kode character varying,
+  nama character varying,
+  constraint jenis_kelamin_pkey primary key (kode)
+) with (oids=false);
+alter table sapk.jenis_kelamin owner to postgres;
+
+alter table anak
+add column gelar_depan character varying
+, add column gelar_belakang character varying
+, add column akta_kelahiran character varying
+, add column jenis_id_dokumen integer
+, add column agama_id numeric
+, add column email character varying
+, add column hp character varying
+, add column telepon character varying
+, add column alamat text
+, add column bpjs_no character varying
+, add column bpjs_tanggal date
+, add column npwp_no character varying
+, add column npwp_tanggal date
+, add column status_pns numeric
+, add column nip_pns character varying
+, add column status_lulus numeric
+, add column kematian_no character varying
+, add column kematian_tanggal date
+, add column jenis_kawin_id integer
+, add column akta_nikah_no character varying
+, add column akta_nikah_tanggal date
+, add column nikah_tanggal date
+, add column akta_cerai_no character varying
+, add column akta_cerai_tanggal date
+, add column cerai_tanggal date;
+
+update anak as u
+set
+jenis_kawin_id= x.jenis_kawin_id
+, jenis_kelamin= x.jenis_kelamin
+from
+(
+ 	select *
+	from
+	(
+		select
+		anak_id
+		, case when status_nikah = '1' then 1 else 4 end jenis_kawin_id
+		, case when jenis_kelamin = 'L' or jenis_kelamin = 'M' then 'M' when jenis_kelamin = 'P' or jenis_kelamin = 'F' then 'F' else '' end jenis_kelamin
+		from anak a
+		where (coalesce(nullif(a.status, ''), null) is null or a.status = '2')
+	) a
+	order by jenis_kawin_id
+) as x
+where u.anak_id = x.anak_id;
+
+CREATE OR REPLACE VIEW riwayat_pegawai_anak_file AS 
+SELECT 'foto'::text AS riwayat_field, 'Foto'::text AS info_data, 1 AS tipe_file UNION ALL
+SELECT 'aktakelahiran'::text AS riwayat_field, 'Akta Kelahiran'::text AS info_data, 2 AS tipe_file UNION ALL
+SELECT 'ktp'::text AS riwayat_field, 'KTP'::text AS info_data, 2 AS tipe_file UNION ALL
+SELECT 'pasport'::text AS riwayat_field, 'Pasport'::text AS info_data, 2 AS tipe_file UNION ALL
+SELECT 'sim'::text AS riwayat_field, 'SIM'::text AS info_data, 2 AS tipe_file UNION ALL
+SELECT 'suratkematian'::text AS riwayat_field, 'Surat Kematian'::text AS info_data, 2 AS tipe_file UNION ALL
+SELECT 'suratnikah'::text AS riwayat_field, 'Surat Menikah'::text AS info_data, 2 AS tipe_file UNION ALL
+SELECT 'suratcerai'::text AS riwayat_field, 'Surat Cerai'::text AS info_data, 2 AS tipe_file UNION ALL
+SELECT 'suratketerangankuliah'::text AS riwayat_field, 'Surat Keterangan Kuliah'::text AS info_data, 2 AS tipe_file UNION ALL
+SELECT 'suratketeranganbelumbekerja'::text AS riwayat_field, 'Surat Keterangan Belum Bekerja'::text AS info_data, 2 AS tipe_file
+;
+ALTER TABLE riwayat_pegawai_anak_file OWNER TO postgres;
+
+alter table suami_istri
+add column status_aktif character varying(1)
+, add column status_bekerja numeric
+, add column jenis_kelamin character varying(1)
+, add column gelar_depan character varying
+, add column gelar_belakang character varying
+, add column akta_kelahiran character varying
+, add column jenis_id_dokumen integer
+, add column agama_id numeric
+, add column email character varying
+, add column hp character varying
+, add column telepon character varying
+, add column alamat text
+, add column bpjs_no character varying
+, add column bpjs_tanggal date
+, add column npwp_no character varying
+, add column npwp_tanggal date
+, add column status_lulus numeric
+, add column tanggal_meninggal date
+, add column kematian_no character varying
+, add column jenis_kawin_id integer
+, add column akta_nikah_no character varying
+, add column akta_nikah_tanggal date
+, add column nikah_tanggal date
+, add column akta_cerai_no character varying
+, add column akta_cerai_tanggal date
+;
+
+update suami_istri as u
+set
+status_bekerja= x.status_bekerja
+, status_aktif= x.status_aktif
+from
+(
+ 	select *
+	from
+	(
+		select
+		suami_istri_id
+		, case when coalesce(nullif(a.pekerjaan, ''), null) is not null then 1 else null::numeric end status_bekerja
+		, case when status_s_i = '3' then '2' else '1' end status_aktif
+		from suami_istri a
+		where (coalesce(nullif(a.status, ''), null) is null or a.status = '2')
+	) a
+	order by suami_istri_id
+) as x
+where u.suami_istri_id = x.suami_istri_id;
+
+CREATE OR REPLACE VIEW riwayat_pegawai_suami_istri_file AS 
+SELECT 'foto'::text AS riwayat_field,
+'Foto'::text AS info_data,
+1 AS tipe_file
+UNION ALL
+SELECT 'aktanikah'::text AS riwayat_field,
+--'AKTA_NIKAH'::text AS info_data,
+'Akta Nikah'::text AS info_data,
+2 AS tipe_file
+UNION ALL
+SELECT 'aktacerai'::text AS riwayat_field,
+--'AKTA_CERAI'::text AS info_data,
+'Akta Cerai'::text AS info_data,
+2 AS tipe_file
+UNION ALL
+SELECT 'kariskarsu'::text AS riwayat_field,
+--'KARIS_KARSU'::text AS info_data,
+'Karis Karsu'::text AS info_data,
+2 AS tipe_file
+UNION ALL
+SELECT
+'aktakelahiran'::text AS riwayat_field
+, 'Akta Kelahiran'::text AS info_data
+, 2 AS tipe_file
+UNION ALL
+SELECT 'ktp'::text AS riwayat_field,
+'KTP'::text AS info_data,
+2 AS tipe_file
+UNION ALL
+SELECT
+'pasport'::text AS riwayat_field
+, 'Pasport'::text AS info_data
+, 2 AS tipe_file
+UNION ALL
+SELECT
+'sim'::text AS riwayat_field
+, 'SIM'::text AS info_data
+, 2 AS tipe_file
+UNION ALL
+SELECT 'suratkematian'::text AS riwayat_field,
+'Surat Kematian'::text AS info_data,
+2 AS tipe_file
+--UNION ALL
+--SELECT 'skkonversinipbaru'::text AS riwayat_field,
+--'SK_KONVERSI'::text AS info_data,
+--2 AS tipe_file
+--UNION ALL
+--SELECT
+--'suratnikah'::text AS riwayat_field
+--, 'Surat Menikah'::text AS info_data
+--, 2 AS tipe_file
+--UNION ALL
+--SELECT
+--'suratcerai'::text AS riwayat_field
+--, 'Surat Cerai'::text AS info_data
+--, 2 AS tipe_file
+UNION ALL
+SELECT 'skjandaduda'::text AS riwayat_field,
+'Surat Keterangan Janda Duda'::text AS info_data,
+2 AS tipe_file
+UNION ALL
+SELECT 'laporanpernikahanpertama'::text AS riwayat_field,
+'Laporan Pernikahan Pertama'::text AS info_data,
+2 AS tipe_file;

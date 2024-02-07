@@ -1,0 +1,144 @@
+CREATE OR REPLACE FUNCTION validasi.validasi_diklat_kursus()
+  RETURNS trigger AS
+$BODY$
+DECLARE
+
+    rec RECORD;
+    pinfoperubahan character varying;
+    thequery character varying;
+    vinfoid numeric;
+    
+    BEGIN
+
+	if new.validasi = 1 or new.validasi is null then
+		pinfoperubahan := '{ "0" : "0" ';
+		if NEW.DIKLAT_KURSUS_ID is null then
+			pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'TIPE_KURSUS_ID', ''::character varying, 'valsixdatabaru'::character varying);
+			pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'REF_JENIS_KURSUS_ID', ''::character varying, 'valsixdatabaru'::character varying);
+			pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'BIDANG_TERKAIT_ID', ''::character varying, 'valsixdatabaru'::character varying);
+			pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'NAMA', ''::character varying, 'valsixdatabaru'::character varying);
+			pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'NO_SERTIFIKAT', ''::character varying, 'valsixdatabaru'::character varying);
+			pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'TANGGAL_SERTIFIKAT', ''::character varying, 'valsixdatabaru'::character varying);
+			pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'TANGGAL_MULAI', ''::character varying, 'valsixdatabaru'::character varying);
+			pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'TANGGAL_SELESAI', ''::character varying, 'valsixdatabaru'::character varying);
+			pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'TAHUN', ''::character varying, 'valsixdatabaru'::character varying);
+			pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'JUMLAH_JAM', ''::character varying, 'valsixdatabaru'::character varying);
+			pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'ANGKATAN', ''::character varying, 'valsixdatabaru'::character varying);
+			pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'TEMPAT', ''::character varying, 'valsixdatabaru'::character varying);
+			pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'NILAI_REKAM_JEJAK', ''::character varying, 'valsixdatabaru'::character varying);
+			pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'RUMPUN_ID', ''::character varying, 'valsixdatabaru'::character varying);
+			pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'REF_INSTANSI_ID', ''::character varying, 'valsixdatabaru'::character varying);
+			pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'REF_INSTANSI_NAMA', ''::character varying, 'valsixdatabaru'::character varying);
+			pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'PENYELENGGARA', ''::character varying, 'valsixdatabaru'::character varying);
+			pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'STATUS_LULUS', ''::character varying, 'valsixdatabaru'::character varying);
+		else
+			FOR rec IN SELECT * FROM DIKLAT_KURSUS A WHERE A.PEGAWAI_ID = NEW.PEGAWAI_ID AND A.DIKLAT_KURSUS_ID = NEW.DIKLAT_KURSUS_ID
+			LOOP
+				if new.validasi is null then
+					pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'TIPE_KURSUS_ID', NEW.TIPE_KURSUS_ID::character varying, rec.TIPE_KURSUS_ID::character varying);
+					pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'REF_JENIS_KURSUS_ID', NEW.REF_JENIS_KURSUS_ID::character varying, rec.REF_JENIS_KURSUS_ID::character varying);
+					pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'BIDANG_TERKAIT_ID', NEW.BIDANG_TERKAIT_ID::character varying, rec.BIDANG_TERKAIT_ID::character varying);
+					pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'NAMA', NEW.NAMA::character varying, rec.NAMA::character varying);
+					pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'NO_SERTIFIKAT', NEW.NO_SERTIFIKAT::character varying, rec.NO_SERTIFIKAT::character varying);
+					pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'TANGGAL_SERTIFIKAT', NEW.TANGGAL_SERTIFIKAT::character varying, rec.TANGGAL_SERTIFIKAT::character varying);
+					pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'TANGGAL_MULAI', NEW.TANGGAL_MULAI::character varying, rec.TANGGAL_MULAI::character varying);
+					pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'TANGGAL_SELESAI', NEW.TANGGAL_SELESAI::character varying, rec.TANGGAL_SELESAI::character varying);
+					pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'TAHUN', NEW.STATUS::character varying, rec.TAHUN::character varying);
+					pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'JUMLAH_JAM', NEW.JUMLAH_JAM::character varying, rec.JUMLAH_JAM::character varying);
+					pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'ANGKATAN', NEW.ANGKATAN::character varying, rec.ANGKATAN::character varying);
+					pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'TEMPAT', NEW.TEMPAT::character varying, rec.TEMPAT::character varying);
+					pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'NILAI_REKAM_JEJAK', NEW.NILAI_REKAM_JEJAK::character varying, rec.NILAI_REKAM_JEJAK::character varying);
+					pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'RUMPUN_ID', NEW.RUMPUN_ID::character varying, rec.RUMPUN_ID::character varying);
+					pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'REF_INSTANSI_ID', NEW.REF_INSTANSI_ID::character varying, rec.REF_INSTANSI_ID::character varying);
+					pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'REF_INSTANSI_NAMA', NEW.REF_INSTANSI_NAMA::character varying, rec.REF_INSTANSI_NAMA::character varying);
+					pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'PENYELENGGARA', NEW.PENYELENGGARA::character varying, rec.PENYELENGGARA::character varying);
+					pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'STATUS_LULUS', NEW.STATUS_LULUS::character varying, rec.STATUS_LULUS::character varying);
+				else
+					pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'TIPE_KURSUS_ID', rec.TIPE_KURSUS_ID::character varying, NEW.TIPE_KURSUS_ID::character varying);
+					pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'REF_JENIS_KURSUS_ID', rec.REF_JENIS_KURSUS_ID::character varying, NEW.REF_JENIS_KURSUS_ID::character varying);
+					pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'BIDANG_TERKAIT_ID', rec.BIDANG_TERKAIT_ID::character varying, NEW.BIDANG_TERKAIT_ID::character varying);
+					pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'NAMA', rec.NAMA::character varying, NEW.NAMA::character varying);
+					pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'NO_SERTIFIKAT', rec.NO_SERTIFIKAT::character varying, NEW.NO_SERTIFIKAT::character varying);
+					pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'TANGGAL_SERTIFIKAT', rec.TANGGAL_SERTIFIKAT::character varying, NEW.TANGGAL_SERTIFIKAT::character varying);
+					pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'TANGGAL_MULAI', rec.TANGGAL_MULAI::character varying, NEW.TANGGAL_MULAI::character varying);
+					pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'TANGGAL_SELESAI', rec.TANGGAL_SELESAI::character varying, NEW.TANGGAL_SELESAI::character varying);
+					pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'TAHUN', rec.STATUS::character varying, NEW.TAHUN::character varying);
+					pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'JUMLAH_JAM', rec.JUMLAH_JAM::character varying, NEW.JUMLAH_JAM::character varying);
+					pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'ANGKATAN', rec.ANGKATAN::character varying, NEW.ANGKATAN::character varying);
+					pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'TEMPAT', rec.TEMPAT::character varying, NEW.TEMPAT::character varying);
+					pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'NILAI_REKAM_JEJAK', rec.NILAI_REKAM_JEJAK::character varying, NEW.NILAI_REKAM_JEJAK::character varying);
+					pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'RUMPUN_ID', rec.RUMPUN_ID::character varying, NEW.RUMPUN_ID::character varying);
+					pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'REF_INSTANSI_ID', rec.REF_INSTANSI_ID::character varying, NEW.REF_INSTANSI_ID::character varying);
+					pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'REF_INSTANSI_NAMA', rec.REF_INSTANSI_NAMA::character varying, NEW.REF_INSTANSI_NAMA::character varying);
+					pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'PENYELENGGARA', rec.PENYELENGGARA::character varying, NEW.PENYELENGGARA::character varying);
+					pinfoperubahan:= validasi.collectinfo(pinfoperubahan, 'STATUS_LULUS', rec.STATUS_LULUS::character varying, NEW.STATUS_LULUS::character varying);
+				end if;
+				
+			END LOOP;
+		end if;
+		
+		pinfoperubahan:= pinfoperubahan || ' }';
+		--raise notice 'sql %', pinfoperubahan;
+	end if;
+	
+	IF NEW.VALIDASI = 1 THEN 
+		if new.diklat_kursus_id is null then
+			if new.tanggal_validasi is null then
+				new.perubahan_verifikator_data= pinfoperubahan;
+			else
+				vinfoid:= (select coalesce(max(diklat_kursus_id), 0) + 1 from diklat_kursus);
+				INSERT INTO DIKLAT_KURSUS
+				(
+					DIKLAT_KURSUS_ID, PEGAWAI_ID
+					, TIPE_KURSUS_ID, REF_JENIS_KURSUS_ID, BIDANG_TERKAIT_ID, NAMA, NO_SERTIFIKAT, TANGGAL_SERTIFIKAT
+					, TANGGAL_MULAI, TANGGAL_SELESAI, TAHUN, JUMLAH_JAM, ANGKATAN, TEMPAT
+					, NILAI_REKAM_JEJAK, RUMPUN_ID, REF_INSTANSI_ID, REF_INSTANSI_NAMA
+					, PENYELENGGARA, STATUS_LULUS
+					, LAST_USER, LAST_DATE, LAST_LEVEL, USER_LOGIN_ID, USER_LOGIN_PEGAWAI_ID
+				)
+				VALUES 
+				(
+					vinfoid, NEW.PEGAWAI_ID
+					, NEW.TIPE_KURSUS_ID, NEW.REF_JENIS_KURSUS_ID, NEW.BIDANG_TERKAIT_ID, NEW.NAMA, NEW.NO_SERTIFIKAT
+					, NEW.TANGGAL_SERTIFIKAT, NEW.TANGGAL_MULAI, NEW.TANGGAL_SELESAI, NEW.TAHUN
+					, NEW.JUMLAH_JAM, NEW.ANGKATAN, NEW.TEMPAT
+					, NEW.NILAI_REKAM_JEJAK, NEW.RUMPUN_ID, NEW.REF_INSTANSI_ID, NEW.REF_INSTANSI_NAMA
+					, NEW.PENYELENGGARA, NEW.STATUS_LULUS
+					, NEW.LAST_USER, NEW.LAST_DATE, NEW.LAST_LEVEL, NEW.USER_LOGIN_ID, NEW.USER_LOGIN_PEGAWAI_ID
+				);
+
+				--untuk update e file
+				UPDATE pegawai_file
+				SET
+				RIWAYAT_ID = vinfoid
+				, TEMP_VALIDASI_BELUM_ID= NULL
+				WHERE RIWAYAT_TABLE = 'DIKLAT_KURSUS' AND PEGAWAI_ID = NEW.PEGAWAI_ID AND TEMP_VALIDASI_BELUM_ID = NEW.TEMP_VALIDASI_ID;
+			end if;
+			--raise notice 'sql %', '';
+		else
+			if new.tanggal_validasi is null then
+				new.perubahan_verifikator_data= pinfoperubahan;
+			else
+				select validasi.vupdateinfo('diklat_kursus', new.diklat_kursus_id, new.temp_validasi_id, new.last_user, new.last_level) into thequery;
+
+				if thequery is not null then
+					--new.last_level:= old.last_level;
+					execute thequery;
+				end if;
+			end if;
+			--raise notice 'sql %', thequery;
+			--return null;
+		end if;
+	ELSIF NEW.VALIDASI = 2 THEN 
+		--raise notice 'sql %', '';
+	ELSE
+		new.perubahan_data := pinfoperubahan;
+	END IF;
+
+	RETURN NEW;
+    END;
+$BODY$
+  LANGUAGE plpgsql VOLATILE
+  COST 100;
+ALTER FUNCTION validasi.validasi_diklat_kursus()
+  OWNER TO postgres;

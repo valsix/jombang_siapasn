@@ -1,0 +1,27 @@
+.navbar-default .navbar-nav > .open > a,
+.navbar-default .navbar-nav > .open > a:hover,
+.navbar-default .navbar-nav > .open > a:focus {  
+  color: #FFF;
+  background-color: #009b4c;
+}
+
+.dropdown-menu {
+  background-color: #7e7e7e;
+}
+.dropdown-menu > li > a:hover,
+.dropdown-menu > li > a:focus {
+  color: #262626;
+  text-decoration: none;
+  background-color: #009b4c;
+}
+.dropdown-menu > li{
+	border-bottom:1px solid #646464;
+}
+.nav .open > a,
+.nav .open > a:hover,
+.nav .open > a:focus {
+  background-color: #009b4c;
+  border-color: #337ab7;
+}
+
+

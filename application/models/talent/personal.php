@@ -1,0 +1,618 @@
+<? 
+  /***
+  * Entity-base class untuk mengimplementasikan tabel kategori.
+  * 
+  ***/
+  include_once(APPPATH.'/models/Entity.php');
+  include_once("functions/talent.func.php");
+
+  class Personal extends Entity{ 
+
+	var $query;
+    /**
+    * Class constructor.
+    **/
+    function Personal()
+	{
+      $this->Entity(); 
+    }
+    
+    function selectByParamsPegawai($paramsArray=array(),$limit=-1,$from=-1, $statement='', $order='ORDER BY A.PEGAWAI_ID ASC')
+	{
+		$str = "
+		SELECT A.*, PF.PATH
+		, AMBIL_SATKER_NAMA_DYNAMIC(A.SATUAN_KERJA_ID) SATUAN_KERJA_NAMA
+		, AMBIL_SATKER_INDUK(A.SATUAN_KERJA_ID) SATUAN_KERJA_INDUK
+		FROM
+		(
+		SELECT
+			A.PEGAWAI_ID, A.NIP_LAMA, A.NIP_BARU, AMBIL_FORMAT_NIP_BARU(A.NIP_BARU) NIP_BARU_FORMAT
+			, (CASE WHEN COALESCE(NULLIF(A.GELAR_DEPAN,'') , NULL ) IS NULL THEN '' ELSE A.GELAR_DEPAN || ' ' END) || A.NAMA || (CASE WHEN COALESCE(NULLIF(A.GELAR_BELAKANG,'') , NULL ) IS NULL THEN '' ELSE '' || A.GELAR_BELAKANG END) NAMA_LENGKAP
+			, A.TEMPAT_LAHIR, A.TANGGAL_LAHIR, PS.PEGAWAI_STATUS_NAMA, PS.PEGAWAI_KEDUDUKAN_NAMA, D.NAMA AGAMA_NAMA
+			, PANG_RIW.KODE PANGKAT_RIWAYAT_KODE, PANG_RIW.TMT_PANGKAT PANGKAT_RIWAYAT_TMT
+			, F.PENDIDIKAN_NAMA, F.PENDIDIKAN_JURUSAN_NAMA, F.NAMA PENDIDIKAN_SEKOLAH, TO_CHAR(F.TANGGAL_STTB, 'YYYY') PENDIDIKAN_LULUS
+			, JAB_RIW.JABATAN_NAMA JABATAN_RIWAYAT_NAMA, JAB_RIW.ESELON_NAMA JABATAN_RIWAYAT_ESELON, JAB_RIW.TMT_JABATAN JABATAN_RIWAYAT_TMT
+			, JAB_RIW.ESELON_ID, A.SATUAN_KERJA_ID
+			, CASE
+			WHEN CURRENT_DATE <= G.TANGGAL_AKHIR AND CURRENT_DATE >= G.TANGGAL_MULAI
+			THEN 1
+			WHEN G.PEGAWAI_ID IS NOT NULL THEN 2
+			ELSE 0
+			END STATUS_BERLAKU
+			, A.ALAMAT, P1.PROPINSI_NAMA, P1.KABUPATEN_NAMA, P1.KECAMATAN_NAMA, P1.DESA_NAMA
+		FROM PEGAWAI A
+		LEFT JOIN
+		(
+			SELECT A.PEGAWAI_STATUS_ID, A.PEGAWAI_ID, A.STATUS_PEGAWAI_ID, B.NAMA PEGAWAI_STATUS_NAMA
+			, A.TMT PEGAWAI_KEDUDUKAN_TMT, C.NAMA PEGAWAI_KEDUDUKAN_NAMA
+			FROM PEGAWAI_STATUS A
+			INNER JOIN STATUS_PEGAWAI B ON A.STATUS_PEGAWAI_ID = B.STATUS_PEGAWAI_ID
+			INNER JOIN STATUS_PEGAWAI_KEDUDUKAN C ON A.STATUS_PEGAWAI_KEDUDUKAN_ID = C.STATUS_PEGAWAI_KEDUDUKAN_ID
+		) PS ON A.PEGAWAI_STATUS_ID = PS.PEGAWAI_STATUS_ID
+		LEFT JOIN
+		(
+			SELECT A.PANGKAT_RIWAYAT_ID, B.KODE, A.TMT_PANGKAT, A.PANGKAT_ID
+			FROM PANGKAT_RIWAYAT A
+			LEFT JOIN PANGKAT B ON A.PANGKAT_ID = B.PANGKAT_ID
+		) PANG_RIW ON A.PANGKAT_RIWAYAT_ID = PANG_RIW.PANGKAT_RIWAYAT_ID
+		LEFT JOIN
+		(
+			SELECT A.JABATAN_RIWAYAT_ID, COALESCE(A.ESELON_ID,99) ESELON_ID, B.NAMA ESELON_NAMA, A.TMT_JABATAN, A.NAMA JABATAN_NAMA
+			FROM JABATAN_RIWAYAT A
+			LEFT JOIN ESELON B ON A.ESELON_ID = B.ESELON_ID
+		) JAB_RIW ON A.JABATAN_RIWAYAT_ID = JAB_RIW.JABATAN_RIWAYAT_ID
+		LEFT JOIN SATUAN_KERJA SK ON SK.SATUAN_KERJA_ID = A.SATUAN_KERJA_ID
+		LEFT JOIN (SELECT PEGAWAI_ID, TANGGAL_MULAI, TANGGAL_AKHIR FROM HUKUMAN_TERAKHIR X) G ON A.PEGAWAI_ID = G.PEGAWAI_ID
+		LEFT JOIN AGAMA D ON A.AGAMA_ID = D.AGAMA_ID
+		LEFT JOIN PENDIDIKAN_RIWAYAT_DATA F ON A.PENDIDIKAN_RIWAYAT_ID = F.PENDIDIKAN_RIWAYAT_ID
+		LEFT JOIN 
+		(
+			SELECT A.PEGAWAI_ID
+			, A.PROPINSI_ID, PROP.NAMA PROPINSI_NAMA, A.KABUPATEN_ID, KAB.NAMA KABUPATEN_NAMA, A.KECAMATAN_ID, KEC.NAMA KECAMATAN_NAMA, A.DESA_ID, KEL.NAMA DESA_NAMA
+			FROM PEGAWAI A
+			LEFT JOIN (SELECT PROPINSI_ID, NAMA FROM PROPINSI) PROP ON PROP.PROPINSI_ID = A.PROPINSI_ID
+			LEFT JOIN (SELECT PROPINSI_ID, KABUPATEN_ID, NAMA FROM KABUPATEN) KAB ON KAB.PROPINSI_ID = A.PROPINSI_ID AND KAB.KABUPATEN_ID = A.KABUPATEN_ID
+			LEFT JOIN (SELECT PROPINSI_ID, KABUPATEN_ID, KECAMATAN_ID, NAMA FROM KECAMATAN) KEC ON KEC.PROPINSI_ID = A.PROPINSI_ID AND KEC.KABUPATEN_ID = A.KABUPATEN_ID AND KEC.KECAMATAN_ID = A.KECAMATAN_ID
+			LEFT JOIN (SELECT PROPINSI_ID, KABUPATEN_ID, KECAMATAN_ID, KELURAHAN_ID, NAMA FROM KELURAHAN) KEL ON KEL.PROPINSI_ID = A.PROPINSI_ID AND KEL.KABUPATEN_ID = A.KABUPATEN_ID AND KEL.KECAMATAN_ID = A.KECAMATAN_ID AND KEL.KELURAHAN_ID = A.DESA_ID
+			WHERE 1 = 1
+		) P1 ON P1.PEGAWAI_ID = A.PEGAWAI_ID
+		WHERE 1 = 1
+		"; 
+		
+		foreach ($paramsArray as $key => $val)
+		{
+			$str .= " AND $key = '$val' ";
+		}
+		
+		$str .= $statement." 
+		) A
+		LEFT JOIN (SELECT PEGAWAI_ID, PATH FROM P_PEGAWAI_FILE_DATA('')) PF ON PF.PEGAWAI_ID = A.PEGAWAI_ID
+		WHERE 1=1 ".$order;
+		$this->query = $str;
+		// echo $str;exit;
+		return $this->selectLimit($str,$limit,$from);
+    }
+
+    function selectByParamsSpider($paramsArray=array(),$limit=-1,$from=-1, $tahun, $statement='', $order='ORDER BY PD.ATRIBUT_ID')
+	{
+		$str = "
+		SELECT
+			P.TANGGAL_TES PENILAIAN_TANGGAL, P.JABATAN_TES_ID PENILAIAN_JABATAN, P.SATKER_TES_ID PENILAIAN_UNIT_KERJA
+			, P.JPM JPM, ".$tahun." TAHUN, COALESCE(SKP.PERILAKU_NILAI,0) NILAI_PERILAKU, COALESCE(SKP.PRESTASI_HASIL,0) NILAI_PRESTASI
+			, P.CATATAN_STRENGTH KELEBIHAN, P.CATATAN_WEAKNES KEKURANGAN, P.KESIMPULAN DESKRIPSI
+			, ATR.NAMA ATRIBUT_NAMA, PD.NILAI ATRIBUT_NILAI
+		FROM talent.penilaian_detil PD
+		LEFT JOIN penilaian_skp SKP ON SKP.TAHUN = ".$tahun." AND PD.PEGAWAI_ID = SKP.PEGAWAI_ID
+		INNER JOIN talent.penilaian P ON PD.PENILAIAN_ID = P.PENILAIAN_ID
+		INNER JOIN talent.atribut ATR ON PD.ATRIBUT_ID = ATR.ATRIBUT_ID AND PD.PERMEN_ID = ATR.PERMEN_ID
+		WHERE P.ASPEK_ID = 2
+		";
+		
+		foreach ($paramsArray as $key => $val)
+		{
+			$str .= " AND $key = '$val' ";
+		}
+		
+		$str .= $statement." ".$order;
+		$this->query = $str;
+		// echo $str;exit;
+		return $this->selectLimit($str,$limit,$from);
+    }
+
+    function selectByParamsPangkat($paramsArray=array(),$limit=-1,$from=-1, $statement='', $order='ORDER BY A.TMT_PANGKAT')
+	{
+		$str = "
+		SELECT
+			A.PANGKAT_RIWAYAT_ID, A.PEGAWAI_ID, A.PEJABAT_PENETAP_ID, A.PEJABAT_PENETAP, A.PANGKAT_ID, A.STLUD, A.NO_STLUD, A.TANGGAL_STLUD, A.NO_NOTA
+			, A.TANGGAL_NOTA, A.NO_SK, A.TANGGAL_SK, A.TMT_PANGKAT, A.KREDIT, A.JENIS_RIWAYAT, A.KETERANGAN, A.MASA_KERJA_TAHUN, A.MASA_KERJA_BULAN
+			, A.GAJI_POKOK, A.STATUS, A.LAST_USER, A.LAST_DATE, A.LAST_LEVEL
+			, B.KODE PANGKAT_KODE, B.NAMA PANGKAT_NAMA
+			, CASE A.JENIS_RIWAYAT WHEN 1 THEN 'CPNS' WHEN 2 THEN 'PNS'
+			WHEN 4 THEN 'Reguler'
+			WHEN 5 THEN 'Pilihan Struktural'
+			WHEN 6 THEN 'Pilihan JFT'
+			WHEN 7 THEN 'Pilihan PI/UD'
+			WHEN 10 THEN 'Penambahan Masa Kerja'
+			WHEN 8 THEN 'Hukuman disiplin'
+			WHEN 9 THEN 'Pemulihan hukuman disiplin'
+			ELSE '-' END JENIS_RIWAYAT_NAMA
+			, PP.NAMA PEJABAT_PENETAP_NAMA
+			, CASE A.STATUS WHEN '1' THEN 'Tidak Aktif' ELSE 'Aktif' END STATUS_NAMA
+			, A.LAST_USER, A.LAST_DATE, A.NO_URUT_CETAK
+			, COALESCE(HK.HUKUMAN_ID,HK1.HUKUMAN_ID,0) DATA_HUKUMAN
+		FROM PANGKAT_RIWAYAT A
+		LEFT JOIN PANGKAT B ON A.PANGKAT_ID = B.PANGKAT_ID
+		LEFT JOIN PEJABAT_PENETAP PP ON A.PEJABAT_PENETAP_ID = PP.PEJABAT_PENETAP_ID
+		LEFT JOIN HUKUMAN HK ON A.PANGKAT_RIWAYAT_ID = HK.PANGKAT_RIWAYAT_TURUN_ID
+		LEFT JOIN HUKUMAN HK1 ON A.PANGKAT_RIWAYAT_ID = HK1.PANGKAT_RIWAYAT_KEMBALI_ID
+		WHERE 1 = 1 AND (COALESCE(NULLIF(A.STATUS, ''), NULL) IS NULL OR A.STATUS = '2')
+		"; 
+
+		foreach ($paramsArray as $key => $val)
+		{
+			$str .= " AND $key = '$val' ";
+		}
+		$this->query = $str;
+			
+		$str .= $statement."  ".$order;
+		// echo $str;exit;
+		return $this->selectLimit($str,$limit,$from);
+    }
+
+    function selectByParamsJabatan($paramsArray=array(),$limit=-1,$from=-1, $statement='', $order='ORDER BY A.TMT_JABATAN')
+	{
+		$str = "
+		SELECT
+			A.JABATAN_RIWAYAT_ID, A.PEGAWAI_ID, A.PEJABAT_PENETAP_ID, A.PEJABAT_PENETAP, A.TIPE_PEGAWAI_ID, A.JABATAN_FU_ID
+			, A.JABATAN_FT_ID, A.ESELON_ID, B.NAMA ESELON_NAMA, A.NO_SK, A.TANGGAL_SK, A.TMT_JABATAN, A.NAMA, A.NO_PELANTIKAN, A.TANGGAL_PELANTIKAN, A.TUNJANGAN, A.KREDIT
+			, A.SATKER_ID, AMBIL_SATKER_INDUK(A.SATKER_ID) SATUAN_KERJA_INDUK
+			, 
+			CASE 
+			WHEN A.SATKER_ID IS NULL THEN
+			A.SATKER_NAMA 
+			ELSE AMBIL_SATKER_NAMA_DYNAMIC(A.SATKER_ID) 
+			END SATUAN_KERJA_NAMA_DETILbak
+			, 
+			CASE 
+			WHEN A.SATKER_ID IS NULL THEN
+			A.SATKER_NAMA 
+			ELSE AMBIL_SATKER_NAMA_DETIL(A.SATKER_ID) 
+			END SATUAN_KERJA_NAMA_DETIL
+			, A.JENIS_JABATAN_ID, CASE A.JENIS_JABATAN_ID WHEN '1' THEN 'Jabatan Struktural' WHEN '2' THEN 'Jabatan Fungsional Umum' WHEN '3' THEN 'Jabatan Fungsional Tertentu' END JENIS_JABATAN_NAMA
+			, A.IS_MANUAL, A.BULAN_DIBAYAR, A.TMT_BATAS_USIA_PENSIUN, A.STATUS, A.LAST_USER, A.LAST_DATE, A.LAST_LEVEL
+			, COALESCE(HK.HUKUMAN_ID,0) DATA_HUKUMAN
+			, A.TMT_ESELON, PP.NAMA PEJABAT_PENETAP_NAMA
+		FROM JABATAN_RIWAYAT A
+		LEFT JOIN ESELON B ON A.ESELON_ID = B.ESELON_ID
+		LEFT JOIN HUKUMAN HK ON A.JABATAN_RIWAYAT_ID = HK.JABATAN_RIWAYAT_ID
+		LEFT JOIN PEJABAT_PENETAP PP ON A.PEJABAT_PENETAP_ID = PP.PEJABAT_PENETAP_ID
+		WHERE 1 = 1 AND (COALESCE(NULLIF(A.STATUS, ''), NULL) IS NULL OR A.STATUS = '2')
+		";
+
+		foreach ($paramsArray as $key => $val)
+		{
+			$str .= " AND $key = '$val' ";
+		}
+		$this->query = $str;
+			
+		$str .= $statement."  ".$order;
+		return $this->selectLimit($str,$limit,$from);
+    }
+
+    function selectByParamsTugas($paramsArray=array(),$limit=-1,$from=-1, $statement='', $order='ORDER BY A.TMT_JABATAN ASC')
+	{
+		$str = "
+		SELECT
+		A.JABATAN_TAMBAHAN_ID, A.PEGAWAI_ID, A.PEJABAT_PENETAP_ID, A.PEJABAT_PENETAP, A.NO_SK, A.TANGGAL_SK
+		, A.TMT_JABATAN, A.TMT_JABATAN_AKHIR, A.NO_PELANTIKAN, A.TANGGAL_PELANTIKAN, A.TUNJANGAN, A.BULAN_DIBAYAR
+		, A.NAMA, A.TUGAS_TAMBAHAN_ID, A.IS_MANUAL
+		, CASE WHEN COALESCE(NULLIF(A.SATKER_NAMA, ''), NULL) IS NULL THEN AMBIL_SATKER_NAMA(A.SATKER_ID) ELSE A.SATKER_NAMA END SATKER_NAMA, A.SATKER_ID, A.STATUS_PLT, A.STATUS,
+		A.LAST_USER, A.LAST_DATE, A.LAST_LEVEL
+		, AMBIL_SATKER_INDUK(A.SATKER_ID) SATUAN_KERJA_INDUK
+		, CASE A.STATUS_PLT
+		WHEN 'plt' THEN 'Plt.'
+		WHEN 'plh' THEN 'Plh.'
+		WHEN '21' THEN 'Pendidikan'
+		WHEN '22' THEN 'Kesehatan'
+		WHEN '23' THEN 'Lainnya'
+		ELSE ''
+		END STATUS_PLT_NAMA
+		, PP.NAMA PEJABAT_PENETAP_NAMA
+		FROM JABATAN_TAMBAHAN A
+		LEFT JOIN PEJABAT_PENETAP PP ON A.PEJABAT_PENETAP_ID = PP.PEJABAT_PENETAP_ID
+		WHERE 1 = 1 AND (COALESCE(NULLIF(A.STATUS, ''), NULL) IS NULL OR A.STATUS = '2')
+		"; 
+
+		foreach ($paramsArray as $key => $val)
+		{
+			$str .= " AND $key = '$val' ";
+		}
+		$this->query = $str;
+			
+		$str .= $statement."  ".$order;
+		return $this->selectLimit($str,$limit,$from);
+    }
+
+    function selectByParamsPendidikan($paramsArray=array(),$limit=-1,$from=-1, $statement='', $order='ORDER BY A.TANGGAL_STTB')
+	{
+		$str = "
+		SELECT 	
+			A.PENDIDIKAN_RIWAYAT_ID, A.PEGAWAI_ID, A.PENDIDIKAN_ID, A.PENDIDIKAN_JURUSAN_ID, B.NAMA PENDIDIKAN_JURUSAN_NAMA, A.NAMA, A.TEMPAT, A.KEPALA, 
+			A.NO_STTB, A.TANGGAL_STTB, A.JURUSAN, A.NO_SURAT_IJIN, A.TANGGAL_SURAT_IJIN, A.STATUS_PENDIDIKAN, A.GELAR_TIPE, 
+			A.GELAR_DEPAN, A.GELAR_NAMA, A.LAST_USER, A.LAST_DATE, A.LAST_LEVEL, A.STATUS, C.NAMA PENDIDIKAN_NAMA,
+			CASE A.STATUS WHEN '1' THEN 'Tidak Aktif' ELSE 'Aktif' END STATUS_NAMA
+			, CASE A.STATUS_PENDIDIKAN
+			WHEN '1' THEN 'Pendidikan CPNS'
+			WHEN '2' THEN 'Diakui'
+			WHEN '3' THEN 'Belum Diakui'
+			WHEN '4' THEN 'Riwayat'
+			WHEN '5' THEN 'Ijin belajar'
+			WHEN '6' THEN 'Tugas Belajar'
+			ELSE '-' END STATUS_PENDIDIKAN_NAMA
+			, A.STATUS_TUGAS_IJIN_BELAJAR
+			, CASE A.STATUS_TUGAS_IJIN_BELAJAR WHEN 1 THEN 'Ijin Belajar' WHEN 2 THEN 'Tugas Belajar' END STATUS_TUGAS_IJIN_BELAJAR_NAMA, A.STATUS_VALIDASI_TUGAS_IJIN_BELAJAR
+		FROM PENDIDIKAN_RIWAYAT A
+		LEFT JOIN PENDIDIKAN_JURUSAN B ON A.PENDIDIKAN_JURUSAN_ID = B.PENDIDIKAN_JURUSAN_ID
+		LEFT JOIN PENDIDIKAN C ON A.PENDIDIKAN_ID = C.PENDIDIKAN_ID
+		WHERE 1 = 1 AND (COALESCE(NULLIF(A.STATUS, ''), NULL) IS NULL OR A.STATUS = '2')
+		"; 
+
+		foreach ($paramsArray as $key => $val)
+		{
+			$str .= " AND $key = '$val' ";
+		}
+		$this->query = $str;
+			
+		$str .= $statement."  ".$order;
+		return $this->selectLimit($str,$limit,$from);
+    }
+
+    function selectByParamsStruktural($paramsArray=array(),$limit=-1,$from=-1, $statement='', $order='ORDER BY A.TANGGAL_MULAI ASC')
+	{
+		$str = "
+		SELECT 
+		A.DIKLAT_STRUKTURAL_ID, A.DIKLAT_ID, A.PEGAWAI_ID, A.TEMPAT, A.PENYELENGGARA, A.ANGKATAN, A.TAHUN, A.TANGGAL_MULAI, A.TANGGAL_SELESAI, 
+		A.NO_STTPP, A.TANGGAL_STTPP, A.JUMLAH_JAM, A.LAST_USER, A.LAST_DATE, A.LAST_LEVEL, A.STATUS, B.NAMA
+		FROM DIKLAT_STRUKTURAL A
+		JOIN DIKLAT B ON A.DIKLAT_ID = B.DIKLAT_ID
+		WHERE 1 = 1 AND (COALESCE(NULLIF(A.STATUS, ''), NULL) IS NULL OR A.STATUS = '2')
+		"; 
+
+		foreach ($paramsArray as $key => $val)
+		{
+			$str .= " AND $key = '$val' ";
+		}
+		$this->query = $str;
+			
+		$str .= $statement."  ".$order;
+		return $this->selectLimit($str,$limit,$from);
+    }
+
+    function selectByParamsFungsional($paramsArray=array(),$limit=-1,$from=-1, $statement='', $order='ORDER BY A.TANGGAL_MULAI ASC')
+	{
+		$str = "
+		SELECT 
+		A.DIKLAT_FUNGSIONAL_ID, A.PEGAWAI_ID, A.TEMPAT, A.PENYELENGGARA, A.ANGKATAN, A.TAHUN, A.TANGGAL_MULAI, 
+		A.TANGGAL_SELESAI, A.NO_STTPP, A.TANGGAL_STTPP, A.JUMLAH_JAM, A.NAMA, A.LAST_USER, A.LAST_DATE, A.LAST_LEVEL, A.STATUS
+		FROM DIKLAT_FUNGSIONAL A
+		WHERE 1 = 1 AND (COALESCE(NULLIF(A.STATUS, ''), NULL) IS NULL OR A.STATUS = '2')
+		"; 
+
+		foreach ($paramsArray as $key => $val)
+		{
+			$str .= " AND $key = '$val' ";
+		}
+		
+			
+		$str .= $statement."  ".$order;
+		$this->query = $str;
+		return $this->selectLimit($str,$limit,$from);
+    }
+
+    function selectByParamsTeknis($paramsArray=array(),$limit=-1,$from=-1, $statement='', $order='ORDER BY A.TANGGAL_MULAI ASC')
+	{
+		$str = "
+		SELECT 
+		A.DIKLAT_TEKNIS_ID, A.PEGAWAI_ID, A.TEMPAT, A.PENYELENGGARA, A.ANGKATAN, A.TAHUN, A.TANGGAL_MULAI, A.TANGGAL_SELESAI, A.NO_STTPP, 
+		A.TANGGAL_STTPP, A.JUMLAH_JAM, A.NAMA, A.LAST_USER, A.LAST_DATE, A.LAST_LEVEL, A.STATUS
+		FROM DIKLAT_TEKNIS A
+		WHERE 1 = 1 AND (COALESCE(NULLIF(A.STATUS, ''), NULL) IS NULL OR A.STATUS = '2')
+		"; 
+
+		foreach ($paramsArray as $key => $val)
+		{
+			$str .= " AND $key = '$val' ";
+		}
+		$this->query = $str;
+			
+		$str .= $statement."  ".$order;
+		return $this->selectLimit($str,$limit,$from);
+    }
+
+    function selectByParamsKursus($paramsArray=array(),$limit=-1,$from=-1, $statement='', $order='ORDER BY A.TANGGAL_MULAI ASC')
+	{
+		$str = "
+		SELECT 	
+		A.KURSUS_ID, A.PEGAWAI_ID, A.TEMPAT, A.PENYELENGGARA, A.TANGGAL_SELESAI, A.TANGGAL_MULAI, A.NO_PIAGAM, A.STATUS, 
+		A.TANGGAL_PIAGAM, A.NAMA, A.LAST_USER, A.LAST_DATE, A.LAST_LEVEL
+		FROM KURSUS A
+		WHERE 1 = 1 AND (COALESCE(NULLIF(A.STATUS, ''), NULL) IS NULL OR A.STATUS = '2')
+		"; 
+
+		foreach ($paramsArray as $key => $val)
+		{
+			$str .= " AND $key = '$val' ";
+		}
+		$this->query = $str;
+			
+		$str .= $statement."  ".$order;
+		return $this->selectLimit($str,$limit,$from);
+    }
+
+    function selectByParamsSeminar($paramsArray=array(),$limit=-1,$from=-1, $statement='', $order='ORDER BY A.TANGGAL_MULAI ASC')
+	{
+		$str = "
+		SELECT 	
+		A.SEMINAR_ID, A.PEGAWAI_ID, A.TEMPAT, A.PENYELENGGARA, A.TANGGAL_MULAI, A.TANGGAL_SELESAI, 
+		A.NO_PIAGAM, A.TANGGAL_PIAGAM, A.STATUS,A.NAMA, A.LAST_USER, A.LAST_DATE, A.LAST_LEVEL
+		FROM SEMINAR A
+		WHERE 1 = 1 AND (COALESCE(NULLIF(A.STATUS, ''), NULL) IS NULL OR A.STATUS = '2')
+		"; 
+
+		foreach ($paramsArray as $key => $val)
+		{
+			$str .= " AND $key = '$val' ";
+		}
+		$this->query = $str;
+			
+		$str .= $statement."  ".$order;
+		return $this->selectLimit($str,$limit,$from);
+    }
+
+    function selectByParamsOrangTua($paramsArray=array(),$limit=-1,$from=-1, $statement='', $order='ORDER BY A.ORANG_TUA_ID ASC')
+	{
+		$str = "
+		SELECT
+		A.ORANG_TUA_ID, A.PEGAWAI_ID, A.JENIS_KELAMIN, A.NAMA, A.TEMPAT_LAHIR, A.TANGGAL_LAHIR, A.PEKERJAAN
+		, A.ALAMAT, A.KODEPOS, A.TELEPON
+		, A.LAST_USER, A.LAST_DATE, A.LAST_LEVEL
+		, A.PROPINSI_ID, PROP.NAMA PROPINSI_NAMA, A.KABUPATEN_ID, KAB.NAMA KABUPATEN_NAMA, A.KECAMATAN_ID, KEC.NAMA KECAMATAN_NAMA, A.KELURAHAN_ID DESA_ID, KEL.NAMA DESA_NAMA
+		FROM ORANG_TUA A
+		LEFT JOIN PROPINSI PROP ON PROP.PROPINSI_ID = A.PROPINSI_ID
+		LEFT JOIN KABUPATEN KAB ON KAB.KABUPATEN_ID = A.KABUPATEN_ID
+		LEFT JOIN KECAMATAN KEC ON KEC.KECAMATAN_ID = A.KECAMATAN_ID
+		LEFT JOIN KELURAHAN KEL ON KEL.KECAMATAN_ID = A.KECAMATAN_ID AND KEL.KELURAHAN_ID = A.KELURAHAN_ID
+		WHERE 1 = 1
+		"; 
+
+		foreach ($paramsArray as $key => $val)
+		{
+			$str .= " AND $key = '$val' ";
+		}
+		$this->query = $str;
+			
+		$str .= $statement."  ".$order;
+		// echo $str;exit;
+		return $this->selectLimit($str,$limit,$from);
+    }
+
+    function selectByParamsMertua($paramsArray=array(),$limit=-1,$from=-1, $statement='', $order='ORDER BY A.MERTUA_ID ASC')
+	{
+		$str = "
+		SELECT A.MERTUA_ID, A.PEGAWAI_ID, A.JENIS_KELAMIN, A.NAMA, A.TEMPAT_LAHIR, A.TANGGAL_LAHIR, A.PEKERJAAN, A.ALAMAT, A.KODEPOS, A.TELEPON
+		, A.LAST_DATE, A.LAST_LEVEL
+		, A.PROPINSI_ID, PROP.NAMA PROPINSI_NAMA, A.KABUPATEN_ID, KAB.NAMA KABUPATEN_NAMA, A.KECAMATAN_ID, KEC.NAMA KECAMATAN_NAMA, A.KELURAHAN_ID DESA_ID, KEL.NAMA DESA_NAMA
+		FROM MERTUA A
+		LEFT JOIN PROPINSI PROP ON PROP.PROPINSI_ID = A.PROPINSI_ID
+		LEFT JOIN KABUPATEN KAB ON KAB.KABUPATEN_ID = A.KABUPATEN_ID
+		LEFT JOIN KECAMATAN KEC ON KEC.KECAMATAN_ID = A.KECAMATAN_ID
+		LEFT JOIN KELURAHAN KEL ON KEL.KECAMATAN_ID = A.KECAMATAN_ID AND KEL.KELURAHAN_ID = A.KELURAHAN_ID
+		WHERE 1 = 1 
+		"; 
+
+		foreach ($paramsArray as $key => $val)
+		{
+			$str .= " AND $key = '$val' ";
+		}
+		$this->query = $str;
+			
+		$str .= $statement."  ".$order;
+		// echo $str;exit();
+		return $this->selectLimit($str,$limit,$from);
+    }
+
+    function selectByParamsSuamiIstri($paramsArray=array(),$limit=-1,$from=-1, $statement='', $order='ORDER BY A.TANGGAL_KAWIN ASC')
+	{
+		$str = "
+		SELECT 	
+		A.SUAMI_ISTRI_ID, A.PEGAWAI_ID, A.PENDIDIKAN_ID, A.NAMA, A.TEMPAT_LAHIR, A.TANGGAL_LAHIR, A.TANGGAL_KAWIN, A.KARTU, 
+		A.STATUS_PNS, A.NIP_PNS, A.PEKERJAAN, A.STATUS_TUNJANGAN, A.STATUS_BAYAR, A.BULAN_BAYAR, A.STATUS, A.STATUS_S_I, A.LAST_USER, A.LAST_DATE, A.LAST_LEVEL,
+		CASE A.STATUS_S_I WHEN '1' THEN 'Nikah' WHEN '2' THEN 'Cerai Hidup' WHEN '3' THEN 'Cerai Mati' ELSE 'Belum di set' END STATUS_S_I_NAMA
+		, A.SURAT_NIKAH, A.NIK, A.CERAI_SURAT, A.CERAI_TANGGAL, A.CERAI_TMT, A.KEMATIAN_SURAT, A.KEMATIAN_TANGGAL, A.KEMATIAN_TMT
+		, B.NAMA PENDIDIKAN_NAMA, CASE A.STATUS_TUNJANGAN WHEN 1 THEN 'Ya' ELSE '-' END STATUS_TUNJANGAN_NAMA
+		FROM SUAMI_ISTRI A
+		LEFT JOIN PENDIDIKAN B ON B.PENDIDIKAN_ID = A.PENDIDIKAN_ID
+		WHERE 1 = 1 AND (COALESCE(NULLIF(A.STATUS, ''), NULL) IS NULL OR A.STATUS = '2')
+		"; 
+
+		foreach ($paramsArray as $key => $val)
+		{
+			$str .= " AND $key = '$val' ";
+		}
+		$this->query = $str;
+		$str .= $statement."  ".$order;
+		// echo $str;exit;
+		return $this->selectLimit($str,$limit,$from);
+    }
+
+    function selectByParamsAnak($paramsArray=array(),$limit=-1,$from=-1, $statement='', $order='ORDER BY A.TANGGAL_LAHIR ASC')
+	{
+		$str = "
+		SELECT 
+		A.ANAK_ID, A.PEGAWAI_ID, A.SUAMI_ISTRI_ID, B.NAMA SUAMI_ISTRI_NAMA, A.PENDIDIKAN_ID, A.NAMA, A.NOMOR_INDUK, A.TEMPAT_LAHIR, A.TANGGAL_LAHIR, A.JENIS_KELAMIN, 
+		A.STATUS_KELUARGA, A.STATUS_TUNJANGAN, A.PEKERJAAN, A.AWAL_BAYAR, A.AKHIR_BAYAR, A.STATUS_NIKAH, A.STATUS_BEKERJA, A.STATUS, A.STATUS_AKTIF, A.LAST_USER, A.LAST_DATE, A.LAST_LEVEL,
+		CASE A.STATUS_KELUARGA WHEN '1' THEN 'Kandung' WHEN '2' THEN 'Tiri' ELSE 'Angkat' END STATUS_KELUARGA_NAMA,
+		CASE A.STATUS_AKTIF WHEN '1' THEN 'Aktif' WHEN '2' THEN 'Meninggal' ELSE '' END STATUS_NAMA
+		, A.TANGGAL_MENINGGAL, PA.ANAK_ID PENSIUN_ANAK_ID,C.NAMA PENDIDIKAN_NAMA
+		, CASE A.STATUS_TUNJANGAN WHEN 1 THEN 'Ya' ELSE '-' END STATUS_TUNJANGAN_NAMA
+		FROM ANAK A
+		LEFT JOIN SUAMI_ISTRI B ON A.SUAMI_ISTRI_ID = B.SUAMI_ISTRI_ID
+		LEFT JOIN
+		(
+		SELECT PEGAWAI_ID, ANAK_ID
+		FROM PERSURATAN.SURAT_MASUK_PENSIUN_ANAK
+		GROUP BY PEGAWAI_ID, ANAK_ID
+		) PA ON A.PEGAWAI_ID = PA.PEGAWAI_ID AND A.ANAK_ID = PA.ANAK_ID
+		LEFT JOIN PENDIDIKAN C ON C.PENDIDIKAN_ID = A.PENDIDIKAN_ID
+		WHERE 1 = 1
+		"; 
+
+		foreach ($paramsArray as $key => $val)
+		{
+			$str .= " AND $key = '$val' ";
+		}
+		$this->query = $str;
+			
+		$str .= $statement."  ".$order;
+		// echo $str;exit;
+		return $this->selectLimit($str,$limit,$from);
+    }
+
+    function selectByParamsPenghargaan($paramsArray=array(),$limit=-1,$from=-1, $statement='', $order='ORDER BY A.TANGGAL_SK ASC')
+	{
+		$str = "
+		SELECT 	
+		A.PENGHARGAAN_ID, A.PEGAWAI_ID, A.PEJABAT_PENETAP_ID, A.PEJABAT_PENETAP, A.NAMA,
+		CASE 'A.NAMA' WHEN '1' THEN 'Satya Lencana Karya Satya X (Perunggu)'
+		WHEN '2' THEN 'Satya Lencana Karya Satya XX (Perak)' ELSE 'Satya Lencana Karya Satya XXX (Emas)' END NAMA_NAMA,
+		A.NO_SK, A.TANGGAL_SK, A.TAHUN, A.LAST_USER, A.LAST_DATE, A.LAST_LEVEL, A.STATUS, B.NAMA PEJABAT_PENETAP_NAMA
+		FROM PENGHARGAAN A
+		LEFT JOIN PEJABAT_PENETAP B ON A.PEJABAT_PENETAP_ID = B.PEJABAT_PENETAP_ID
+		WHERE 1 = 1 AND (COALESCE(NULLIF(A.STATUS, ''), NULL) IS NULL OR A.STATUS = '2')
+		"; 
+
+		foreach ($paramsArray as $key => $val)
+		{
+			$str .= " AND $key = '$val' ";
+		}
+		$this->query = $str;
+			
+		$str .= $statement."  ".$order;
+		return $this->selectLimit($str,$limit,$from);
+    }
+
+    function selectByParamsPenilaianSkp($paramsArray=array(),$limit=-1,$from=-1, $statement='', $order='ORDER BY A.TAHUN ASC')
+	{
+		$str = "
+		SELECT 	
+		A.PENILAIAN_SKP_ID, A.STATUS, A.PEGAWAI_ID, A.TAHUN, A.PEGAWAI_PEJABAT_PENILAI_ID, A.PEGAWAI_ATASAN_PEJABAT_ID
+		, A.SKP_NILAI, A.SKP_HASIL
+		, A.ORIENTASI_NILAI, A.INTEGRITAS_NILAI, A.KOMITMEN_NILAI, A.DISIPLIN_NILAI, A.KERJASAMA_NILAI, A.KEPEMIMPINAN_NILAI
+		, A.PERILAKU_NILAI, A.PERILAKU_HASIL, A.PRESTASI_HASIL, A.JUMLAH_NILAI, A.RATA_NILAI, A.KEBERATAN
+		, A.KEBERATAN_TANGGAL, A.TANGGAPAN, A.TANGGAPAN_TANGGAL
+		, A.KEPUTUSAN, A.KEPUTUSAN_TANGGAL, A.REKOMENDASI
+		, A.PEGAWAI_PEJABAT_PENILAI_NIP, A.PEGAWAI_PEJABAT_PENILAI_NAMA, A.PEGAWAI_ATASAN_PEJABAT_NIP
+		, A.PEGAWAI_ATASAN_PEJABAT_NAMA, A.LAST_USER, A.LAST_DATE, A.LAST_LEVEL
+		FROM PENILAIAN_SKP A 
+		WHERE 1=1 AND (COALESCE(NULLIF(A.STATUS, ''), NULL) IS NULL OR A.STATUS = '2')
+		"; 
+
+		foreach ($paramsArray as $key => $val)
+		{
+			$str .= " AND $key = '$val' ";
+		}
+		$this->query = $str;
+			
+		$str .= $statement."  ".$order;
+		return $this->selectLimit($str,$limit,$from);
+    }
+
+    function selectByParamsHukuman($paramsArray=array(),$limit=-1,$from=-1, $statement='', $order='ORDER BY A.TANGGAL_SK ASC')
+	{
+		$str = "
+		SELECT 	
+			A.HUKUMAN_ID, A.PEGAWAI_ID, A.PEJABAT_PENETAP_ID, A.PEJABAT_PENETAP, A.PERATURAN_ID
+			, A.TINGKAT_HUKUMAN_ID, B.NAMA TINGKAT_HUKUMAN_NAMA
+			, A.JENIS_HUKUMAN_ID, C.NAMA JENIS_HUKUMAN_NAMA
+			, A.NO_SK, A.TANGGAL_SK, A.TMT_SK, A.KETERANGAN, A.BERLAKU, A.TANGGAL_MULAI, A.TANGGAL_AKHIR
+			, A.LAST_USER, A.LAST_DATE, A.LAST_LEVEL, A.STATUS
+			, B.NAMA TINGKAT_HUKUMAN_NAMA, C.NAMA JENIS_HUKUMAN_NAMA, D.NAMA PEJABAT_PENETAP_NAMA
+			, CASE A.BERLAKU WHEN '1' THEN 'Berlaku' ELSE 'Tidak Berlaku' END BERLAKU_NAMABAK,
+			CASE WHEN CURRENT_DATE <= COALESCE(A.TANGGAL_AKHIR,CURRENT_DATE) AND CURRENT_DATE >= A.TANGGAL_MULAI THEN 'Berlaku' ELSE 'Tidak Berlaku' END BERLAKU_NAMA
+			, A.TANGGAL_PEMULIHAN, A.TMT_BERIKUT_PANGKAT, A.TMT_BERIKUT_GAJI
+			, CASE WHEN CURRENT_DATE <= COALESCE(A.TANGGAL_AKHIR,CURRENT_DATE) AND CURRENT_DATE >= A.TANGGAL_MULAI THEN 1 ELSE 0 END STATUS_BERLAKU
+			, CASE WHEN CURRENT_DATE <= COALESCE(A.TANGGAL_AKHIR,CURRENT_DATE) AND CURRENT_DATE >= A.TANGGAL_MULAI THEN 'Ya' ELSE 'Tidak' END STATUS_BERLAKU_INFO
+			, A.PANGKAT_RIWAYAT_TERAKHIR_ID, A.GAJI_RIWAYAT_TERAKHIR_ID
+			, A.PANGKAT_RIWAYAT_TURUN_ID, A.GAJI_RIWAYAT_TURUN_ID, A.PANGKAT_RIWAYAT_KEMBALI_ID, A.GAJI_RIWAYAT_KEMBALI_ID, A.JABATAN_RIWAYAT_ID, A.PEGAWAI_STATUS_ID
+		FROM HUKUMAN A
+		LEFT JOIN TINGKAT_HUKUMAN B ON B.TINGKAT_HUKUMAN_ID = A.TINGKAT_HUKUMAN_ID
+		LEFT JOIN JENIS_HUKUMAN C ON C.JENIS_HUKUMAN_ID = A.JENIS_HUKUMAN_ID
+		LEFT JOIN PEJABAT_PENETAP D ON D.PEJABAT_PENETAP_ID = A.PEJABAT_PENETAP_ID
+		WHERE 1 = 1 AND (COALESCE(NULLIF(A.STATUS, ''), NULL) IS NULL OR A.STATUS = '2')
+		"; 
+
+		foreach ($paramsArray as $key => $val)
+		{
+			$str .= " AND $key = '$val' ";
+		}
+		$this->query = $str;
+			
+		$str .= $statement."  ".$order;
+		return $this->selectLimit($str,$limit,$from);
+    }
+
+    function selectByParamsCuti($paramsArray=array(),$limit=-1,$from=-1, $statement='', $order='ORDER BY A.TANGGAL_SURAT')
+	{
+		$str = "
+		SELECT 
+		A.CUTI_ID, A.PEGAWAI_ID, A.JENIS_CUTI, A.NO_SURAT, A.TANGGAL_PERMOHONAN, A.TANGGAL_SURAT, A.LAMA, A.TANGGAL_MULAI, A.TANGGAL_SELESAI, 
+		A.KETERANGAN, A.CUTI_KETERANGAN, A.STATUS, A.LAST_USER, A.LAST_DATE, A.LAST_LEVEL
+		, CASE A.JENIS_CUTI 
+		WHEN 1 THEN 'Cuti Tahunan'
+		WHEN 2 THEN 'Cuti Besar'
+		WHEN 3 THEN 'Cuti Sakit'
+		WHEN 4 THEN 'Cuti Bersalin'
+		WHEN 5 THEN 'Cuti Alasan Penting'
+		WHEN 6 THEN 'Cuti Bersama'
+		WHEN 7 THEN 'CLTN'
+		ELSE '-' END JENIS_CUTI_NAMA
+		, TO_CHAR(A.TANGGAL_SURAT, 'YYYY') TAHUN
+		FROM CUTI A
+		WHERE 1 = 1 AND (COALESCE(NULLIF(A.STATUS, ''), NULL) IS NULL OR A.STATUS = '2')
+		"; 
+
+		foreach ($paramsArray as $key => $val)
+		{
+			$str .= " AND $key = '$val' ";
+		}
+		$this->query = $str;
+			
+		$str .= $statement."  ".$order;
+		return $this->selectLimit($str,$limit,$from);
+    }
+
+    function selectByParamsBahasa($paramsArray=array(),$limit=-1,$from=-1, $statement='', $order='ORDER BY A.JENIS ASC')
+	{
+		$str = "
+		SELECT A.BAHASA_ID, A.PEGAWAI_ID, A.JENIS,
+		CASE A.JENIS WHEN '1' THEN 'Asing' ELSE 'Daerah' END JENIS_NAMA,
+		A.NAMA, A.KEMAMPUAN,
+		CASE A.KEMAMPUAN WHEN '1' THEN 'Aktif' ELSE 'Pasif' END KEMAMPUAN_NAMA,
+		A.STATUS, A.LAST_USER, A.LAST_DATE, A.LAST_LEVEL
+		FROM BAHASA A
+		WHERE 1 = 1 AND (COALESCE(NULLIF(A.STATUS, ''), NULL) IS NULL OR A.STATUS = '2')
+		"; 
+
+		foreach ($paramsArray as $key => $val)
+		{
+			$str .= " AND $key = '$val' ";
+		}
+		$this->query = $str;
+			
+		$str .= $statement."  ".$order;
+		// echo $str;exit;
+		return $this->selectLimit($str,$limit,$from);
+    }
+	
+  } 
+?>

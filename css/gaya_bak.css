@@ -1,0 +1,2857 @@
+@import url("fonts.css");
+
+body{
+	
+}
+
+/****/
+.header-utama{
+	background:cyan;
+	border:100px solid red;
+}
+
+/****/
+.area-konten{
+	background:#f9f9f9; 
+	*border:1px solid red;
+	padding-left:60px;
+	padding-right:60px;
+	
+	height:100% !important;
+	
+	
+}
+.area-konten-sub{
+	padding-left:0px !important;
+	padding-right:0px !important;
+}
+
+/****/
+.konten{
+	font-size:16px;
+	padding-right:40px;
+	padding-bottom:30px;
+}
+/*.konten-home{
+	background:#f9f9f9; 
+	*border:3px solid green !important;
+	*border:1px solid green !important;
+	
+	*width:100%;
+	*height:500px;
+	
+	*width:calc(100% - 10px) !important;
+	width:calc(100% - 0px) !important;
+	height:calc(100vh - 0px);
+	
+	*margin-left:0px;
+	*margin-right:0px;
+	
+	padding-left:60px;
+	padding-right:60px;
+	
+	*padding-left:75px; 
+	*padding-right:80px; 
+	*overflow:auto; 
+	*margin-left:-15px; 
+	*margin-right:-15px; 
+	*margin-top:80px;
+	
+	*padding-left:60px;
+	*padding-right:55px;
+	
+	margin-bottom:0px;
+	
+}*/
+.konten-home{
+	background:#f9f9f9; 
+	width:calc(100% - 0px) !important;
+	*height:calc(100vh - 60px);
+	height:calc(100vh - 0px);
+	
+	*padding-left:60px;
+	*padding-right:60px;
+	
+	padding-left:0px;
+	padding-right:0px;
+	
+	margin-bottom:0px;
+	
+}
+.konten-frame{
+	border:0px solid red;
+	font-size:16px;
+	padding-left:50px;
+	
+	width:100% !important;
+	height:calc(100vh - 140px) !important;
+	overflow:auto;
+}
+.konten-frame.mCustomScrollbar .mCSB_draggerContainer{
+	*border:2px solid	 red;
+	*background:red;
+	margin-right:-60px !important;
+	left:60px;
+	*width:16px;
+}
+.konten-frame2{
+	font-size:16px;
+	
+	width:100% !important;
+	*height:calc(100vh - 140px) !important;
+	height:calc(100vh - 0px) !important;
+	overflow:auto;
+}
+.konten-page{
+	font-size:16px;
+}
+#content-1.konten-frame2.mCustomScrollbar .mCSB_draggerContainer{
+	*border:2px solid red;
+	*background:cyan;
+	margin-right:-60px !important;
+	left:60px;
+	*width:16px;
+}
+
+/****/
+.konten-halaman{
+	margin-top:80px;
+}
+.konten .prioritas-1,
+.konten-frame-inner .prioritas-1{
+	border-top:2px solid #FFF/*29517e*//*fbe049*/;
+	border-bottom:2px solid #FFF/*29517e*//*fbe049*/;
+	text-align:center;
+	
+	padding-top:10px;
+	padding-bottom:10px;
+	
+	margin-bottom:10px;
+	
+	background:rgba(255,255,255,0.3);
+}
+.konten span.prioritas-nomor,
+.konten-frame-inner span.prioritas-nomor{
+	background:#29517e;
+	color:#FFF;
+}
+
+/****/
+/*.konten-home:before{
+	content:"haiii";
+	left:-30px;
+	bottom:-260px !important;
+	position:absolute;
+	
+	height:60px;
+	width:100px;
+	background:red;
+}
+*/
+/****/
+.judul-aplikasi{
+	padding-top:17px;
+	*border:1px solid cyan;
+}
+.judul-aplikasi a{
+	font-family: 'FuturaBookC';
+	
+	color:#333333 !important;
+	
+	*line-height:20px;
+	
+	
+	text-align:left;
+	*background:grey;
+	padding-left:0px !important;
+	padding-right:0px !important;
+}
+.judul-aplikasi a .logo{
+	float:left;
+	width:100px;
+	height:70px;
+	*background:cyan;
+	padding-left:20px;
+	padding-right:10px;
+	
+	margin-top:-8px;
+}
+.judul-aplikasi a .logo img{
+	width:60px;
+	height:60px;
+	
+	-webkit-border-radius: 50%;
+	-moz-border-radius: 50%;
+	border-radius: 50%;
+}
+.judul-aplikasi a .keterangan{
+	float:left;
+	width:calc(100% - 100px);
+	*background:red;
+	padding-left:10px;
+}
+.judul-aplikasi a .nama{
+	*background:cyan;
+	font-size:280%;
+	font-weight:normal;
+	line-height:normal !important;
+}
+.judul-aplikasi a .perusahaan{
+	*background:red;
+	*font-size:140%;
+	font-size:18px;
+	font-weight:normal;
+	line-height:normal !important;
+	letter-spacing:4px;
+	*color:#919191;
+	color:#454545;
+}
+/*.judul-aplikasi a span{
+	font-family: 'FuturaBookC';
+	font-size:16px;
+	font-weight:normal;
+	letter-spacing:4px;
+	
+	color:#919191;
+	*line-height:10px !important;
+	display:inline-block;
+	*background:red;
+	margin-top:-100px !important;
+}*/
+.judul-halaman{
+	font-family: 'BaskervilleItalic';
+	*font-size:240%;
+	font-size:24px;
+	background:url(../images/hr-item-prosedur.jpg) bottom left no-repeat;
+	color:#999999;
+	
+	margin-top:10px;
+	margin-bottom:18px;
+	
+	padding-top:6px;
+	padding-bottom:6px;
+}
+.judul-halaman.halaman{
+	margin-top:113px;
+	margin-right:20px;
+	text-align:right;
+	background:url(../images/hr-item-prosedur.jpg) bottom right no-repeat;
+}
+.judul-halaman.tengah{
+	text-align:center !important;
+	color:#333;
+	background-position:bottom center !important;
+	background-repeat:no-repeat;
+}
+.judul-halaman-sub{
+	color:#fbe049;
+	*background:rgba(0,0,0,0.4) url(../images/hr-putih.jpg) bottom right no-repeat;
+	background:rgba(0,0,0,0.4) url(../images/hr-item-prosedur.jpg) bottom right no-repeat;
+	*border-bottom:1px solid rgba(0,0,0,0.2);
+	margin-bottom:10px;
+	
+	padding:10px;
+}
+
+.judul-pg{
+	font-family: 'BaskervilleItalic';
+	*font-size:240%;
+	font-size:30px;
+	background:url(../images/hr-putih.jpg) bottom left no-repeat;
+	color:#fbe049;
+	
+	*margin-top:10px;
+	*margin-bottom:18px;
+	
+	margin-left:30px;
+	padding-top:8px;
+	padding-bottom:8px;
+	
+	*background:red;
+}
+.judul-keterangan{
+	float:right;
+	font-family: 'FuturaBookC';
+	font-size:16px;
+	
+	*border:1px solid red;
+	*width:300px;
+}
+.judul-keterangan span{
+	*display:inline-block;
+	*vertical-align:middle;
+}
+
+
+/****/
+.area-judul-kanan{
+	background:#FFF;
+}
+
+/****/
+.area-menu-atas{
+	*font-size:130% !important;
+	border-left:none !important;
+	
+	width:50% !important;
+	background:#fbe049;
+}
+.area-menu-atas .navbar-default{
+	border:none !important;
+	*background:red !important;
+	height:80px;
+	background-color:transparent;
+}
+.area-menu-atas .navbar-default .collapse.navbar-collapse{
+	*background:cyan !important;
+	height:80px;
+}
+.area-menu-atas .navbar-default .collapse.navbar-collapse ul.nav.navbar-nav{
+	*border:1px solid blue;
+	height:80px;
+	line-height:80px !important;
+	*padding-top:14px !important;
+}
+.area-menu-atas .navbar-default .collapse.navbar-collapse ul.nav.navbar-nav li{
+	*border:1px solid green;
+	line-height:80px !important;
+}
+.area-menu-atas ul.dropdown-menu{
+	*border:2px solid red;
+	position:absolute;
+	*right:100px !important;
+}
+.area-menu-atas ul.dropdown-menu li{
+	line-height:normal !important;
+	height:auto !important;
+}
+.area-menu-atas ul.dropdown-menu li a{
+	font-size:120%;
+	line-height:normal !important;
+	border-bottom:1px solid #f5f5f5;
+	
+	padding-top:12px;
+	padding-bottom:12px;
+}
+.area-menu-atas ul.dropdown-menu li a:hover{
+	text-decoration:none;
+}
+
+/****/
+.area-menu-atas .navbar-default .collapse.navbar-collapse ul.nav.navbar-nav{
+	*border:1px solid cyan;
+	float:right;
+	*margin-right:45px;
+	margin-right:60px;
+	
+	height:80px;
+	*border:1px solid red;
+	padding-bottom:0px !important;
+	padding-top:0px !important;
+}
+.area-menu-atas .navbar-default .collapse.navbar-collapse ul.nav.navbar-nav li.dropdown,
+.area-menu-atas .navbar-default .collapse.navbar-collapse ul.nav.navbar-nav li{
+	*background:cyan;
+	
+	line-height:80px;
+	height:80px;
+}
+.area-menu-atas .navbar-default .collapse.navbar-collapse ul.nav.navbar-nav li.dropdown a.dropdown-toggle,
+.area-menu-atas .navbar-default .collapse.navbar-collapse ul.nav.navbar-nav li a.menu-utama{
+	*border:1px solid yellow;
+	*font-size:160%;
+	*font-size:17px;
+	font-size:18px;
+	text-transform:uppercase;
+	*font-weight:bold;
+	
+	padding-left:0px !important;
+	padding-right:0px !important;
+	*margin-right:25px;
+	*margin-left:25px;
+	margin-left:1px;
+	
+	color:#333;
+	
+	border-top:4px solid #fbe049;
+	*border-top:4px solid rgba(255,255,255,0.5);
+	*border-top:4px solid #fbe049/*29517e*/;
+	*background:rgba(255,255,255,0.3);
+	*border-top:4px solid rgba(0,0,0,0.1);
+	
+	*display:block !important;
+	
+	*-webkit-transition: width 5s; /* Safari */
+    *transition: width 5s;
+}
+.area-menu-atas .navbar-default .collapse.navbar-collapse ul.nav.navbar-nav li.dropdown a.dropdown-toggle div.ket,
+.area-menu-atas .navbar-default .collapse.navbar-collapse ul.nav.navbar-nav li a.menu-utama div.ket{
+	*border:1px solid red;
+	*display:inline-block;
+	*width:80%;
+	font-size:13px;
+	text-transform:none;
+	*color:#999;
+	color:rgba(0,0,0,0.5);
+	
+	*display:none;
+	
+	padding-left:15px;
+	padding-right:15px;
+}
+.area-menu-atas .navbar-default .collapse.navbar-collapse ul.nav.navbar-nav li.dropdown a.dropdown-toggle b.caret{
+	color:#FFF/*fbe049*/;
+	
+	position:absolute;
+	left:calc(50% - 4px);
+	bottom:10px;
+}
+.area-menu-atas .navbar-default .collapse.navbar-collapse ul.nav.navbar-nav li.dropdown a.dropdown-toggle:hover,
+.area-menu-atas .navbar-default .collapse.navbar-collapse ul.nav.navbar-nav li a.menu-utama:hover{
+	border-top:4px solid #FFF;
+	background:rgba(255,255,255,0.3);
+}
+.area-menu-atas .navbar-default .collapse.navbar-collapse ul.nav.navbar-nav li.dropdown a.dropdown-toggle.current,
+.area-menu-atas .navbar-default .collapse.navbar-collapse ul.nav.navbar-nav li a.menu-utama.current{
+	border-top:4px solid #FFF;
+}
+
+/****/
+.area-prosedur{
+	margin-top:80px;
+	margin-left:40px;
+	*border-top:1px solid #d3d3d3;
+	border-bottom:1px solid #d3d3d3;
+	
+	display:inline-block;
+	width:calc(100% - 40px);
+	padding-bottom:30px;
+}
+.area-prosedur .nama-item{
+	text-transform:uppercase;
+	*font-size:160%;
+	font-size:15px;
+	line-height:normal !important;
+	text-align:center;
+	
+	background:url(../images/hr-item-prosedur.jpg) bottom center no-repeat;
+	padding:0px 0px 9px;
+	margin-top:25px;
+}
+
+/****/
+.area-berita-home{
+	*padding-top:18px;
+	border-bottom:1px solid #d3d3d3;
+	*background:#fbe049;
+	
+	margin-left:40px;
+	margin-bottom:40px;
+}
+.area-berita-home .item,
+.area-berita .item{
+	display:inline-block;
+	*border:1px solid red;
+	*padding-left:10px;
+	*padding-top:18px;
+	
+	
+}
+.area-berita-home .item .tanggal,
+.area-berita .item .tanggal{
+	width:80px;
+	height:40px;
+	line-height:40px;
+	float:left;
+	background:#29517e;
+	
+	font-family: 'BaskervilleItalic';
+	font-size:16px;
+	color:#FFF;
+	text-align:center;
+}
+.area-berita-home .item .keterangan,
+.area-berita .item .keterangan{
+	width:calc(100% - 80px);
+	float:left;
+}
+.area-berita-home .item .keterangan .judul,
+.area-berita .item .keterangan .judul{
+	font-size:16px;
+	text-transform:uppercase;
+	padding:9px 10px 8px;
+	background:#fbe049;
+}
+.area-berita-home .item .keterangan .judul a,
+.area-berita .item .keterangan .judul a{
+	color:#333;
+	
+}
+.area-berita-home .item .keterangan .judul a:hover,
+.area-berita .item .keterangan .judul a:hover{
+	color:#333;
+	text-decoration:none;
+	
+}
+.area-berita-home .item .keterangan .isi,
+.area-berita .item .keterangan .isi{
+	font-size:16px;
+	*padding:18px 10px 0;
+	padding:10px 0;
+}
+
+/****/
+.area-visi-home{
+	background:#29517e url(../images/bg-visi.png) center right no-repeat;
+	color:#FFF;
+	float:left;
+	width:100%;
+	padding:30px 50px;
+}
+.area-visi-home .judul{
+	width:120px;
+	
+	float:left;
+	background:url(../images/hr-item-prosedur.jpg) bottom left no-repeat;
+	color:#a4cdfb;
+	font-family: 'BaskervilleItalic';
+	font-size:24px;
+}
+.area-visi-home .isi{
+	width:calc(100% - 120px);
+	
+	float:left;
+	font-family: 'BaskervilleItalic';
+	font-size:24px;
+}
+
+/****/
+.area-misi-home{
+	background:#f2f2f2 url(../images/bg-misi.png) center right no-repeat;
+	color:#333;
+	float:left;
+	width:100%;
+	padding:30px 50px;
+}
+.area-misi-home .judul{
+	width:120px;
+	
+	float:left;
+	background:url(../images/hr-item-prosedur.jpg) bottom left no-repeat;
+	color:#999999;
+	font-family: 'BaskervilleItalic';
+	font-size:24px;
+}
+.area-misi-home .isi{
+	width:calc(100% - 120px);
+	
+	float:left;
+	font-family: 'BaskervilleItalic';
+	font-size:24px;
+}
+
+/****/
+.area-kontak-home{
+	background:#dcdcdc url(../images/bg-gedung.png) top left  no-repeat;
+	float:left;
+	width:100%;
+	*padding-top:18px;
+	*padding-bottom:18px;
+	
+	padding-top:30px;
+	*padding-bottom:30px;
+}
+.area-kontak-home .item:nth-child(1){
+	float:left;
+	width:calc(50% - 80px);
+	padding:0 15px 0 30px;
+	*background:cyan;
+	font-size:160%;
+}
+.area-kontak-home .item:nth-child(2){
+	float:left;
+	width:calc(50% - 100px);
+	padding:0 15px;
+	*background:yellow;
+	font-size:160%;
+}
+.area-kontak-home .item:nth-child(2) .telp{
+	border-bottom:1px solid #cecece;
+	padding-bottom:10px;
+}
+.area-kontak-home .item:nth-child(2) .email{
+	padding-top:10px;
+}
+.area-kontak-home .item:last-child{
+	float:left;
+	width:180px;	
+	*background:grey;
+	padding:0 30px 0 15px;
+}
+
+/****/
+.area-ringkasan-performance{
+	margin-left:40px;
+	
+}
+.area-ringkasan-performance .item{
+	font-size:160%;
+	margin-top:18px;
+	
+	-webkit-border-radius: 4px;
+	-moz-border-radius: 4px;
+	border-radius: 4px;
+
+  -moz-box-shadow:    1px 1px 3px 1px rgba(0,0,0,0.3);
+  -webkit-box-shadow: 1px 1px 3px 1px rgba(0,0,0,0.3);
+  box-shadow:         1px 1px 3px 1px rgba(0,0,0,0.3);
+}
+.area-ringkasan-performance .item .judul{
+	color:#333;
+	text-align:center;
+	padding:18px 30px 15px;
+	
+	text-transform:uppercase;
+}
+.area-ringkasan-performance .item .nilai{
+	background:#29517e;
+	color:#FFF;
+	text-align:center;
+	padding:15px 30px 18px;
+	
+	-webkit-border-bottom-right-radius: 4px;
+	-webkit-border-bottom-left-radius: 4px;
+	-moz-border-radius-bottomright: 4px;
+	-moz-border-radius-bottomleft: 4px;
+	border-bottom-right-radius: 4px;
+	border-bottom-left-radius: 4px;
+}
+
+/****/
+.area-galeri-home{
+	*border:3px solid red;
+	margin-left:40px;
+	margin-bottom:30px;
+	*margin-top:10px;
+	*margin-left:0px;
+	*background:#dcdcdc;
+	background:#29517e;
+	
+	padding-left:1px;
+	border-bottom:1px solid #29517e;
+	
+	
+}
+.area-galeri-home .judul{
+	background:#29517e;
+	color:#FFF;
+	padding:0 15px;
+	font-size:14px;
+	text-transform:uppercase;
+	
+	height:40px;
+	line-height:40px;
+}
+.area-galeri-home .judul:after{
+	font-family:"FontAwesome";
+	content:"\f03e";
+	float:right;
+}
+/*
+.area-galeri-home .judul-halaman{
+	margin-left:20px;
+	*text-align:right;
+	*background-position:right bottom;
+	
+	color:#FFF;
+}
+*/
+.row.galeri-home{
+	*border:1px solid cyan;
+	height:230px;
+	overflow:hidden;
+}
+.row.galeri-home .col-lg-6{
+	*border:1px solid #f9f9f9;
+	border-right:1px solid #29517e;
+	padding-left:0px;
+	padding-right:0px;
+}
+.row.galeri-home .col-lg-3{
+	*border:1px solid #f9f9f9;
+	border-right:1px solid #29517e;
+	border-bottom:1px solid #29517e;
+	padding-left:0px;
+	padding-right:0px;
+}
+ul.galeri-home li{
+	margin-bottom:0px !important ;
+}
+
+/****/
+.area-annual-report-home{
+	
+}
+.area-annual-report-home .ooffer_box{
+	*border:1px solid red;
+}
+.area-annual-report-home .item{
+	position:relative;
+	
+	*border:10px solid yellow;
+	height:210px !important;
+	
+}
+.area-annual-report-home .item .annual-img{
+	position:absolute;
+	z-index:5;
+	*display:none;
+	width:100%;
+	
+}
+.area-annual-report-home .item .annual-img img{
+	width:100%;
+}
+.area-annual-report-home .item .annual-info{
+	position:absolute;
+	z-index:999;
+	background:rgba(0,0,0,0.5);
+	*border:10px solid red;
+	
+	left:0;
+	right:0;
+	bottom:30px;
+	height:40px;
+	line-height:40px;
+	
+	font-size:160%;
+	color:#FFF;
+	text-transform:uppercase;
+	
+	padding-left:20px;
+	padding-right:20px;
+	
+}
+.area-annual-report-home .item .annual-info span.icon{
+	float:right;
+}
+
+/****/
+.area-banner-halaman{
+	width:calc(100% + 40px);
+	
+	
+}
+.area-banner-halaman img{
+	width:100% !important;
+	height:130px;
+}
+
+/****/
+.area-menu-kanan{
+	
+}
+.area-menu-kanan .title{
+	background:#29517e;
+	color:#FFF;
+	padding:10px;
+	font-size:16px;
+	text-align:right;
+	text-transform:uppercase;
+}
+.area-menu-kanan .item{
+	margin-bottom:1px;
+}
+.area-menu-kanan .item a{
+	font-size:16px;
+	text-align:right;
+	
+	*background:#999999;
+	background:rgba(153,153,153,0.5);
+	display:block;
+	
+	padding:10px;
+	color:#FFF;
+	text-transform:uppercase;
+}
+.area-menu-kanan .item a.current{
+	color:#fbe049;	
+}
+
+/****/
+.bg-half-banner-profil{
+	background:url(../images/half-banner-profil.png) top center no-repeat;
+	background-size:100%;
+	height:calc(100% + 110px) !important;
+	
+	position:relative;
+	margin-top:-110px;
+	padding-top:110px;
+}
+.bg-half-banner-so{
+	background:url(../images/half-banner-so.png) top center no-repeat;
+	background-size:100%;
+	height:calc(100% + 110px) !important;
+	
+	position:relative;
+	margin-top:-110px;
+	padding-top:110px;
+}
+.bg-half-banner-berita{
+	background:url(../images/half-banner-berita.png) top center no-repeat;
+	background-size:100%;
+	height:calc(100% + 110px) !important;
+	
+	position:relative;
+	margin-top:-110px;
+	padding-top:110px;
+}
+.bg-half-banner-program{
+	background:url(../images/half-banner-program.png) top center no-repeat;
+	background-size:100%;
+	height:calc(100% + 110px) !important;
+	
+	position:relative;
+	margin-top:-110px;
+	padding-top:110px;
+}
+.bg-half-banner-kontak{
+	background:url(../images/half-banner-kontak.png) top center no-repeat;
+	background-size:100%;
+	height:calc(100% + 110px) !important;
+	
+	position:relative;
+	margin-top:-110px;
+	padding-top:110px;
+}
+.bg-half-banner-prosedur{
+	background:url(../images/half-banner-prosedur.png) top center no-repeat;
+	background-size:100%;
+	height:calc(100% + 110px) !important;
+	
+	position:relative;
+	margin-top:-110px;
+	padding-top:110px;
+}
+.bg-half-banner-kepesertaan{
+	background:url(../images/half-banner-kepesertaan.png) top center no-repeat;
+	background-size:100%;
+	height:calc(100% + 110px) !important;
+	
+	position:relative;
+	margin-top:-110px;
+	padding-top:110px;
+}
+.konten-half-banner{
+	position:absolute;
+	bottom:0;
+	width:100%;
+	font-size:16px;
+	*background:red;
+}
+.konten-half-banner .submenu{
+	padding:30px 30px 15px;
+	*border:1px solid red;
+}
+.konten-half-banner .submenu a{
+	width:calc(33.3% - 3px);
+	display:inline-block;
+	border:1px solid #29517e/*fbe049*/;
+	*color:#fbe049;
+	color:#29517e;
+	font-size:18px;
+	
+	padding:6px 10px;
+	
+	background:rgba(255,255,255,0.5);
+	*background:rgba(0,0,0,0.1);
+	
+	-webkit-border-radius: 4px;
+	-moz-border-radius: 4px;
+	border-radius: 4px;
+
+}
+.konten-half-banner .submenu a:hover{
+	background:rgba(255,255,255,0.9);
+	text-decoration:none;
+}
+.konten-half-banner .submenu a:before{
+	font-family:"FontAwesome";
+	font-size:14px;
+	content:"\f0da";
+	vertical-align:middle;
+	margin-right:5px;
+}
+
+/****/
+.menu-kolom{
+	margin:0 30px 30px;
+	border:1px solid #29517e;
+	background:rgba(255,255,255,0.1);
+	
+	-webkit-border-radius: 4px;
+	-moz-border-radius: 4px;
+	border-radius: 4px;
+	
+	display:inline-block;
+	width:calc(100% - 60px);
+	
+	padding-bottom:10px;
+}
+.menu-kolom .judul{
+	*background:#FFF;
+	background:rgba(255,255,255,0.4);
+	color:#333;
+	text-align:center;
+	text-transform:uppercase;
+	padding:6px 10px;
+	
+	-webkit-border-top-left-radius: 3px;
+	-webkit-border-top-right-radius: 3px;
+	-moz-border-radius-topleft: 3px;
+	-moz-border-radius-topright: 3px;
+	border-top-left-radius: 3px;
+	border-top-right-radius: 3px;
+}
+.menu-kolom .item{
+	width:calc(50% - 20px);
+	margin:10px 10px 0;
+	background:#29517e;
+	
+	-webkit-border-radius: 4px;
+	-moz-border-radius: 4px;
+	border-radius: 4px;
+	
+	float:left;
+	
+	
+}
+.menu-kolom .item a{
+	color:#FFF;
+	text-align:center;
+	
+	padding:6px 10px;
+	display:block;
+	
+}
+.menu-kolom .item a:hover{
+	
+}
+.menu-kolom .item a i{
+	display:inline-block;
+	width:100%;
+	color:#fbe049;
+}
+
+
+/****/
+.area-visi,
+.area-misi{
+	text-align:center;
+	padding:10px 30px;
+	
+	*border:1px solid #FFF;
+	
+	/*-webkit-border-radius: 15px;
+	-moz-border-radius: 15px;
+	border-radius: 15px;*/
+	
+	min-height:260px;
+
+}
+.area-visi{
+	*background:rgba(255,255,255,0.4) url(../images/bg-visi.png) top left no-repeat;
+	background:rgba(0,0,0,0.2) url(../images/bg-visi.png) top left no-repeat;
+	*margin-left:30px;
+	margin-left:0px;
+	margin-bottom:30px;
+	
+}
+.area-misi{
+	*background:rgba(255,255,255,0.4) url(../images/bg-misi.png) top left no-repeat;
+	background:rgba(0,0,0,0.2) url(../images/bg-misi.png) top left no-repeat;
+	margin-right:30px;
+	margin-bottom:30px;
+	
+}
+
+/****/
+.area-visi-misi{
+	background:red;
+}
+.area-visi-misi .item{
+	float:left;
+	width:calc(50% - 1px);
+	text-align:center;
+}
+.area-visi-misi .item:nth-child(even){
+	float:right;
+	width:calc(50% - 0px);
+}
+.area-visi-misi .item .judul{
+	height:40px;
+	line-height:40px;
+	
+	-webkit-border-radius: 20px;
+	-moz-border-radius: 20px;
+	border-radius: 20px;
+	
+	padding:0 20px;
+
+	text-transform:uppercase;
+	background:rgba(0,0,0,0.2);
+	display:inline-block;
+}
+.area-visi-misi .item .judul i{
+	display:inline-block;
+	width:100%;
+	
+}
+.area-visi-misi .item .judul:before{
+	/*content:"•";
+	color:#fbe049;
+	margin-right:5px;*/
+}
+.area-visi-misi .item .isi{
+	background:rgba(0,0,0,0.2) url(../images/bg-visi.png) top left no-repeat;
+	min-height:160px;
+	padding:10px 30px;
+	margin-top:18px;
+	
+	*display: flex;
+	*justify-content: center; /* align horizontal */
+	*align-items: center; /* align vertical */
+}
+.area-visi-misi .item:nth-child(even) .isi{
+	background:rgba(0,0,0,0.2) url(../images/bg-misi.png) top left no-repeat;
+	min-height:160px;
+	padding:10px 30px;
+}
+.area-visi-misi .item .isi span{
+	display:inline-block;
+	background: url(../images/hr-item-prosedur.jpg) bottom center no-repeat;
+	height:10px;
+	width:100%;
+	margin-bottom:5px;
+}
+.area-visi-misi .item .isi .ikon{
+	width:100%;
+	display:inline-block;	
+	*background:cyan;
+}
+.area-visi-misi .item .isi .ket{
+	width:100%;
+	display:inline-block;	
+	color:#FFF;
+	
+	*background:red;
+}
+
+
+/****/
+table.data-info{
+	border-collapse:separate;
+	width:100%;
+	border-spacing:1px;
+}
+table.data-info thead th{
+	background:#29517e;
+	color:#FFF;
+	padding:5px 8px;
+}
+table.data-info tbody td{
+	background:#eeeeee;	
+	padding:5px 8px;
+}
+table.data-info tbody tr:nth-child(even) td{
+	background:#e3e2e2;
+}
+
+/****/
+p.ket{
+	color:#999;
+	font-style:italic;
+}
+
+/****/
+.submenu-oval{
+	margin-bottom:18px;
+	padding-left:30px;
+	padding-right:30px;
+	
+	display:inline-block;
+	width:100%;
+	
+}
+.submenu-oval a{
+	background:rgba(0,0,0,0.2);
+	color:#FFF;
+	width:calc(33.3% - 20px);
+	height:40px;
+	line-height:40px;
+	
+	float: left;
+	margin-left:10px;
+	margin-right:10px;
+	
+	text-align:center;
+	text-transform:uppercase;
+	
+	-webkit-border-radius: 20px;
+	-moz-border-radius: 20px;
+	border-radius: 20px;
+	
+	letter-spacing:2px;
+
+	
+}
+.submenu-oval a:before{
+	content:"•";
+	margin-right:5px;
+	color:#fbe049;
+}
+.submenu-oval a:last-child{
+	
+}
+.submenu-oval a:hover{
+	background:rgba(0,0,0,0.4);
+	color:#FFF;
+	text-decoration:none;
+	
+}
+.submenu-oval a.current{
+	
+}
+
+/****/
+.submenu-oval2{
+	margin-bottom:18px;
+	padding-left:30px;
+	padding-right:30px;
+	
+	display:inline-block;
+	width:100%;
+	
+}
+.submenu-oval2 a{
+	background:rgba(0,0,0,0.2);
+	*color:#FFF;
+	color:#333;
+	
+	font-size:16px;
+	
+	width:calc(33.3% - 10px);
+	min-height:60px;
+	line-height: normal;
+	
+	float: left;
+	margin-left:5px;
+	margin-right:5px;
+	
+	text-align:center;
+	text-transform:uppercase;
+	
+	-webkit-border-radius: 30px;
+	-moz-border-radius: 30px;
+	border-radius: 30px;
+	
+	letter-spacing:2px;
+	
+	display: flex;
+	justify-content: center; /* align horizontal */
+	align-items: center; /* align vertical */
+
+	
+}
+.submenu-oval2 a:before{
+	*content:"•";
+	*margin-right:5px;
+	*color:#fbe049;
+}
+.submenu-oval2 a:last-child{
+	
+}
+.submenu-oval2 a:hover{
+	background:rgba(0,0,0,0.4);
+	color:#FFF;
+	text-decoration:none;
+	
+}
+.submenu-oval2 a.current{
+	
+}
+
+
+/****/
+.menu-kotak{
+	
+}
+.menu-kotak .judul{
+	background:rgba(0,0,0,0.2);
+	width:calc(33.3% - 1px);
+	height:100px;
+	float:left;
+	margin-right:1px;
+	margin-bottom:1px;
+	
+	color:#fbe049;
+	text-align:center;
+	text-transform:uppercase;
+	letter-spacing:3px;
+	
+	display: flex;
+	justify-content: center; /* align horizontal */
+	align-items: center; /* align vertical */
+}
+.menu-kotak .item{
+	background:rgba(0,0,0,0.2);
+	width:calc(33.3% - 1px);
+	height:100px;
+	float:left;
+	margin-right:1px;
+	margin-bottom:1px;
+	text-align:center;
+	
+	display: flex;
+	justify-content: center; /* align horizontal */
+	align-items: center; /* align vertical */
+}
+.menu-kotak .item:nth-child(3),
+.menu-kotak .item:nth-child(6),
+.menu-kotak .item:nth-child(9){
+	width:calc(33.3% - 0px);
+	margin-right:0px;
+	
+
+}
+.menu-kotak .item a{
+	display:block;
+	color:#FFF;
+	
+	padding-top:15px;
+	padding-left:5px;
+	padding-right:5px;
+	
+	width:100%;
+	height:100%;
+}
+.menu-kotak .item a:hover{
+	background:rgba(0,0,0,0.2);
+}
+.menu-kotak .item a.current{
+	
+}
+.menu-kotak .item a i{
+	display:inline-block;
+	width:100%;
+	font-size:24px;
+	
+	
+}
+.menu-kotak .item a span{
+	display:inline-block;
+	width:100%;
+	padding-top:7px;
+	padding-bottom:5px;
+	
+	background:url(../images/hr-item-prosedur.jpg) bottom center no-repeat;	
+}
+
+/****/
+.menu-prosedur{
+	
+}
+.menu-prosedur .judul{
+	background:rgba(0,0,0,0.2);
+	*width:calc(66.6% - 1px);
+	width:100%;
+	height:100px;
+	float:left;
+	margin-right:1px;
+	margin-bottom:1px;
+	
+	color:#fbe049;
+	text-align:center;
+	text-transform:uppercase;
+	letter-spacing:3px;
+	
+	display: flex;
+	justify-content: center; /* align horizontal */
+	align-items: center; /* align vertical */
+}
+.menu-prosedur .item{
+	background:rgba(0,0,0,0.2);
+	*width:calc(33.3% - 1px);
+	width:calc(25% - 1px);
+	height:100px;
+	float:left;
+	margin-right:1px;
+	margin-bottom:1px;
+	text-align:center;
+	
+	display: flex;
+	justify-content: center; /* align horizontal */
+	align-items: center; /* align vertical */
+}
+.menu-prosedur .item:nth-child(5){
+	*width:calc(33.3% - 0px);
+	width:calc(25% - 0px);
+	margin-right:0px;
+	
+
+}
+.menu-prosedur .item a{
+	display:block;
+	color:#FFF;
+	
+	padding-top:15px;
+	padding-left:5px;
+	padding-right:5px;
+	
+	width:100%;
+	height:100%;
+}
+.menu-prosedur .item a:hover{
+	background:rgba(0,0,0,0.2);
+}
+.menu-prosedur .item a.current{
+	
+}
+.menu-prosedur .item a i{
+	display:inline-block;
+	width:100%;
+	font-size:24px;
+	
+	
+}
+.menu-prosedur .item a span{
+	display:inline-block;
+	width:100%;
+	padding-top:7px;
+	padding-bottom:5px;
+	
+	background:url(../images/hr-item-prosedur.jpg) bottom center no-repeat;	
+}
+
+/****/
+span.img-kiri{
+	float:left;
+	margin-right:20px;
+	padding-top:5px;
+	
+	position:relative;
+}
+span.img-kiri:after{
+	content:url(../images/hr-item-prosedur.jpg);
+	
+	position:absolute;
+	right:0;
+	bottom:0px;
+	z-index:9;
+	
+}
+
+/****/
+span.fa-konten{
+	display:inline-block;
+	width:100%;
+	margin-bottom:20px;
+	
+	text-align:center;	
+}
+span.fa-konten i{
+	font-size:60px;
+	
+	color:#fbe049;
+	
+	width:100px;
+	height:100px;
+	line-height:100px;
+	
+	-webkit-border-radius: 50%;
+	-moz-border-radius: 50%;
+	border-radius: 50%;
+
+	
+	border:1px solid #fbe049;
+}
+
+/****/
+.area-berita-terbaru{
+	padding-left:30px;
+	padding-right:30px;
+}
+.area-berita-terbaru .item{
+	*background:rgba(0,0,0,0.2);
+	*background:rgba(0,0,0,0.1);
+	background:rgba(255,255,255,0.4);
+	float:left;
+	width:calc(50% - 1px);
+}
+.area-berita-terbaru .item:nth-child(even){
+	float:right;
+	width:calc(50% - 0px);
+}
+.area-berita-terbaru .item .gambar{
+	float:left;
+	width:100%;
+	height:160px;
+	overflow:hidden;
+}
+.area-berita-terbaru .item .gambar img{
+	width:100%;
+	*border-top:10px solid #FFF/*fbe049*/;
+}
+.area-berita-terbaru .item .tanggal{
+	float:left;
+	width:100%;
+	
+	padding:10px 20px 0;
+	font-size:14px;
+	*color:rgba(255,255,255,0.7);
+	color:#999;
+}
+.area-berita-terbaru .item .judul{
+	font-size:17px;
+	clear:both;
+	text-transform:uppercase;
+	padding:5px 0px 5px;
+	
+	margin-left:20px;
+	margin-right:20px;
+	margin-bottom:10px;
+	
+	background:url(../images/hr-item-prosedur.jpg) bottom left no-repeat;
+	*background:#fbe049;
+}
+.area-berita-terbaru .item .isi{
+	padding:5px 20px 5px;
+	font-size:16px;
+	
+	*display:none;
+	
+}
+.area-berita-terbaru .item .isi span.selengkapnya{
+	display:inline-block;
+	width:100%;
+	
+	text-align:right;
+}
+.area-berita-terbaru .item .isi span.selengkapnya a{
+	border:1px solid #FFF;
+	*border:1px solid #e1e1e1;
+	
+	color:#333;
+	background:rgba(255,255,255,0.2);
+	
+	height:34px;
+	line-height:32px;
+	
+	display:inline-block;
+	
+	padding-left:15px;
+	padding-right:15px;
+	
+	margin-top:18px;
+	margin-bottom:18px;
+	
+	-webkit-border-radius: 17px;
+	-moz-border-radius: 17px;
+	border-radius: 17px;
+	
+}
+.area-berita-terbaru .item .isi span.selengkapnya a:hover{
+	text-decoration:none;
+	*background:rgba(255,255,255,1);
+	background:rgba(255,255,255,0.4);
+	*border:1px solid #eee;
+	color:#333;
+}
+
+/****/
+.area-berita-detil{
+	*padding-left:30px;
+	*padding-right:30px;
+}
+.area-berita-detil .item{
+	*background:rgba(0,0,0,0.2);
+	*background:rgba(255,255,255,0.4);
+	float:left;
+	width:calc(100% - 0px);
+}
+.area-berita-detil .item .gambar{
+	float:left;
+	width:100%;
+	height:180px;
+	overflow:hidden;
+}
+.area-berita-detil .item .gambar img{
+	width:100%;
+	*border-top:10px solid #FFF/*fbe049*/;
+}
+.area-berita-detil .item .tanggal{
+	float:left;
+	width:100%;
+	
+	padding:10px 0px 0;
+	font-size:14px;
+	*color:rgba(255,255,255,0.7);
+	color:#999;
+}
+.area-berita-detil .item .judul{
+	font-size:17px;
+	clear:both;
+	text-transform:uppercase;
+	padding:5px 0px 5px;
+	
+	*margin-left:20px;
+	*margin-right:20px;
+	margin-bottom:10px;
+	
+	background:url(../images/hr-item-prosedur.jpg) bottom left no-repeat;
+	*background:#fbe049;
+}
+.area-berita-detil .item .isi{
+	padding:5px 0px 5px;
+	font-size:16px;
+	
+	*display:none;
+	
+}
+
+/****/
+.area-berita-lainnya{
+	border:1px solid #FFF;
+	margin:0 30px 30px;
+}
+.area-berita-lainnya .judul{
+	text-transform:uppercase;
+	padding:10px 20px;
+	*background:#fbe049;
+	background:rgba(255,255,255,0.5);
+}
+.area-berita-lainnya .judul:before{
+	content:"•";
+	margin-right:5px;
+	color:#FFF;
+}
+
+.area-berita-lainnya .item{
+	
+}
+.area-berita-lainnya .item a{
+	padding:10px 20px;
+	border-bottom:1px solid rgba(255,255,255,0.5);
+	display:block;
+	
+	color:#333;
+}
+.area-berita-lainnya .item a:hover{
+	text-decoration:none;
+	
+	background:rgba(255,255,255,0.2);
+}
+.area-berita-lainnya .item:last-child a{
+	border-bottom:none;
+}
+
+/** PAGINATION **/
+nav.halaman{
+	text-align:center;
+}
+nav.halaman .pagination > li > a,
+nav.halaman .pagination > li > span {
+  position: relative;
+  float: left;
+  padding: 6px 12px;
+  margin-left: -1px;
+  line-height: 1.42857143;
+  color: #29517e;
+  text-decoration: none;
+  background-color: #fff;
+  border: 1px solid #ddd;
+}
+
+nav.halaman .pagination > .active > a,
+nav.halaman .pagination > .active > span,
+nav.halaman .pagination > .active > a:hover,
+nav.halaman .pagination > .active > span:hover,
+nav.halaman .pagination > .active > a:focus,
+nav.halaman .pagination > .active > span:focus {
+  z-index: 3;
+  color: #fff;
+  cursor: default;
+  background-color: #29517e;
+  border-color: #29517e;
+}
+
+/****/
+.area-kontak-form{
+	color:#FFF;
+}
+.area-kontak-form input[type=text],
+.area-kontak-form textarea{
+	border-top:none;
+	border-left:none;
+	border-right:none;
+	border-bottom:1px solid #fbe049;
+	
+	-webkit-border-radius: 0px;
+	-moz-border-radius: 0px;
+	border-radius: 0px;
+	
+	*background-color:transparent;
+	background:rgba(0,0,0,0.1);
+
+}
+
+/* Different color for some fields */
+
+.area-kontak-form input[type=text]::-webkit-input-placeholder,
+.area-kontak-form textarea::-webkit-input-placeholder
+{
+  color:    #FFF;
+}
+
+.area-kontak-form input[type=text]:-moz-placeholder,
+.area-kontak-form textarea:-moz-placeholder 
+{
+  color:    #FFF;
+}
+
+.area-kontak-form input[type=text]::-moz-placeholder,
+.area-kontak-form textarea::-moz-placeholder 
+{
+  color:    #FFF;
+}
+
+.area-kontak-form input[type=text]:-ms-input-placeholder,
+.area-kontak-form textarea:-ms-input-placeholder 
+{
+  color:    #FFF;
+}
+
+/****/
+.area-kontak-form input[type=submit],
+.area-kontak-form input[type=reset]{
+	height:36px;
+	line-height:36px;
+	
+	padding:0 0;
+	text-transform:uppercase;
+	
+	
+	-webkit-border-radius: 18px;
+	-moz-border-radius: 18px;
+	border-radius: 18px;
+
+}
+.area-kontak-form input[type=submit]{
+	background:#29517e;
+	border:rgba(41,81,126,0.5);
+}
+.area-kontak-form input[type=reset]{
+	background:#fbe049;
+	border:rgba(251,224,73,0.5);
+}
+
+/****/
+.area-kontak{
+	display:inline-block;
+	width:100%;
+}
+.area-kontak .alamat{
+	padding-bottom:18px;
+	margin-bottom:18px;
+	background:url(../images/hr-item-prosedur.jpg) bottom left no-repeat;
+}
+.area-kontak .telp{
+	color:#29517e;
+	border:1px solid #29517e;
+	*display:inline-block;
+	float:left;
+	margin-right:15px;
+	
+	width:calc(50% - 15px);
+	height:50px;
+	line-height:50px;
+	
+	-webkit-border-radius: 25px;
+	-moz-border-radius: 25px;
+	border-radius: 25px;
+	
+	padding:0 20px 0 0px;
+}
+.area-kontak .email{
+	color:#29517e;
+	border:1px solid #29517e;
+	*display:inline-block;
+	float:right;
+	margin-left:15px;
+	
+	width:calc(50% - 15px);
+	height:50px;
+	line-height:50px;
+	
+	-webkit-border-radius: 25px;
+	-moz-border-radius: 25px;
+	border-radius: 25px;
+	
+	padding:0 20px 0 0px;
+}
+
+.area-kontak .telp span,
+.area-kontak .email span{
+	background:#FFF;
+	padding:0 20px;
+	display:inline-block;
+	height:48px;
+	margin-right:10px;
+	border-right:1px solid #eee;
+	
+	-webkit-border-top-left-radius: 24px;
+	-webkit-border-bottom-left-radius: 24px;
+	-moz-border-radius-topleft: 24px;
+	-moz-border-radius-bottomleft: 24px;
+	border-top-left-radius: 24px;
+	border-bottom-left-radius: 24px;
+}
+
+/****/
+.area-kontak-peta{
+	*background:red;
+	height:calc(45vh - 10px);
+	margin-top:18px;
+}
+.area-kontak-peta iframe{
+	*background:cyan;
+	width:100%;
+	height:100%;
+	border:none;
+	display:block;
+}
+
+/****/
+div.ext-box { display: table; width:100%; }
+div.int-box { display: table-cell; vertical-align: middle; }
+
+.menu-so{
+	
+}
+.menu-so .item{
+	background:rgba(0,0,0,0.2);
+	float:left;
+	width:calc(33.3% - 1px);
+	margin-right:1px;
+}
+.menu-so .item a{
+	color:#FFF;
+	text-align:center;
+	text-transform:uppercase;
+	display:block;
+	*background:red;
+	
+	padding:20px 0;
+}
+.menu-so .item a:hover{
+	background:rgba(0,0,0,0.2);
+	text-decoration:none;
+	
+}
+.menu-so .item a span.ikon{
+	display:inline-block;
+	width:100%;
+	margin-bottom:10px;
+	
+}
+.menu-so .item a span.ikon i{
+	font-size:36px;
+	
+	border:1px solid #fbe049;
+	
+	width:80px;
+	height:80px;
+	line-height:80px;
+	
+	-webkit-border-radius: 50%;
+	-moz-border-radius: 50%;
+	border-radius: 50%;
+
+}
+
+/****/
+.area-main-menu{
+	*background:yellow;
+	display:inline-block;
+	width:100%;
+	
+}
+.area-main-menu .item{
+	background:rgba(0,0,0,0.2);
+	float:left;
+	width:calc(50% - 1px);
+	margin-right:1px;
+	margin-bottom:1px;
+	text-align:center;
+	
+	*padding-top:15px;
+	*padding-bottom:15px;
+	
+	*padding-top:14px;
+	*padding-bottom:14px;
+}
+.area-main-menu .item a{
+	display:block;
+	padding-top:14px;
+	padding-bottom:14px;
+	
+	float:left;
+	width:100%;
+	
+	margin-bottom:0px;
+}
+.area-main-menu .item a:hover{
+	background:rgba(0,0,0,0.1);
+}
+.area-main-menu .item span.ikon{
+	*width:100%;
+	width:100px;
+	float:left;
+	
+	*display:inline-block;
+	*background:cyan;
+	
+	
+}
+.area-main-menu .item span.ikon i{
+	border:1px solid #fbe049;
+	color:#fbe049;
+	width:50px;
+	height:50px;
+	line-height:50px;
+	
+	font-size:20px;
+	
+	-webkit-border-radius: 50%;
+	-moz-border-radius: 50%;
+	border-radius: 50%;
+
+}
+.area-main-menu .item span.nama{
+	color:#FFF;
+	text-transform:uppercase;
+	letter-spacing:2px;
+	*margin-top:10px;
+	*display:inline-block;
+	
+	float:left;
+	width:calc(100% - 100px);
+	font-size:16px;
+	*background:red;
+	
+	vertical-align:middle;
+}
+
+/****/
+.area-profil-pribadi{
+	display:inline-block;
+	width:100%;
+	*border:1px solid red;
+	
+	*background:rgba(255,255,255,0.1);
+	background:rgba(0,0,0,0.2);
+}
+.area-profil-pribadi .foto{
+	float:left;
+	*width:140px;
+	*height:140px;
+	
+	width:200px;
+	height:200px;
+	
+	*background:red;
+	
+	padding:15px;
+	
+}
+.area-profil-pribadi .foto img{
+	width:100%;
+	
+	-webkit-border-radius: 50%;
+	-moz-border-radius: 50%;
+	border-radius: 50%;
+	
+	border:2px solid #fbe049;
+
+}
+.area-profil-pribadi .keterangan{
+	float:left;
+	width:calc(100% - 200px);
+	*padding-left:20px;
+	
+	*background:cyan;
+}
+.area-profil-pribadi .keterangan .nama{
+	background:#fbe049;
+	padding:10px 15px;
+	text-transform:uppercase;
+}
+.area-profil-pribadi .keterangan .jabatan,
+.area-profil-pribadi .keterangan .cabang{
+	background:#29517e;
+	color:#FFF;
+	margin-top:1px;
+	padding:10px 15px;
+}
+.area-profil-pribadi .keterangan .nrp{
+	background:#29517e;
+	color:#FFF;
+	margin-top:1px;
+	margin-bottom:1px;
+	padding:10px 15px;
+}
+.area-profil-pribadi .keterangan .tombol{
+	padding:15px 15px 15px 0;
+	
+	*border:1px solid	 red;
+	display:inline-block;
+	width:100%;
+}
+.area-profil-pribadi .keterangan .tombol a{
+	color:#FFF;
+	text-align:center;
+	display:block;
+	padding:7px 15px;
+}
+.area-profil-pribadi .keterangan .tombol a:hover{
+	background:rgba(0,0,0,0.2);
+	text-decoration:none;
+}
+.area-profil-pribadi .keterangan .tombol .edit-profil{
+	float:left;
+	width:calc(50% - 15px); 
+	background:#0000f6;
+	color:#FFF;
+	
+	-webkit-border-radius: 4px;
+	-moz-border-radius: 4px;
+	border-radius: 4px;
+
+	
+}
+.area-profil-pribadi .keterangan .tombol .ganti-password{
+	float:right;
+	width:calc(50% - 15px);
+	background:#b71405;
+	
+	-webkit-border-radius: 4px;
+	-moz-border-radius: 4px;
+	border-radius: 4px;
+
+}
+
+/****/
+.area-profil-pribadi table{
+	clear:both;
+	*border-collapse: separate;
+	*border-spacing:1px;
+	
+	border-collapse:collapse;
+	
+	width:100%;
+}
+.area-profil-pribadi table td{
+	*background:rgba(0,0,0,0.2);
+	padding:4px 8px;
+	
+	*border:1px solid rgba(0,0,0,0.1);
+	border:1px solid rgba(255,255,255,0.2);
+}
+.area-profil-pribadi table td:first-child{
+	border-left:none;
+}
+.area-profil-pribadi table td:last-child{
+	border-right:none;
+}
+.area-profil-pribadi table td:nth-child(1){
+	text-align:right;
+	width:200px;
+}
+.area-profil-pribadi table td:nth-child(2){
+	*background:red;
+	width:15px;
+	text-align:center;
+}
+
+/****/
+.area-chat-dashboard{
+	
+}
+.area-chat-dashboard .chat
+{
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.area-chat-dashboard .chat li
+{
+    margin-bottom: 10px;
+    padding-bottom: 5px;
+    border-bottom: 1px dotted #B3A9A9;
+}
+
+.area-chat-dashboard .chat li.left .chat-body
+{
+    margin-left: 60px;
+}
+
+.area-chat-dashboard .chat li.right .chat-body
+{
+    margin-right: 60px;
+}
+
+
+.area-chat-dashboard .chat li .chat-body p
+{
+    margin: 0;
+    color: #777777;
+}
+
+.area-chat-dashboard .panel .slidedown .glyphicon, 
+.area-chat-dashboard .chat .glyphicon
+{
+    margin-right: 5px;
+}
+
+.area-chat-dashboard .panel-body
+{
+    overflow-y: scroll;
+    height: 250px;
+}
+
+.area-chat-dashboard ::-webkit-scrollbar-track
+{
+    -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
+    background-color: #F5F5F5;
+}
+
+.area-chat-dashboard ::-webkit-scrollbar
+{
+    width: 12px;
+    background-color: #F5F5F5;
+}
+
+.area-chat-dashboard ::-webkit-scrollbar-thumb
+{
+    -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,.3);
+    background-color: #555;
+}
+
+/****/
+.area-chat-dashboard .chat-img.pull-left{
+	border:1px solid #FFF;
+	width:50px;
+	height:50px;
+	line-height:50px;
+	
+	text-align:center;
+	
+	-webkit-border-radius: 50%;
+	-moz-border-radius: 50%;
+	border-radius: 50%;
+
+}
+.area-chat-dashboard .chat-img.pull-left i{
+	color:#FFF;
+}
+.area-chat-dashboard .chat-img.pull-right{
+	border:1px solid #29517e;
+	width:50px;
+	height:50px;
+	line-height:50px;
+	
+	text-align:center;
+	
+	-webkit-border-radius: 50%;
+	-moz-border-radius: 50%;
+	border-radius: 50%;
+
+}
+.area-chat-dashboard .chat-img.pull-right i{
+	color:#29517e;
+}
+
+/****/
+.bg-dashboard{
+	background:url(../images/full-banner-dashboard.png) top center no-repeat;
+	background-size:100%;
+}
+.bg-profil-edit{
+	background:url(../images/full-banner-profil-edit.png) top center no-repeat;
+	background-size:100%;
+	
+}
+
+/****/
+.row-tanpa-margin{
+	margin-left:0px !important;
+	margin-right:0px !important;
+}
+
+/****/
+/*.area-agenda-kalender{
+	border:1px solid red;
+}*/
+
+/****/
+.area-chat-dashboard{
+	
+}
+.area-chat-dashboard .panel.panel-primary{
+	background-color:transparent;
+	
+	-webkit-border-radius: 0px;
+	-moz-border-radius: 0px;
+	border-radius: 0px;
+	
+	border:none;
+	
+	box-shadow:none;
+
+}
+.area-chat-dashboard .panel-primary > .panel-heading{
+	background-color:transparent;
+	border:none;
+	background:#29517e;
+	
+	-webkit-border-radius: 0px;
+	-moz-border-radius: 0px;
+	border-radius: 0px;
+}
+.area-chat-dashboard .panel-body{
+	padding:0px;
+}
+.area-chat-dashboard .panel-body .header strong{
+	color:#fbe049;
+	font-weight:normal !important;
+	text-transform:uppercase;
+}
+.area-chat-dashboard .panel-body .chat-body p{
+	color:#FFF !important;  
+}
+.area-chat-dashboard .panel-footer{
+	background-color:transparent;
+	*background:rgba(0,0,0,0.6);
+	
+	background:#e5e5e5;
+	
+	-webkit-border-radius: 0px;
+	-moz-border-radius: 0px;
+	border-radius: 0px;
+	
+	border-top:none;
+}
+.area-chat-dashboard .panel-footer .btn.btn-warning.btn-sm{
+	background:#fbe049;
+	*border:1px solid #dcc232;
+	border:1px solid #cccccc;
+	
+	color:#333;
+	text-transform:uppercase;
+}
+.area-chat-dashboard .chat{
+	*padding:0 0;
+}
+.area-chat-dashboard .chat li{
+	*border-bottom:none;
+	background:rgba(0,0,0,0.2);
+	
+	*display:inline-block;
+	margin-bottom:1px;
+	
+	padding-top:10px;
+	padding-bottom:10px;
+	
+	padding-left:15px;
+	padding-right:15px;
+	
+	*border-bottom:1px solid #fbe049;
+}
+.area-chat-dashboard .chat li:last-child{
+	*background:red !important;
+	margin-bottom: 0px;
+}
+.area-chat-dashboard .chat li.left .chat-body{
+	*margin-left:0px;
+}
+
+/****/
+.area-rekap-rekening-pribadi{
+	
+}
+.area-rekap-rekening-pribadi table{
+	border-collapse:separate;
+	border-spacing:1px;
+	width:100%;
+}
+.area-rekap-rekening-pribadi table thead th{
+	background:#29517e;
+	color:#FFF;
+	padding:4px 8px;
+	text-align:center;
+}
+.area-rekap-rekening-pribadi table td{
+	background:rgba(0,0,0,0.2);
+	padding:6px 8px 5px;
+}
+.area-rekap-rekening-pribadi table tr:nth-child(even) td{
+	background:rgba(0,0,0,0.1);
+}
+.area-rekap-rekening-pribadi table td.total{
+	background:#fbe049 !important;
+}
+
+/****/
+.area-rekap-rekening-peserta-aktif{
+	background:rgba(0,0,0,0.2);
+	display:inline-block;
+	
+	width:100%;
+}
+.area-rekap-rekening-peserta-aktif .unit{
+	text-align:center;
+	
+	float:left;
+	width:50%;
+	
+	background:url(../images/bg-building.png) bottom center no-repeat;
+	*border:1px solid red;
+}
+.area-rekap-rekening-peserta-aktif .unit .nama{
+	padding:18px 20px 10px;
+	background:url(../images/hr-item-prosedur.jpg) bottom center no-repeat;
+	color:#FFF;
+	
+	padding-top:47px;
+}
+.area-rekap-rekening-peserta-aktif .unit .keterangan{
+	*color:rgba(255,255,255,0.5);
+	color:rgba(0,0,0,0.5);
+	padding:10px 20px 18px;
+}
+.area-rekap-rekening-peserta-aktif .peserta-aktif{
+	text-align:center;
+	
+	float:right;
+	width:50%;
+}
+.area-rekap-rekening-peserta-aktif .peserta-aktif .jumlah{
+	padding:18px 20px 10px;
+	background:rgba(0,0,0,0.2) url(../images/hr-item-prosedur.jpg) bottom center no-repeat;
+	color:#FFF;
+	font-size:36px;
+}
+.area-rekap-rekening-peserta-aktif .peserta-aktif .jumlah span{
+	font-size:18px !important;
+	display:inline-block;
+}
+.area-rekap-rekening-peserta-aktif .peserta-aktif .keterangan{
+	color:rgba(0,0,0,0.5);
+	padding:10px 20px 18px;
+	background:rgba(0,0,0,0.2);
+}
+
+/****/
+.area-rekap-rekening-peserta-aktif .nilai{
+	*display:inline-block;
+	float:left;
+	width:100%;
+	background:#fbe049;
+}
+
+/****/
+.area-rekap-rekening-peserta-aktif .nilai .iuran{
+	float:left;
+	width:33.3%;
+	text-align:center;
+	
+	border-right:1px solid #959493;
+	padding-top:15px;
+	padding-bottom:15px;
+}
+.area-rekap-rekening-peserta-aktif .nilai .iuran .keterangan{
+	background:url(../images/hr-putih.jpg) bottom center no-repeat;
+	padding-bottom:10px;
+	margin-bottom:10px;
+}
+.area-rekap-rekening-peserta-aktif .nilai .iuran .nilai{
+	font-size:24px;
+}
+
+/****/
+.area-rekap-rekening-peserta-aktif .nilai .pengembangan{
+	float:left;
+	width:33.3%;
+	text-align:center;
+	
+	border-right:1px solid #959493;
+	padding-top:15px;
+	padding-bottom:15px;
+}
+.area-rekap-rekening-peserta-aktif .nilai .pengembangan .keterangan{
+	background:url(../images/hr-putih.jpg) bottom center no-repeat;
+	padding-bottom:10px;
+	margin-bottom:10px;
+}
+.area-rekap-rekening-peserta-aktif .nilai .pengembangan .nilai{
+	font-size:24px;
+}
+
+
+/****/
+.area-rekap-rekening-peserta-aktif .nilai .grand-total{
+	float:left;
+	width:33.3%;
+	text-align:center;
+	
+	padding-top:15px;
+	padding-bottom:15px;
+}
+.area-rekap-rekening-peserta-aktif .nilai .grand-total .keterangan{
+	background:url(../images/hr-putih.jpg) bottom center no-repeat;
+	padding-bottom:10px;
+	margin-bottom:10px;
+}
+.area-rekap-rekening-peserta-aktif .nilai .grand-total .nilai{
+	font-size:24px;
+}
+
+/****/
+.area-edit-profil{
+	*padding-top:18px;
+	*background:grey;
+}
+.area-edit-profil .kop .judul{
+	
+}
+.area-edit-profil .kop .judul-peserta{
+	
+}
+.area-edit-profil .kop .nomor{
+	
+}
+
+/*****/
+table.ahli-waris{
+	border-collapse:separate;
+	border-spacing:1px;
+	width:100%;
+}
+table.ahli-waris thead th{
+	background:#29517e;
+	color:#FFF;
+	padding:4px 8px;
+}
+table.ahli-waris thead th:nth-child(1){
+	width:20px;
+	text-align: center !important;
+}
+table.ahli-waris tbody td{
+	background:rgba(255,255,255,0.8);
+	padding:4px 8px;
+}
+table.ahli-waris tbody td:nth-child(1){
+	width:20px;
+	text-align: center !important;
+}
+
+table.ahli-waris tfoot th{
+	background:rgba(255,255,255,0.8);
+	padding:4px 8px;
+}
+table.ahli-waris tfoot th.total{
+	background:#fbe049;
+	text-align:center;	
+}
+
+/****/
+.area-npwp-rekening-bank{
+	*border-top:1px solid #fbe049;
+	*border-top:1px solid #FFF;
+	padding-top:10px;
+	*background:rgba(255,255,255,0.5);
+	*padding-bottom:0px !important;
+	*margin-bottom:-20px !important;
+}
+
+/****/
+.nomor-kepesertaan{
+	background:#29517e;
+	color:#FFF;
+	padding:10px 12px;
+}
+.nomor-kepesertaan input[type=text]{
+	*border:1px solid rgba(255,255,255,0.7) !important ;
+	*border:1px solid #21eeff;
+	*border:1px solid rgba(0,0,0,0.7) !important ;
+	border:1px solid #fbe049;
+	margin-left:10px;
+	min-width:260px;
+	
+}
+
+/****/
+.catatan-kaki{
+	display:none;
+	
+	*background:rgba(255,255,255,0.7);
+	background:#eee;
+	padding:10px 20px 0px;
+	*background:rgba(231,231,231,0.7);
+	
+	margin-top:20px;
+	margin-bottom:20px;
+}
+.catatan-kaki ul{
+	display:inline-block;
+}
+.catatan-kaki ul li{
+	display:inline-block;
+	margin-right:10px;
+	
+	background:#FFF;
+	padding:0 10px;
+}
+.catatan-kaki ul li:before{
+	content:"•";
+}
+
+/****/
+.data-perusahaan{
+	margin-bottom:20px;
+}
+.data-perusahaan .judul,
+.data-peserta .judul,
+.data-ahli-waris .judul{
+	background:#FFF;
+	*border-bottom:3px solid #ddd;
+	border-bottom:3px solid #fbe049;
+	padding:7px 10px;
+	
+	text-transform:uppercase;
+	font-weight:bold;
+}
+.data-perusahaan .judul i,
+.data-peserta .judul i,
+.data-ahli-waris .judul i{
+	color:#bbbbbb;
+	font-size:22px;
+	border:1px solid #fbe049;
+	
+	width:40px;
+	height:40px;
+	line-height:40px;
+	
+	text-align:center;
+	
+	-webkit-border-radius: 50%;
+	-moz-border-radius: 50%;
+	border-radius: 50%;
+	
+	margin-right:10px;
+	vertical-align:middle;
+
+}
+.data-perusahaan .form-group{
+	background:rgba(255,255,255,0.8);
+	margin-bottom:1px;
+	padding-top:10px;
+	padding-bottom:10px;
+	margin-left:0px !important;
+	margin-right:0px !important;
+}
+
+
+/****/
+.data-peserta{
+	margin-bottom:20px;
+}
+.data-peserta .form-group{
+	background:rgba(255,255,255,0.8);
+	margin-bottom:1px;
+	padding-top:10px;
+	padding-bottom:10px;
+	
+	margin-left:0px !important;
+	margin-right:0px !important;
+}
+
+/****/
+.data-ahli-waris{
+	margin-bottom:20px;
+}
+.data-ahli-waris .judul{
+	background:#FFF;
+}
+.data-ahli-waris .form-group{
+	background:rgba(255,255,255,0.8);
+	margin-bottom:1px;
+	padding-top:10px;
+	padding-bottom:10px;
+}
+
+/** GALERI **/
+#galeri-area{
+	margin-top:4px;
+	float:left;
+}
+
+#galeri-area{
+	/*margin-left:3px;*/
+}
+#galeri-foto{
+	float:left;
+	margin-left:5px;
+	margin-right:5px;
+	margin-bottom:10px;
+	position:relative;
+}
+#galeri-foto .judul{
+	position:absolute;
+	left:0;
+	bottom:0;
+	background-color: rgba(0,0,0,0.8);
+	width:290px;
+	padding:10px 10px;
+}
+#galeri-foto .judul a{
+	color:#FFF;
+	text-decoration:none;
+}
+#galeri-foto .judul a:hover{
+	color:#14a7db;
+
+}
+
+/* GALERI */
+#galeri-page{
+	margin-top:10px;
+	margin-left:15px;
+	float:left;
+	width: -moz-calc(100% + 40px);
+    width: -webkit-calc(100% + 40px);
+    width: -o-calc(100% + 40px);
+    width: calc(100% + 40px);
+	
+	/*width:100%;*/
+
+	
+}
+#galeri-item, #galeri-item-detil{
+	float:left;
+	margin-right:10px;
+	margin-bottom:10px;
+	
+	background:#FFF; 
+	/*padding:10px; */
+	/*border:1px solid #d5d5d5; */
+	
+	/*-webkit-border-radius: 5px;
+	-moz-border-radius: 5px;
+	border-radius: 5px;*/
+	
+	text-align:center;
+}
+#galeri-item{
+	width:200px;
+	height:185px; 
+}
+#galeri-item-detil{
+	width:150px;
+	height:120px; 
+}
+#galeri-item:hover{
+	border:1px solid #9dc4e5;
+	
+	-moz-box-shadow:    0px 0px 7px 1px #b3d1eb;
+	-webkit-box-shadow: 0px 0px 7px 1px #b3d1eb;
+	box-shadow:         0px 0px 7px 1px #b3d1eb;
+  
+	/*box-shadow:			3px 3px 3px #8ab8e0; /*shadow for CSS3 capable browsers.*
+	-webkit-box-shadow: 3px 3px 3px #8ab8e0;
+	-moz-box-shadow:	3px 3px 3px #8ab8e0;*/
+}
+#galeri-nama{ float:left; width:100%; clear:both; margin-top:5px; text-transform:capitalize;}
+
+/****/
+/*************** SIMPLE INNER SCROLLBAR ***************/
+ 
+.scrollbar-inner > .scroll-element,
+.scrollbar-inner > .scroll-element div
+{
+    border: none;
+    margin: 0;
+    padding: 0;
+    position: absolute;
+    z-index: 10;
+}
+ 
+.scrollbar-inner > .scroll-element div {
+    display: block;
+    height: 100%;
+    left: 0;
+    top: 0;
+    width: 100%;
+}
+ 
+.scrollbar-inner > .scroll-element.scroll-x {
+    bottom: 2px;
+    height: 8px;
+    left: 0;
+    width: 100%;
+}
+ 
+.scrollbar-inner > .scroll-element.scroll-y {
+    height: 100%;
+    right: 2px;
+    top: 0;
+    width: 8px;
+}
+ 
+.scrollbar-inner > .scroll-element .scroll-element_outer {
+    overflow: hidden;
+}
+ 
+.scrollbar-inner > .scroll-element .scroll-element_outer,
+.scrollbar-inner > .scroll-element .scroll-element_track,
+.scrollbar-inner > .scroll-element .scroll-bar {
+    -webkit-border-radius: 8px;
+    -moz-border-radius: 8px;
+    border-radius: 8px;
+}
+ 
+.scrollbar-inner > .scroll-element .scroll-element_track,
+.scrollbar-inner > .scroll-element .scroll-bar {
+    -ms-filter:"progid:DXImageTransform.Microsoft.Alpha(Opacity=40)";
+    filter: alpha(opacity=40);
+    opacity: 0.4;
+}
+ 
+.scrollbar-inner > .scroll-element .scroll-element_track { background-color: #e0e0e0; }
+.scrollbar-inner > .scroll-element .scroll-bar { background-color: #c2c2c2; }
+.scrollbar-inner > .scroll-element:hover .scroll-bar { background-color: #919191; }
+.scrollbar-inner > .scroll-element.scroll-draggable .scroll-bar { background-color: #919191; }
+ 
+ 
+/* update scrollbar offset if both scrolls are visible */
+ 
+.scrollbar-inner > .scroll-element.scroll-x.scroll-scrolly_visible .scroll-element_track { left: -12px; }
+.scrollbar-inner > .scroll-element.scroll-y.scroll-scrollx_visible .scroll-element_track { top: -12px; }
+ 
+ 
+.scrollbar-inner > .scroll-element.scroll-x.scroll-scrolly_visible .scroll-element_size { left: -12px; }
+.scrollbar-inner > .scroll-element.scroll-y.scroll-scrollx_visible .scroll-element_size { top: -12px; }
+
+/****/
+.area-mitra-usaha{
+	background:blue;
+	position: relative;
+
+	width:100%;
+	
+	height: 60px;
+	line-height:60px;
+	
+	text-align:center;
+	clear:both;
+	
+	font-size:16px;
+	
+	float:left;
+	width:100%;
+}
+.area-mitra-usaha{
+	/*background:#888888;
+	*float:left;
+	display:inline-block;
+	width:100%;
+	
+	border:1px solid blue;*/
+}
+.area-mitra-usaha .item{
+	float:left !important;
+	width:16,67 !important;
+	height:200px;
+	background:red;
+	border:1px solid cyan;
+	
+	
+}
+.area-mitra-usaha .item img{
+	*height:120px;	
+	*display:none;
+}
+
+/****/
+.area-mitra{
+	clear:both; 
+	*border:1px solid red; 
+	position:relative; 
+	z-index:999;
+	
+	*padding-left:15px; 
+	*padding-right:15px;	
+	
+	padding-left:0px;
+	padding-right:0px;
+	
+	float:left;
+	width:100%;
+	background:#888 url(../images/bg-mitra.png);
+}
+.area-mitra .judul{
+	font-family: 'BaskervilleItalic';
+	font-size:20px;
+	background:url(../images/hr-item-prosedur.jpg) bottom center no-repeat;
+	color:#FFF;
+	
+	padding-top:5px;
+	padding-bottom:5px;
+	
+	text-align:center;
+}
+.area-mitra-inner{
+	float:left;
+	width:100%;
+	*border:2px solid yellow;
+	*padding:20px;
+	
+	padding:10px 5px 10px;
+	
+}
+.area-mitra .item{
+	float:left;
+	*width:calc(14.28% - 20px);
+	
+	width:calc(14.28% - 10px);
+	
+	*height:105px;
+	height:80px;
+	
+	*border:1px solid green;
+	background:#FFF;
+	text-align:center;
+	*margin:0 10px;
+	
+	margin:0 5px;
+	
+	-webkit-border-radius: 4px;
+	-moz-border-radius: 4px;
+	border-radius: 4px;
+	
+	display: flex;
+	justify-content: center; /* align horizontal */
+	align-items: center; /* align vertical */
+
+}
+.area-mitra .item img{
+	*width:50%;
+	*height:70%;
+	
+	width:90%;
+	max-height:80px;
+}
+
+/****/
+.area-mitra-aktif{
+	*border:1px solid cyan;
+	*background:#FFF;
+	*height:210px !important;
+	*display:inline-block;
+	*width:calc(100% - 10px);
+	
+	margin-left:10px;
+	*float:left;
+}
+.area-mitra-aktif .peserta-aktif{
+	background:#fbe049;
+	*height:65px;
+	*margin-top:10px;	
+	margin-bottom:10px;
+	
+	*border:2px solid yellow;
+}
+.area-mitra-aktif .peserta-aktif .judul{
+	background:#29517e;
+	color:#FFF;
+	
+	height:40px;
+	line-height:40px;
+	padding:0 15px;
+	
+	font-size:14px;
+	text-transform:uppercase;
+}
+.area-mitra-aktif .peserta-aktif .jumlah{
+	*background:#f2f2f2;
+	background:#FFF url(../images/bg-peserta-aktif-home.png) bottom right no-repeat;
+	color:#29517e;
+	text-align:center;
+	
+	font-size:36px;
+	
+	height:90px;
+	line-height:90px;
+}
+.area-mitra-aktif .peserta-aktif .jumlah span{
+	font-size:18px;
+}
+/*.area-mitra-aktif .peserta-aktif .judul-halaman{
+	margin-left:20px;
+	background:url(../images/hr-putih.jpg) left bottom no-repeat;
+	color:#333;
+}*/
+
+.area-mitra-aktif .mitra{
+	*float:left;
+	border:0px solid cyan;
+	
+	*clear:both;
+	margin-top:10px;
+	background:#FFF;
+}
+.area-mitra-aktif .mitra .judul{
+	background:#29517e;
+	color:#FFF;
+	
+	height:40px;
+	line-height:40px;
+	padding:0 15px;
+	
+	font-size:14px;
+	text-transform:uppercase;
+}
+
+/****/
+.area-mitra-aktif .carousel{
+	*background:red;
+	background:#FFF;
+	
+	*height:210px;
+	height:90px;
+}
+.area-mitra-aktif .carousel li{
+	background:url(../images/shadow-logo.png) bottom center no-repeat;
+	*margin-top:50px;
+	margin-top:10px;
+	*padding-bottom:40px;
+	margin-right:10px !important;
+}
+.area-mitra-aktif .carousel img{
+	width:70px;
+	height:70px;
+}
+
+
+

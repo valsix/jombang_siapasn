@@ -1,0 +1,75 @@
+@font-face {
+	font-family: 'Open SansRegular';
+	src: url('../font/OpenSans-Regular-webfont.eot');
+	src: url('../font/OpenSans-Regular-webfont.eot?#iefix') format('embedded-opentype'),
+	url('../font/OpenSans-Regular-webfont.woff') format('woff'),
+	url('../font/OpenSans-Regular-webfont.ttf') format('truetype'),
+	url('../font/OpenSans-Regular-webfont.svg#Open SansRegular') format('svg');
+	font-weight: normal;
+	font-style: normal;
+}
+
+
+/* TTF type */
+@font-face {
+	font-family: 'Futura-Condensed';
+	src: url('../font/Futura/Futura-Condensed.otf');
+}
+
+@font-face {
+	font-family: 'Catamaran Regular';
+	src: url('../font/Catamaran/catamaran-regular.eot');
+	src: url('../font/Catamaran/catamaran-regular.eot?#iefix') format('embedded-opentype'),
+	url('../font/Catamaran/catamaran-regular.woff') format('woff'),
+	url('../font/Catamaran/catamaran-regular.ttf') format('truetype'),
+	url('../font/Catamaran/catamaran-regular.svg#Catamaran Regular') format('svg');
+	font-weight: normal;
+	font-style: normal;
+}
+@font-face {
+	font-family: 'Catamaran Bold';
+	src: url('../font/Catamaran/catamaran-bold.eot');
+	src: url('../font/Catamaran/catamaran-bold.eot?#iefix') format('embedded-opentype'),
+	url('../font/Catamaran/catamaran-bold.woff') format('woff'),
+	url('../font/Catamaran/catamaran-bold.ttf') format('truetype'),
+	url('../font/Catamaran/catamaran-bold.svg#Catamaran Bold') format('svg');
+	font-weight: normal;
+	font-style: normal;
+}
+
+@font-face {
+    font-family: 'avenir-next-regular';
+    src: url('../font/avenir-next/avenir-next-regular-webfont.eot');
+    src: url('../font/avenir-next/avenir-next-regular-webfont.eot?#iefix') format('embedded-opentype'),
+         url('../font/avenir-next/avenir-next-regular-webfont.woff') format('woff'),
+         url('../font/avenir-next/avenir-next-regular-webfont.ttf') format('truetype'),
+         url('../font/avenir-next/avenir-next-regular-webfont.svg#avenir-next-regular') format('svg');
+    font-weight: normal;
+    font-style: normal;
+
+}
+@font-face {
+    font-family: 'avenir-next-demibold';
+    src: url('../font/avenir-next/avenirnextdemibold.eot');
+    src: url('../font/avenir-next/avenirnextdemibold.eot?#iefix') format('embedded-opentype'),
+         url('../font/avenir-next/avenirnextdemibold.woff') format('woff'),
+         url('../font/avenir-next/avenirnextdemibold.ttf') format('truetype'),
+         url('../font/avenir-next/avenirnextdemibold.svg#avenir-next-demibold') format('svg');
+    font-weight: normal;
+    font-style: normal;
+
+}
+@font-face {
+    font-family: 'avenir-next-bold';
+    src: url('../font/avenir-next/avenir-next-bold-webfont.eot');
+    src: url('../font/avenir-next/avenir-next-bold-webfont.eot?#iefix') format('embedded-opentype'),
+         url('../font/avenir-next/avenir-next-bold-webfont.woff') format('woff'),
+         url('../font/avenir-next/avenir-next-bold-webfont.ttf') format('truetype'),
+         url('../font/avenir-next/avenir-next-bold-webfont.svg#avenir-next-bold') format('svg');
+    font-weight: normal;
+    font-style: normal;
+
+}
+
+
+

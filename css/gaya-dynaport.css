@@ -1,0 +1,139 @@
+table {
+	width: 100%;
+}
+
+td {
+  	text-align: left;
+  	padding-top: 5px;
+  	padding-bottom: 5px;
+  	max-height: 10px;
+}
+
+tr:nth-child(even){
+	background-color: #f2f2f2;
+	max-height: 10px;
+}
+
+th {
+  	background-color: #ff9100;
+  	border-radius: 0px;
+  	color: white;
+  	text-align: left;
+}
+
+.row .col {
+	padding: 0;
+}
+
+.vmenu{
+	border:1px solid #aaa;
+	position:absolute;
+	background:#fff;
+	display:none;font-size:0.75em;
+}
+.first_li{}
+.first_li span{
+	width:200px;
+	display:block;
+	padding:5px 10px;
+	cursor:pointer
+}
+.inner_li{
+	display:none;
+	margin-left:200px;
+	position:absolute;
+	border:1px solid #aaa;
+	border-left:1px solid #ccc;
+	margin-top:-30px;
+	background:#fff;
+}
+.sep_li{
+	border-top: 1px ridge #aaa;
+	margin:5px 0
+}
+.fill_title{
+	font-size:11px;
+	font-weight:bold;
+	height:15px;
+	overflow:hidden;
+	word-wrap:break-word;
+}
+
+.vmenu1{
+	border:1px solid #aaa;
+	position:absolute;
+	background:#fff;
+	display:none;font-size:0.75em;
+}
+.first_li1{}
+.first_li1 span{
+	width:200px;
+	display:block;
+	padding:5px 10px;
+	cursor:pointer
+}
+.inner_li1{
+	display:none;
+	margin-left:200px;
+	position:absolute;
+	border:1px solid #aaa;
+	border-left:1px solid #ccc;
+	top:0;
+	background:#fff;
+}
+.sep_li1{
+	border-top: 1px ridge #aaa;
+	margin:5px 0
+}
+.fill_title1{
+	font-size:11px;
+	font-weight:bold;
+	height:15px;
+	overflow:hidden;
+	word-wrap:break-word;
+}
+
+select{
+	display: block !important;
+	border: 1px solid #ff9100;
+	font-size:12px;
+	height: auto;
+	float: left;
+}
+
+input[type="text"]{
+	display: block !important;
+	border: 1px solid #ff9100;
+	background:#fff;
+	font-size:12px;
+	height: 25px;
+	padding-left: 5px;
+	padding-bottom: 3px;
+	padding-top: 5px;
+}
+
+.combo {
+    border-color: none;
+    background-color: none;
+    display: none;
+	white-space: nowrap;
+	margin: 0;
+	padding: 0;
+	border-width: 1px;
+	border-style: solid;
+	overflow: hidden;
+	vertical-align: middle;
+}
+
+.combo-arrow {
+	background-color: none;
+	background: none;
+	width: 0px;
+	height: 20px;
+	overflow: hidden;
+	display: none;
+	vertical-align: top;
+	cursor: pointer;
+	opacity: 0;
+	filter: alpha(opacity=60);
+}
